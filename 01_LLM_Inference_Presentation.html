@@ -76,7 +76,7 @@ label{display:block;font-family:var(--mono);font-size:12px;color:var(--mute);mar
 .tk{font-family:var(--mono);font-size:16px;padding:5px 10px;border:1px solid var(--rule);border-radius:4px;background:#fff;position:relative}
 .tk.draft{border-style:dashed;opacity:0}
 .slide.active .tk.draft{animation:fade .3s both;animation-delay:calc(var(--i)*0.3s + .3s)}
-.mk{position:absolute;top:-9px;right:-7px;font-size:12px;font-weight:600;opacity:0}
+.mk{position:absolute;top:-13px;right:-9px;font-size:16px;font-weight:600;opacity:0}
 .slide.active .mk{animation:fade .3s both;animation-delay:calc(1.8s + var(--j)*0.3s)}
 .acc{opacity:0}
 .slide.active .acc{animation:fade .3s both;animation-delay:calc(3.2s + var(--i)*0.15s)}
@@ -94,7 +94,7 @@ label{display:block;font-family:var(--mono);font-size:12px;color:var(--mute);mar
 <div id="stage"><div id="deck">
 
 <section class="slide" data-title="Title">
-  <div class="run"><span>AI Team · Tech Talk</span><span>October 2026</span></div>
+  <div class="run"><span>AI team tech talk</span><span>October 2026</span></div>
   <div style="margin-top:120px;max-width:820px">
     <h1 class="fade">What happens after<br><span style="font-family:var(--mono);font-size:54px;font-weight:500">model.generate()</span></h1>
     <p class="lede fade" style="--i:1;margin-top:26px">A working guide to LLM inference: the mental model, the toolkit every engine uses, and serving with vLLM. Paired with a hands-on notebook you can run on one GPU.</p>
@@ -106,10 +106,10 @@ label{display:block;font-family:var(--mono);font-size:12px;color:var(--mute);mar
     <div class="lab" style="left:0;top:82px"><span class="pf">prefill</span>: whole prompt at once</div>
     <div class="lab" style="left:316px;top:82px"><span class="dc">decode</span>: one token per step, until done</div>
   </div>
-  <div class="src">Slides · 01_LLM_Inference_Presentation.html &nbsp;·&nbsp; Notebook · 03_vLLM_Hands_On.ipynb &nbsp;·&nbsp; → / space to advance, F for fullscreen</div>
+  <div class="src">Notebook: 03_vLLM_Hands_On.ipynb. Press space to advance, F for fullscreen.</div>
 </section>
 
-<section class="slide" data-title="Why · What · How">
+<section class="slide" data-title="Why/What/How">
   <div class="run"><span>Introduction</span></div>
   <h2>Why we're spending an hour on this</h2>
   <div class="cols c3 vr" style="margin-top:28px">
@@ -137,12 +137,12 @@ label{display:block;font-family:var(--mono);font-size:12px;color:var(--mute);mar
   <h2>What we'll cover</h2>
   <table style="margin-top:10px">
     <tr><th style="width:210px">Part</th><th>Topics</th><th style="width:150px">Notebook</th></tr>
-    <tr class="fade" style="--i:1"><td>1 · The mental model</td><td>Prefill vs decode · TTFT, TPOT, goodput · where the memory goes · roofline and the decode speed limit · compute, bandwidth, overhead · the GPU memory hierarchy · hardware cheat sheet</td><td class="mono">§2–3, §8, §30</td></tr>
-    <tr class="fade" style="--i:2"><td>2 · The standard toolkit</td><td>KV cache · continuous batching · PagedAttention · prefix caching · chunked prefill · FlashAttention &amp; CUDA graphs · quantization</td><td class="mono">§4–7, §12, §16–17</td></tr>
-    <tr class="fade" style="--i:3"><td>3 · Scaling up</td><td>Speculative decoding · tensor, pipeline &amp; expert parallelism · MoE · GQA and MLA · disaggregated prefill/decode · KV-aware routing</td><td class="mono">§18, §20</td></tr>
-    <tr class="fade" style="--i:4"><td>4 · vLLM in practice</td><td>The V1 engine · vLLM vs SGLang vs TensorRT-LLM · the flags that matter · serving and benchmarking</td><td class="mono">§9–15, §22–29</td></tr>
-    <tr class="fade" style="--i:5"><td>5 · Local hosting</td><td>Will it fit on my machine? · llama.cpp, MLX, exo, KTransformers · MoE expert offload · edge cases · practitioner reports</td><td class="mono">§31–35</td></tr>
-    <tr class="fade" style="--i:6"><td>6 · Running it</td><td>Cost per million tokens · what to monitor · a tuning playbook · what to read next</td><td class="mono">§13, §21</td></tr>
+    <tr class="fade" style="--i:1"><td>1. The mental model</td><td>Prefill vs decode, TTFT, TPOT, goodput, where the memory goes, roofline and the decode speed limit, compute, bandwidth, overhead, the GPU memory hierarchy, hardware cheat sheet</td><td class="mono">§2–3, §8, §30</td></tr>
+    <tr class="fade" style="--i:2"><td>2. The standard toolkit</td><td>KV cache, continuous batching, PagedAttention, prefix caching, chunked prefill, FlashAttention &amp; CUDA graphs, quantization</td><td class="mono">§4–7, §12, §16–17</td></tr>
+    <tr class="fade" style="--i:3"><td>3. Scaling up</td><td>Speculative decoding, tensor, pipeline &amp; expert parallelism, MoE, GQA and MLA, disaggregated prefill/decode, KV-aware routing</td><td class="mono">§18, §20</td></tr>
+    <tr class="fade" style="--i:4"><td>4. vLLM in practice</td><td>The V1 engine, vLLM vs SGLang vs TensorRT-LLM, the flags that matter, serving and benchmarking</td><td class="mono">§9–15, §22–29</td></tr>
+    <tr class="fade" style="--i:5"><td>5. Local hosting</td><td>Will it fit on my machine?, llama.cpp, MLX, exo, KTransformers, MoE expert offload, edge cases, practitioner reports</td><td class="mono">§31–35</td></tr>
+    <tr class="fade" style="--i:6"><td>6. Running it</td><td>Cost per million tokens, what to monitor, a tuning playbook, what to read next</td><td class="mono">§13, §21</td></tr>
   </table>
   <p class="small mute" style="margin-top:18px">You already know transformers, so we skip tokenization and sampling here (they're in notebook §2 and §5). The time goes to systems behaviour instead.</p>
 </section>
@@ -156,7 +156,7 @@ label{display:block;font-family:var(--mono);font-size:12px;color:var(--mute);mar
     <tr><td>Generating synthetic data or judge labels</td><td>Cost ≈ GPU $/hr ÷ tokens/s. You can price the job before launching it, and see how much batching moves the number.</td><td class="mono dc">§21</td></tr>
     <tr><td>Choosing between an 8B and a 70B model</td><td>Weights + KV-cache arithmetic gives you GPU count and max concurrency before you ask anyone for hardware.</td><td class="mono dc">§3</td></tr>
     <tr><td>Shipping three fine-tunes</td><td>LoRA adapters can share one base model on one GPU, instead of three separate deployments.</td><td class="mono dc">§19</td></tr>
-    <tr><td>Building an extraction pipeline</td><td>Constrained decoding guarantees schema-valid JSON, so the retry-on-parse-error loop goes away.</td><td class="mono dc">§14</td></tr>
+    <tr><td>Building an extraction pipeline</td><td>Constrained decoding guarantees schema-valid JSON or a fixed label set, so the retry-on-parse-error loop goes away. Logprobs give you a confidence score for free.</td><td class="mono dc">§14, §39</td></tr>
     <tr><td>Prototyping a big model on a workstation or Mac</td><td>Fit and speed are arithmetic: memory decides what fits, bandwidth decides tokens/s. Check before you download 200 GB.</td><td class="mono dc">§31</td></tr>
     <tr><td>Handing a model to the platform team</td><td>TTFT, TPOT, goodput and KV-cache usage are the words they'll use. It shortens the conversation.</td><td class="mono dc">§10–13</td></tr>
   </table>
@@ -164,10 +164,10 @@ label{display:block;font-family:var(--mono);font-size:12px;color:var(--mute);mar
 </section>
 
 <section class="slide divider" data-title="Part 1">
-  <div class="part">PART 1</div>
+  <div class="part">Part 1</div>
   <h1>The mental model</h1>
   <p class="lede">One idea carries most of this talk: reading the prompt and writing the answer are different workloads, bottlenecked on different parts of the GPU.</p>
-  <ol><li>Two workloads glued together</li><li>Four numbers that describe a server</li><li>Where the memory goes</li><li>Why decode can't keep the GPU busy</li><li>The decode speed limit</li><li>Compute, bandwidth, overhead</li><li>The GPU memory hierarchy</li><li>Hardware cheat sheet</li></ol>
+  <ol><li>Two workloads glued together</li><li>The GPU memory hierarchy</li><li>Four numbers that describe a server</li><li>Where the memory goes</li><li>Why decode can't keep the GPU busy</li><li>The decode speed limit</li><li>Compute, bandwidth, overhead</li><li>Hardware cheat sheet</li></ol>
 </section>
 
 <section class="slide" data-title="Prefill vs decode">
@@ -195,6 +195,20 @@ label{display:block;font-family:var(--mono);font-size:12px;color:var(--mute);mar
   <div class="src">Framing follows Databricks/MosaicML, <i>LLM Inference Performance Engineering: Best Practices</i> (2023), and Kiely §2.4.</div>
 </section>
 
+<section class="slide" data-title="Memory hierarchy" data-anim="ladder">
+  <div class="run"><span>Part 1: The mental model</span><span class="nb">Notebook §30</span></div>
+  <h2>A GPU is a memory hierarchy with a math unit attached</h2>
+  <div class="cols c12" style="margin-top:8px;gap:44px">
+    <div>
+      <p>An H100 has 132 SMs, each with tensor cores and ~256 KB of on-chip SRAM. The weights don't live there. They live in 80 GB of HBM, and every decode step streams all of them through the chip.</p>
+      <p style="margin-top:12px">Every step away from the tensor cores costs bandwidth, often 3–10× per step. Every trick in this talk keeps data higher up: FlashAttention keeps tiles in SRAM, quantization shrinks what crosses HBM, and offloading pushes capacity down the ladder and pays for it in speed.</p>
+      <p class="small mute" style="margin-top:12px">Notebook §30 measures your own GPU's bandwidth and matmul rate. Expect 80–90% of spec for bandwidth and 60–80% for matmul.</p>
+    </div>
+    <div id="ladder"></div>
+  </div>
+  <div class="src">NVIDIA H100 datasheet; Kiely §3 (Hardware); SRAM figure is an order-of-magnitude aggregate, not a spec-sheet number.</div>
+</section>
+
 <section class="slide" data-title="Metrics">
   <div class="run"><span>Part 1: The mental model</span><span class="nb">Notebook §10–11</span></div>
   <h2>Four numbers describe a serving system</h2>
@@ -212,7 +226,7 @@ label{display:block;font-family:var(--mono);font-size:12px;color:var(--mute);mar
       <p style="margin-top:14px">Two more caveats from the same talk. Report P90/P99, not means. And with reasoning models, the first token generated isn't the first token the user sees.</p>
     </div>
   </div>
-  <div class="src">C. Huyen, P99 CONF 2026 keynote (via The New Stack) and <i>AI Engineering</i> Ch. 9 · goodput: Zhong et al., <i>DistServe</i>, OSDI '24.</div>
+  <div class="src">C. Huyen, P99 CONF 2026 keynote (via The New Stack) and <i>AI Engineering</i> Ch. 9; goodput: Zhong et al., <i>DistServe</i>, OSDI '24.</div>
 </section>
 
 <section class="slide" data-title="Memory" data-anim="memcalc">
@@ -220,7 +234,7 @@ label{display:block;font-family:var(--mono);font-size:12px;color:var(--mute);mar
   <h2>Where the memory goes: weights are fixed, KV cache grows</h2>
   <div class="cols c2" style="margin-top:12px;gap:48px">
     <div>
-      <div class="label">Worked example · Llama-3.1-8B, BF16</div>
+      <div class="label">Worked example: Llama-3.1-8B, BF16</div>
 <div class="calc">weights   8.0B × 2 B              = 16 GB
 KV/token  2 × 32 layers × 8 kv_heads
           × 128 dim × 2 B          = 128 KiB
@@ -233,7 +247,7 @@ one 8K-token chat                  = 1 GiB
       <div class="label">Try it</div>
       <div class="cols c2" style="gap:14px">
         <div><label>model</label><select id="m-preset"><option value="1.5,28,2,128">Qwen2.5-1.5B (GQA, 2 kv)</option><option value="7,32,32,128">Llama-2-7B (MHA)</option><option value="8,32,8,128" selected>Llama-3.1-8B (GQA, 8 kv)</option><option value="70,80,8,128">Llama-3.1-70B</option></select></div>
-        <div><label>GPU</label><select id="m-gpu"><option value="24">L4 · 24 GB</option><option value="80" selected>H100 · 80 GB</option><option value="141">H200 · 141 GB</option></select></div>
+        <div><label>GPU</label><select id="m-gpu"><option value="24">L4, 24 GB</option><option value="80" selected>H100, 80 GB</option><option value="141">H200, 141 GB</option></select></div>
         <div><label>weights</label><select id="m-wp"><option value="2" selected>BF16</option><option value="1">FP8</option><option value="0.5">INT4</option></select></div>
         <div><label>KV cache</label><select id="m-kp"><option value="2" selected>BF16</option><option value="1">FP8</option></select></div>
       </div>
@@ -246,7 +260,7 @@ one 8K-token chat                  = 1 GiB
 </section>
 
 <section class="slide" data-title="Roofline" data-anim="roofline">
-  <div class="run"><span>Part 1: The mental model</span><span class="nb">Notebook §7</span></div>
+  <div class="run"><span>Part 1: The mental model</span><span class="nb">Notebook §7, §36</span></div>
   <h2>Decode can't keep the tensor cores busy</h2>
   <div class="cols c12" style="margin-top:6px;gap:40px">
     <div>
@@ -261,7 +275,7 @@ one 8K-token chat                  = 1 GiB
       <input type="range" id="rf-b" min="0" max="10" step="0.1" value="0">
     </div>
   </div>
-  <div class="src">kipply, <i>Transformer Inference Arithmetic</i> (2022) · H100 numbers: Kiely §2.4.1 (989 TFLOPS dense BF16, 3.35 TB/s).</div>
+  <div class="src">kipply, <i>Transformer Inference Arithmetic</i> (2022); H100 numbers: Kiely §2.4.1 (989 TFLOPS dense BF16, 3.35 TB/s).</div>
 </section>
 
 <section class="slide" data-title="Speed limit & MBU">
@@ -272,11 +286,11 @@ one 8K-token chat                  = 1 GiB
       <div class="label">Upper bound at batch 1</div>
       <div class="calc">tokens/s ≤ memory bandwidth ÷ bytes per step</div>
       <table style="margin-top:14px">
-        <tr><th>Model · GPU</th><th style="text-align:right">ceiling</th></tr>
-        <tr><td>8B BF16 (16 GB) · H100</td><td style="text-align:right" class="mono">~209 tok/s</td></tr>
-        <tr><td>8B FP8 (8 GB) · H100</td><td style="text-align:right" class="mono">~419 tok/s</td></tr>
-        <tr><td>70B FP8 (70 GB) · H100</td><td style="text-align:right" class="mono">~48 tok/s</td></tr>
-        <tr><td>70B FP8 · H200 (4.8 TB/s)</td><td style="text-align:right" class="mono">~69 tok/s</td></tr>
+        <tr><th>Model and GPU</th><th style="text-align:right">ceiling</th></tr>
+        <tr><td>8B BF16 (16 GB) on H100</td><td style="text-align:right" class="mono">~209 tok/s</td></tr>
+        <tr><td>8B FP8 (8 GB) on H100</td><td style="text-align:right" class="mono">~419 tok/s</td></tr>
+        <tr><td>70B FP8 (70 GB) on H100</td><td style="text-align:right" class="mono">~48 tok/s</td></tr>
+        <tr><td>70B FP8 on H200 (4.8 TB/s)</td><td style="text-align:right" class="mono">~69 tok/s</td></tr>
       </table>
       <p class="small mute" style="margin-top:10px">Halving the bytes doubles the ceiling, which is most of why FP8 matters for decode.</p>
     </div>
@@ -303,22 +317,8 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
     <div><h3>Bandwidth</h3><p class="small">Waiting on HBM. Decode at small or medium batch.</p><p class="small" style="margin-top:8px"><b>Helps:</b> batching, quantization, speculative decoding, fewer bytes per useful token.</p></div>
     <div><h3>Overhead</h3><p class="small">GPU idle while Python, the scheduler or kernel launches catch up. Small models, tiny steps.</p><p class="small" style="margin-top:8px"><b>Helps:</b> CUDA graphs, torch.compile, async scheduling.</p></div>
   </div>
-  <blockquote style="margin-top:34px;font-size:22px">"One way to think about compute is as a factory." <span class="mute" style="font-style:normal;font-family:var(--sans);font-size:15px">: Horace He. Bandwidth is the shipping that keeps the factory supplied.</span></blockquote>
+  <blockquote style="margin-top:34px;font-size:22px">"One way to think about compute is as a factory." <span class="mute" style="font-style:normal;font-family:var(--sans);font-size:15px">(Horace He) Bandwidth is the shipping that keeps the factory supplied.</span></blockquote>
   <div class="src">H. He, <i>Making Deep Learning Go Brrrr From First Principles</i> (2022). The 1.5B model in notebook §8 lands well below its bandwidth ceiling; most of that gap is overhead.</div>
-</section>
-
-<section class="slide" data-title="Memory hierarchy" data-anim="ladder">
-  <div class="run"><span>Part 1: The mental model</span><span class="nb">Notebook §30</span></div>
-  <h2>A GPU is a memory hierarchy with a math unit attached</h2>
-  <div class="cols c12" style="margin-top:8px;gap:44px">
-    <div>
-      <p>An H100 has 132 SMs, each with tensor cores and ~256 KB of on-chip SRAM. The weights don't live there. They live in 80 GB of HBM, and every decode step streams all of them through the chip.</p>
-      <p style="margin-top:12px">Each step down the ladder is roughly ten times slower. Every trick in this talk keeps data higher up: FlashAttention keeps tiles in SRAM, quantization shrinks what crosses HBM, and offloading pushes capacity down the ladder and pays for it in speed.</p>
-      <p class="small mute" style="margin-top:12px">Notebook §30 measures your own GPU's bandwidth and matmul rate. Expect 80–90% of spec for bandwidth and 60–80% for matmul.</p>
-    </div>
-    <div id="ladder"></div>
-  </div>
-  <div class="src">NVIDIA H100 datasheet · Kiely §3 (Hardware) · SRAM figure is an order-of-magnitude aggregate, not a spec-sheet number.</div>
 </section>
 
 <section class="slide" data-title="Hardware cheat sheet">
@@ -339,7 +339,7 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
 </section>
 
 <section class="slide divider" data-title="Part 2">
-  <div class="part">PART 2</div>
+  <div class="part">Part 2</div>
   <h1>The standard toolkit</h1>
   <p class="lede">vLLM, SGLang and TensorRT-LLM all implement roughly this list. They differ in defaults, kernels and how quickly new models land.</p>
   <ol><li>KV cache</li><li>Continuous batching</li><li>PagedAttention</li><li>Prefix caching</li><li>Chunked prefill</li><li>Kernels: FlashAttention, CUDA graphs</li><li>Quantization</li></ol>
@@ -359,7 +359,7 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
       <div id="kv-grid" style="display:grid;grid-template-columns:92px 1fr 1fr;gap:5px 8px;font-family:var(--mono);font-size:13px"></div>
     </div>
   </div>
-  <div class="src">P. Lienhart, <i>LLM Inference Series 3: KV caching explained</i> (Medium, 2023) · kipply, <i>Transformer Inference Arithmetic</i>.</div>
+  <div class="src">P. Lienhart, <i>LLM Inference Series 3: KV caching explained</i> (Medium, 2023); kipply, <i>Transformer Inference Arithmetic</i>.</div>
 </section>
 
 <section class="slide" data-title="Continuous batching" data-anim="batching">
@@ -367,9 +367,9 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
   <h2>Continuous batching: refill a slot the moment it frees up</h2>
   <div class="cols c2" style="margin-top:8px;gap:40px">
     <div>
-      <h3>Static batching <span class="mute small" style="font-weight:400">· utilization <span id="bg-su">–</span></span></h3>
+      <h3>Static batching <span class="mute small" style="font-weight:400">(utilization <span id="bg-su">–</span>)</span></h3>
       <div class="bgrid" id="bg-static"></div>
-      <h3 style="margin-top:16px">Continuous batching <span class="mute small" style="font-weight:400">· utilization <span id="bg-cu">–</span></span></h3>
+      <h3 style="margin-top:16px">Continuous batching <span class="mute small" style="font-weight:400">(utilization <span id="bg-cu">–</span>)</span></h3>
       <div class="bgrid" id="bg-cont"></div>
       <p class="tiny mute" style="margin-top:8px">Rows are batch slots, columns are decode steps, colours are requests. Hatched = slot doing nothing.</p>
     </div>
@@ -380,7 +380,7 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
       <p class="small" style="margin-top:12px">Hugging Face's 2025 write-up takes it further: drop the batch dimension, pack sequences raggedly, and run prefill and decode tokens in the same step.</p>
     </div>
   </div>
-  <div class="src">Anyscale (2023) · Orca, OSDI '22 · Hugging Face, <i>Continuous batching from first principles</i> (Nov 2025).</div>
+  <div class="src">Anyscale (2023); Orca, OSDI '22; Hugging Face, <i>Continuous batching from first principles</i> (Nov 2025).</div>
 </section>
 
 <section class="slide" data-title="PagedAttention" data-anim="paged">
@@ -388,12 +388,12 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
   <h2>PagedAttention: give the KV cache virtual memory</h2>
   <div class="cols c2" style="margin-top:10px;gap:48px">
     <div>
-      <div class="label">Before · reserve max_len per request</div>
+      <div class="label">Before: reserve max_len per request</div>
       <div class="mem" id="pg-before"></div>
       <p class="small" style="margin-top:12px">Pre-vLLM systems used only <b>20–38%</b> of the KV memory they reserved for actual tokens. The rest was internal and external fragmentation.</p>
     </div>
     <div>
-      <div class="label">After · 16-token blocks via a block table</div>
+      <div class="label">After: 16-token blocks via a block table</div>
       <div class="mem" id="pg-after"></div>
       <p class="small" style="margin-top:12px">Blocks are allocated on demand anywhere in memory, like OS pages. Waste drops below <b>4%</b>, and blocks can be shared copy-on-write across parallel samples and common prefixes.</p>
     </div>
@@ -408,7 +408,7 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
   <div class="cols c2" style="margin-top:10px;gap:48px">
     <div>
       <svg viewBox="0 0 520 250" width="100%" height="250" font-family="IBM Plex Mono, monospace" font-size="12">
-        <rect x="4" y="100" width="150" height="50" fill="#FBEDE7" stroke="#C8461E"/><text x="79" y="122" text-anchor="middle" fill="#16181D">system + tools</text><text x="79" y="139" text-anchor="middle" fill="#7A808C">3k tok · cached</text>
+        <rect x="4" y="100" width="150" height="50" fill="#FBEDE7" stroke="#C8461E"/><text x="79" y="122" text-anchor="middle" fill="#16181D">system + tools</text><text x="79" y="139" text-anchor="middle" fill="#7A808C">3k tokens, cached</text>
         <path d="M154 125 C190 125,190 40,226 40 M154 125 L226 125 M154 125 C190 125,190 210,226 210" fill="none" stroke="#16181D"/>
         <rect x="226" y="20" width="140" height="40" fill="#FBEDE7" stroke="#C8461E"/><text x="296" y="45" text-anchor="middle">RAG doc A</text>
         <rect x="226" y="105" width="140" height="40" fill="#FBEDE7" stroke="#C8461E"/><text x="296" y="130" text-anchor="middle">turns 1–3</text>
@@ -425,15 +425,15 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
       <p class="note" style="margin-top:16px">Put static content first and dynamic content last. A timestamp at the top of the system prompt quietly turns every request into a cache miss.</p>
     </div>
   </div>
-  <div class="src">vLLM docs, automatic prefix caching · Zheng et al., <i>SGLang</i> (RadixAttention), 2024.</div>
+  <div class="src">vLLM docs, automatic prefix caching; Zheng et al., <i>SGLang</i> (RadixAttention), 2024.</div>
 </section>
 
 <section class="slide" data-title="Chunked prefill">
-  <div class="run"><span>Part 2: The standard toolkit</span><span class="nb">Notebook §15–16</span></div>
+  <div class="run"><span>Part 2: The standard toolkit</span><span class="nb">Notebook §16, §38</span></div>
   <h2>Chunked prefill: a long prompt shouldn't stall everyone else</h2>
   <div class="cols c2" style="margin-top:16px;gap:48px">
     <div>
-      <div class="label">Without · one 16k-token prefill takes a whole step</div>
+      <div class="label">Without: one 16k-token prefill takes a whole step</div>
       <svg viewBox="0 0 520 90" width="100%" height="90" font-family="IBM Plex Mono, monospace" font-size="11">
         <g fill="#1F5FAD"><rect x="0" y="20" width="30" height="22"/><rect x="34" y="20" width="30" height="22"/></g>
         <rect x="68" y="20" width="270" height="22" fill="#C8461E"/>
@@ -442,7 +442,7 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
       </svg>
     </div>
     <div>
-      <div class="label">With · prefill split to fit a per-step token budget</div>
+      <div class="label">With: prefill split to fit a per-step token budget</div>
       <svg viewBox="0 0 520 90" width="100%" height="90" font-family="IBM Plex Mono, monospace" font-size="11">
         <g fill="#C8461E"><rect x="0" y="12" width="64" height="20"/><rect x="68" y="12" width="64" height="20"/><rect x="136" y="12" width="64" height="20"/><rect x="204" y="12" width="64" height="20"/><rect x="272" y="12" width="64" height="20"/></g>
         <g fill="#1F5FAD"><rect x="0" y="36" width="64" height="10"/><rect x="68" y="36" width="64" height="10"/><rect x="136" y="36" width="64" height="10"/><rect x="204" y="36" width="64" height="10"/><rect x="272" y="36" width="64" height="10"/><rect x="340" y="36" width="64" height="10"/><rect x="408" y="36" width="64" height="10"/></g>
@@ -451,11 +451,11 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
     </div>
   </div>
   <p style="margin-top:24px">The knob is <code>--max-num-batched-tokens</code>. A smaller budget gives smoother TPOT for everyone; a larger one finishes the long prompt sooner and raises throughput. It's on by default in vLLM V1, and for small deployments it gets you much of what disaggregation promises at none of the cost.</p>
-  <div class="src">Agrawal et al., <i>Sarathi-Serve</i>, OSDI '24 · vLLM docs, chunked prefill.</div>
+  <div class="src">Agrawal et al., <i>Sarathi-Serve</i>, OSDI '24; vLLM docs, chunked prefill.</div>
 </section>
 
 <section class="slide" data-title="Kernels">
-  <div class="run"><span>Part 2: The standard toolkit</span></div>
+  <div class="run"><span>Part 2: The standard toolkit</span><span class="nb">Notebook §37, §40</span></div>
   <h2>Kernels: one fix per regime</h2>
   <table style="margin-top:16px">
     <tr><th style="width:220px">Technique</th><th style="width:140px">Regime</th><th>What it does</th></tr>
@@ -465,7 +465,7 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
     <tr><td>torch.compile</td><td class="mute">overhead + bw</td><td>vLLM compiles the model graph to fuse ops automatically, so new architectures get fusion without hand-written CUDA.</td></tr>
     <tr><td>FP8 / FP4 GEMMs</td><td class="pf">compute</td><td>Low-precision tensor cores roughly double (FP8) and redouble (FP4, Blackwell) math throughput for prefill and big batches.</td></tr>
   </table>
-  <div class="src">Dao et al., <i>FlashAttention</i> 1–3 (2022–24) · regimes from H. He (2022).</div>
+  <div class="src">Dao et al., <i>FlashAttention</i> 1–3 (2022–24); regimes from H. He (2022).</div>
 </section>
 
 <section class="slide" data-title="Quantization">
@@ -482,11 +482,11 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
     <p>For a 70B model the jump from BF16 (140 GB) to FP8 (70 GB) is the difference between two GPUs and one. That changes the deployment more than any kernel tweak.</p>
     <p class="note">Quantization is a quality trade, and perplexity hides regressions. Run your own task evals before and after. This is one place data scientists should own the decision, not the platform team.</p>
   </div>
-  <div class="src">Lin et al., <i>AWQ</i> (2023) · Frantar et al., <i>GPTQ</i> (2022) · Kiely §5.1.</div>
+  <div class="src">Lin et al., <i>AWQ</i> (2023); Frantar et al., <i>GPTQ</i> (2022); Kiely §5.1.</div>
 </section>
 
 <section class="slide divider" data-title="Part 3">
-  <div class="part">PART 3</div>
+  <div class="part">Part 3</div>
   <h1>Scaling up</h1>
   <p class="lede">More tokens per forward pass, more GPUs per model, and splitting the two phases across a cluster.</p>
   <ol><li>Speculative decoding</li><li>Parallelism and MoE</li><li>Architecture choices are inference choices</li><li>Disaggregated prefill and decode</li></ol>
@@ -509,12 +509,54 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
     <tr><td>EAGLE-3</td><td>Small head reading the target's hidden states</td><td>General chat; needs a trained head</td></tr>
     <tr><td>MTP</td><td>Multi-token-prediction layers trained into the model</td><td>DeepSeek-V3 and similar models</td></tr>
   </table>
-  <div class="src">Leviathan et al. (2023) · Li et al., <i>EAGLE-3</i> (2025). Output distribution is unchanged. Gains shrink, and can go negative, at high concurrency because the "idle" compute is no longer idle.</div>
+  <div class="src">Leviathan et al. (2023); Li et al., <i>EAGLE-3</i> (2025). Output distribution is unchanged. Gains shrink, and can go negative, at high concurrency because the "idle" compute is no longer idle.</div>
+</section>
+
+<section class="slide" data-title="Parallelism picture">
+  <div class="run"><span>Part 3: Scaling up</span><span class="nb">Notebook §20</span></div>
+  <h2>What each kind of parallelism actually splits</h2>
+  <svg viewBox="0 0 1120 330" width="100%" height="330" font-family="IBM Plex Sans, sans-serif" font-size="14" style="margin-top:8px">
+    <g font-weight="600" fill="#16181D"><text x="0" y="20">Tensor parallel (TP=2)</text><text x="390" y="20">Pipeline parallel (PP=2)</text><text x="780" y="20">Expert parallel (EP=2)</text></g>
+    <g fill="#7A808C" font-size="13"><text x="0" y="40">every layer is cut in half</text><text x="390" y="40">each GPU holds half the layers</text><text x="780" y="40">each GPU holds half the experts</text></g>
+    <!-- TP -->
+    <g>
+      <rect x="0" y="60" width="140" height="44" fill="#C8461E"/><rect x="146" y="60" width="140" height="44" fill="#1F5FAD"/>
+      <rect x="0" y="130" width="140" height="44" fill="#C8461E"/><rect x="146" y="130" width="140" height="44" fill="#1F5FAD"/>
+      <rect x="0" y="200" width="140" height="44" fill="#C8461E"/><rect x="146" y="200" width="140" height="44" fill="#1F5FAD"/>
+      <g fill="#fff" font-size="13" text-anchor="middle"><text x="70" y="87">layer 1, half A</text><text x="216" y="87">layer 1, half B</text><text x="70" y="157">layer 2, half A</text><text x="216" y="157">layer 2, half B</text><text x="70" y="227">layer 3, half A</text><text x="216" y="227">layer 3, half B</text></g>
+      <g stroke="#A86A12" stroke-width="2" fill="none"><path d="M60 108 C100 122,186 122,226 108"/><path d="M60 178 C100 192,186 192,226 178"/><path d="M60 248 C100 262,186 262,226 248"/></g>
+      <text x="0" y="292" font-size="13" fill="#A86A12">↔ all-reduce after every layer: needs NVLink</text>
+    </g>
+    <!-- PP -->
+    <g>
+      <rect x="390" y="60" width="286" height="44" fill="#C8461E"/><rect x="390" y="130" width="286" height="44" fill="#C8461E"/><rect x="390" y="200" width="286" height="44" fill="#1F5FAD"/>
+      <g fill="#fff" font-size="13" text-anchor="middle"><text x="533" y="87">layer 1, GPU 0</text><text x="533" y="157">layer 2, GPU 0</text><text x="533" y="227">layer 3, GPU 1</text></g>
+      <path d="M533 176 V198" stroke="#A86A12" stroke-width="2" marker-end="url(#ah)"/>
+      <text x="390" y="292" font-size="13" fill="#A86A12">↓ one hand-off between stages: PCIe or network is fine</text>
+    </g>
+    <!-- EP -->
+    <g>
+      <rect x="780" y="60" width="340" height="40" fill="#F4F5F7" stroke="#16181D"/><text x="950" y="85" text-anchor="middle" font-size="13">attention (replicated or TP)</text>
+      <g font-size="12" text-anchor="middle" fill="#fff">
+        <rect x="780" y="170" width="78" height="40" fill="#C8461E"/><text x="819" y="195">expert 1</text>
+        <rect x="866" y="170" width="78" height="40" fill="#C8461E"/><text x="905" y="195">expert 2</text>
+        <rect x="956" y="170" width="78" height="40" fill="#1F5FAD"/><text x="995" y="195">expert 3</text>
+        <rect x="1042" y="170" width="78" height="40" fill="#1F5FAD"/><text x="1081" y="195">expert 4</text>
+      </g>
+      <g stroke="#A86A12" stroke-width="2" fill="none"><path d="M880 102 L819 168"/><path d="M1000 102 L1081 168"/></g>
+      <text x="780" y="236" font-size="12" fill="#7A808C">a router sends each token to 2 of the experts</text>
+      <text x="780" y="292" font-size="13" fill="#A86A12">⇄ all-to-all: tokens travel to their experts</text>
+    </g>
+    <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#A86A12"/></marker></defs>
+    <g font-size="12" fill="#454A56"><rect x="0" y="310" width="12" height="12" fill="#C8461E"/><text x="18" y="321">GPU 0</text><rect x="80" y="310" width="12" height="12" fill="#1F5FAD"/><text x="98" y="321">GPU 1</text></g>
+  </svg>
+  <p style="margin-top:10px">The communication pattern decides where each one belongs. TP talks after every layer, so it stays inside one NVLink box. PP talks once per stage, so it can cross nodes. EP sends each token wherever its experts live, so it scales with network bandwidth.</p>
+  <div class="src">Diagram after Kiely §5.4 and the vLLM parallelism docs. Data parallel (not drawn) is simply whole copies of the model.</div>
 </section>
 
 <section class="slide" data-title="Parallelism & MoE">
   <div class="run"><span>Part 3: Scaling up</span><span class="nb">Notebook §20</span></div>
-  <h2>Parallelism: what you split decides what you pay in communication</h2>
+  <h2>Parallelism: the trade-offs in one table</h2>
   <table style="margin-top:14px">
     <tr><th style="width:150px">Strategy</th><th>Splits</th><th>Buys you</th><th style="width:300px">Costs</th></tr>
     <tr><td>Tensor (TP)</td><td>Each layer's matrices</td><td>Lower latency; fits bigger models</td><td>All-reduce every layer. Keep it inside an NVLink domain.</td></tr>
@@ -532,7 +574,7 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
       <p class="small">TP inside a node, PP or EP across nodes, DP for throughput. In vLLM these are <code>--tensor-parallel-size</code>, <code>--pipeline-parallel-size</code>, <code>--data-parallel-size</code> and <code>--enable-expert-parallel</code>.</p>
     </div>
   </div>
-  <div class="src">Kiely §5.4 · DeepSeek-V3 Technical Report (2024) · OpenAI gpt-oss model card (2025).</div>
+  <div class="src">Kiely §5.4; DeepSeek-V3 Technical Report (2024); OpenAI gpt-oss model card (2025).</div>
 </section>
 
 <section class="slide" data-title="Architecture">
@@ -550,7 +592,7 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
     </div>
   </div>
   <p class="note blue" style="margin-top:22px">When you're choosing a base model to fine-tune, check <code>num_key_value_heads</code> in the config. It's the cheapest serving optimisation you'll ever get.</p>
-  <div class="src">Ainslie et al., <i>GQA</i> (2023) · DeepSeek-V2 (MLA, 2024) · per-token sizes computed from the published model configs.</div>
+  <div class="src">Ainslie et al., <i>GQA</i> (2023); DeepSeek-V2 (MLA, 2024); per-token sizes computed from the published model configs.</div>
 </section>
 
 <section class="slide" data-title="Disaggregation">
@@ -566,11 +608,11 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
     <div><h3 class="pf">When it doesn't</h3><p class="small">Small deployments and decode-heavy traffic. NVIDIA's MLSys '26 analysis finds the benefit depends on the input/output length mix. Try chunked prefill first; it's already on.</p></div>
   </div>
   <p class="small" style="margin-top:20px">At cluster scale the KV cache also becomes something to route on. Send each request to the replica that already holds its prefix (llm-d, NVIDIA Dynamo), and spill cold blocks to CPU or SSD (LMCache).</p>
-  <div class="src">Zhong et al., <i>DistServe</i>, OSDI '24 · NVIDIA, MLSys 2026 · Kiely §5.5.</div>
+  <div class="src">Zhong et al., <i>DistServe</i>, OSDI '24; NVIDIA, MLSys 2026; Kiely §5.5.</div>
 </section>
 
 <section class="slide divider" data-title="Part 4">
-  <div class="part">PART 4</div>
+  <div class="part">Part 4</div>
   <h1>vLLM in practice</h1>
   <p class="lede">How the engine is put together, how it compares, and the handful of flags you'll actually touch. Then we switch to the notebook.</p>
   <ol><li>Anatomy of a request</li><li>Picking an engine</li><li>The flags that matter</li><li>vLLM, SGLang, TensorRT-LLM side by side</li></ol>
@@ -584,20 +626,20 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
     <span class="arrow">→</span>
     <div class="box" style="width:200px"><h3>API server</h3>HTTP, tokenise, chat template; detokenise and stream back</div>
     <span class="arrow">→</span>
-    <div class="box" style="flex:1"><h3>EngineCore <span class="mute" style="font-weight:400">· own process, busy loop</span></h3>
+    <div class="box" style="flex:1"><h3>EngineCore <span class="mute" style="font-weight:400">(own process, busy loop)</span></h3>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px">
         <div><b class="small">Scheduler</b><br><span class="small">token budget per step, continuous batching, chunked prefill, preemption</span></div>
         <div><b class="small">KV cache manager</b><br><span class="small">block pool, prefix hashing, allocate and free</span></div>
       </div></div>
     <span class="arrow">→</span>
-    <div class="box" style="width:200px"><h3>Workers <span class="mute" style="font-weight:400">· 1 per GPU</span></h3>model runner, torch.compile, CUDA graphs, attention backend, sampler</div>
+    <div class="box" style="width:200px"><h3>Workers <span class="mute" style="font-weight:400">(1 per GPU)</span></h3>model runner, torch.compile, CUDA graphs, attention backend, sampler</div>
   </div>
   <div class="cols c3 vr" style="margin-top:30px">
     <div><h3>One loop iteration</h3><p class="small">Pick work within the token budget, allocate blocks, one forward pass, sample, stream out, free finished requests.</p></div>
     <div><h3>Why separate processes</h3><p class="small">Tokenising and HTTP happen on CPU while the GPU runs, so the GPU isn't waiting on Python. That's the overhead regime again.</p></div>
     <div><h3>One scheduler for everything</h3><p class="small">Prefill and decode are both "tokens to compute", which is why chunked prefill, prefix caching and spec decode compose cleanly.</p></div>
   </div>
-  <div class="src">vLLM V1 guide (docs.vllm.ai). V1 has been the only engine since v0.11 (Oct 2025) · A. Gordić, <i>Inside vLLM</i> (2025).</div>
+  <div class="src">vLLM V1 guide (docs.vllm.ai). V1 has been the only engine since v0.11 (Oct 2025); A. Gordić, <i>Inside vLLM</i> (2025).</div>
 </section>
 
 <section class="slide" data-title="Picking an engine">
@@ -614,7 +656,7 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
       <tr><td>SGLang</td><td>Heavy prefix reuse, structured or agentic workloads, large MoE</td></tr>
       <tr><td>TensorRT-LLM</td><td>Squeezing the last 10–30% on NVIDIA and you can afford the build step</td></tr>
       <tr><td>llama.cpp / Ollama</td><td>Laptops, Macs, CPUs, single user</td></tr>
-      <tr><td>Dynamo / llm-d</td><td>Multi-node, disaggregation, KV-aware routing on Kubernetes</td></tr>
+      <tr><td>Dynamo / llm&#8209;d</td><td>Multi-node, disaggregation, KV-aware routing on Kubernetes</td></tr>
     </table>
   </div>
   <div class="src">C. Frye, <i>How fast are LLM inference engines anyway?</i> (AI Engineer World's Fair 2025) and modal.com/llm-almanac. Single replica, default configs.</div>
@@ -660,11 +702,11 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
     <p class="small">All three accept <code>/v1/chat/completions</code>, so one benchmark harness compares them fairly (notebook §26 and §29). Above them sits <b>NVIDIA Dynamo</b>, which orchestrates any of the three for disaggregation and KV-aware routing.</p>
     <p class="note" style="font-size:15px">Give each engine its own virtualenv or container. They pin different PyTorch and CUDA versions, and installing two in one environment is the most common way to lose an afternoon.</p>
   </div>
-  <div class="src">docs.vllm.ai · docs.sglang.ai · nvidia.github.io/TensorRT-LLM (quick start, trtllm-serve). Flags drift between releases; check <code>--help</code>.</div>
+  <div class="src">docs.vllm.ai; docs.sglang.ai; nvidia.github.io/TensorRT-LLM (quick start, trtllm-serve). Flags drift between releases; check <code>--help</code>.</div>
 </section>
 
 <section class="slide divider" data-title="Part 5">
-  <div class="part">PART 5</div>
+  <div class="part">Part 5</div>
   <h1>Hosting big models locally</h1>
   <p class="lede">Two questions decide whether a model runs on your machine: does it fit, and how fast does it stream? Both come from the arithmetic in Part 1.</p>
   <ol><li>Will it fit on my machine?</li><li>The local toolbox</li><li>Edge cases you will hit</li><li>What practitioners report</li></ol>
@@ -689,7 +731,7 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
         <div><label>Context: <b id="pl-cv">32K</b></label><input type="range" id="pl-c" min="2" max="128" step="2" value="32"></div>
       </div>
       <div style="margin-top:20px;height:30px;display:flex;border:1px solid var(--rule);background:var(--soft)" id="pl-bar"></div>
-      <div class="tiny mute" style="margin-top:6px;display:flex;gap:18px"><span><span style="display:inline-block;width:10px;height:10px;background:var(--ink)"></span> on GPU</span><span><span style="display:inline-block;width:10px;height:10px;background:var(--warn)"></span> offloaded to CPU RAM</span><span><span style="display:inline-block;width:10px;height:10px;background:#6F94C7"></span> KV cache (FP8)</span></div>
+      <div class="tiny mute" style="margin-top:6px;display:flex;gap:18px"><span><span style="display:inline-block;width:10px;height:10px;background:var(--ink)"></span> on GPU</span><span><span style="display:inline-block;width:10px;height:10px;background:#6F94C7"></span> KV cache (FP8)</span><span><span style="display:inline-block;width:10px;height:10px;background:var(--warn)"></span> offloaded to CPU RAM</span></div>
     </div>
     <div>
       <div class="big" id="pl-v" style="font-size:44px">–</div>
@@ -705,15 +747,15 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
   <h2>The local toolbox: pick by what doesn't fit</h2>
   <table style="margin-top:12px">
     <tr><th style="width:200px">Tool</th><th>Reach for it when</th><th style="width:430px">Flags that matter</th></tr>
-    <tr><td>llama.cpp</td><td>The model doesn't fit in VRAM; GGUF quants; Mac, AMD, Vulkan, CPU</td><td class="mono small">-ngl 99 · --n-cpu-moe N · -c · -fa on · --cache-type-k q8_0</td></tr>
+    <tr><td>llama.cpp</td><td>The model doesn't fit in VRAM; GGUF quants; Mac, AMD, Vulkan, CPU</td><td class="mono small">-ngl 99, --n-cpu-moe N, -c, -fa on, --cache-type-k q8_0</td></tr>
     <tr><td>MLX (mlx-lm)</td><td>Apple Silicon; often faster than llama.cpp on the same Mac</td><td class="mono small">mlx_lm.server --model mlx-community/…-4bit</td></tr>
-    <tr><td>Ollama / LM Studio</td><td>A friendly wrapper for one user, quick demos</td><td class="mono small">OLLAMA_KV_CACHE_TYPE=q8_0 · num_ctx</td></tr>
+    <tr><td>Ollama / LM Studio</td><td>A friendly wrapper for one user, quick demos</td><td class="mono small">OLLAMA_KV_CACHE_TYPE=q8_0, num_ctx</td></tr>
     <tr><td>exo</td><td>Pooling several Macs over Thunderbolt 5 for 1T-parameter MoEs</td><td class="mono small">automatic discovery</td></tr>
     <tr><td>KTransformers</td><td>Huge MoE with experts on CPU, attention on GPU; better hybrid prefill</td><td class="mono small">YAML placement rules</td></tr>
-    <tr><td>vLLM / SGLang</td><td>Several users on 1–4 consumer GPUs</td><td class="mono small">--cpu-offload-gb · --enforce-eager · --pipeline-parallel-size</td></tr>
+    <tr><td>vLLM / SGLang</td><td>Several users on 1–4 consumer GPUs</td><td class="mono small">--cpu-offload-gb, --enforce-eager, --pipeline-parallel-size</td></tr>
   </table>
   <p style="margin-top:18px"><b>The MoE trick.</b> Keep attention and shared layers on the GPU and push expert weights to system RAM (<code>--n-cpu-moe</code>). Each token touches only a few experts, so decode stays usable. Start high, lower N until you run out of memory, then step back one.</p>
-  <div class="src">llama.cpp README and <code>llama-server --help</code> · ml-explore/mlx-lm · exo-explore/exo · kvcache-ai/ktransformers.</div>
+  <div class="src">llama.cpp README and <code>llama-server --help</code>; ml-explore/mlx-lm; exo-explore/exo; kvcache-ai/ktransformers.</div>
 </section>
 
 <section class="slide" data-title="Edge cases">
@@ -742,14 +784,14 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
     <tr><td>12 GB GPU, Qwen3 MoE, re-tuned <code>--n-cpu-moe</code></td><td>Decode 17 → 34 tok/s</td><td class="small">r/LocalLLaMA</td></tr>
     <tr><td>26B MoE, experts on CPU vs on GPU</td><td>Prefill ~5.3× slower, decode ~2.4× slower</td><td class="small">ai-muninn blog</td></tr>
     <tr><td>Llama 4 Maverick, hybrid CPU + GPU</td><td>Decode 25 tok/s, prefill only 18 tok/s</td><td class="small">r/LocalLLaMA</td></tr>
-    <tr><td>M5 MacBook Pro, Qwen3.5-9B</td><td>llama.cpp 22 · MLX 25 · uzu 92 tok/s</td><td class="small">Avi Chawla on X</td></tr>
+    <tr><td>M5 MacBook Pro, Qwen3.5-9B</td><td>llama.cpp 22, MLX 25, uzu 92 tok/s</td><td class="small">Avi Chawla on X</td></tr>
   </table>
   <p style="margin-top:20px">These are single anecdotes with different quants and builds, so don't compare rows. The pattern is consistent though: <b>local decode is a bandwidth story, local prefill is a compute story, and offload hurts prefill most.</b> The Part 1 arithmetic predicts all of it.</p>
-  <div class="src">heise.de/-11085716 · aiweekly.co (r/LocalLLaMA summary) · ai-muninn.com · x.com/_avichawla/status/2115010493899502058.</div>
+  <div class="src">heise.de/-11085716; aiweekly.co (r/LocalLLaMA summary); ai-muninn.com; x.com/_avichawla/status/2115010493899502058.</div>
 </section>
 
 <section class="slide divider" data-title="Part 6">
-  <div class="part">PART 6</div>
+  <div class="part">Part 6</div>
   <h1>Running it</h1>
   <p class="lede">A fast engine is necessary but not sufficient. Cost, monitoring and a way to decide what to change next.</p>
   <ol><li>Cost per million tokens</li><li>What to monitor</li><li>A tuning playbook</li><li>What to read next</li></ol>
@@ -757,14 +799,11 @@ achieved = (weight bytes + KV bytes) ÷ TPOT
 
 <section class="slide" data-title="Cost & monitoring">
   <div class="run"><span>Part 6: Running it</span><span class="nb">Notebook §13, §21</span></div>
-  <h2>Cost is a utilisation problem wearing a pricing hat</h2>
+  <h2>Cost per token is set by utilisation, not by the GPU price</h2>
   <div class="cols c2" style="margin-top:12px;gap:48px">
     <div>
-<div class="calc">$ / 1M tokens = GPU $/hr ÷ (tok/s × 3600) × 10⁶
-
-$3/hr GPU at   500 tok/s → $1.67
-$3/hr GPU at 2,000 tok/s → $0.42
-$3/hr GPU at 8,000 tok/s → $0.10</div>
+<div class="calc">$ / 1M tokens = GPU $/hr ÷ (tok/s × 3600) × 10⁶</div>
+      <div style="margin-top:14px;font-size:14px"><div style="display:grid;grid-template-columns:120px 1fr 56px;gap:10px;align-items:center;margin:8px 0"><span class="mono small">500 tok/s</span><div style="height:20px;background:var(--soft)"><div style="height:100%;width:100%;background:var(--pf)"></div></div><span class="mono small" style="text-align:right">$1.67</span></div><div style="display:grid;grid-template-columns:120px 1fr 56px;gap:10px;align-items:center;margin:8px 0"><span class="mono small">2,000 tok/s</span><div style="height:20px;background:var(--soft)"><div style="height:100%;width:25%;background:var(--pf)"></div></div><span class="mono small" style="text-align:right">$0.42</span></div><div style="display:grid;grid-template-columns:120px 1fr 56px;gap:10px;align-items:center;margin:8px 0"><span class="mono small">8,000 tok/s</span><div style="height:20px;background:var(--soft)"><div style="height:100%;width:6%;background:var(--pf)"></div></div><span class="mono small" style="text-align:right">$0.10</span></div><p class="tiny mute">A $3/hr GPU at three levels of batching.</p></div>
       <p class="small" style="margin-top:12px">Same GPU, same price. The only thing that changed is how well it's batched. SemiAnalysis's InferenceX benchmark reports hardware the same way, as tokens per dollar at a given interactivity level.</p>
       <p class="tiny mute" style="margin-top:6px">$3/hr is illustrative. Plug in your own rate and the throughput you measure in notebook §11.</p>
     </div>
@@ -780,7 +819,7 @@ $3/hr GPU at 8,000 tok/s → $0.10</div>
       <p class="tiny mute" style="margin-top:8px">All exposed on vLLM's Prometheus <code>/metrics</code> endpoint.</p>
     </div>
   </div>
-  <div class="src">SemiAnalysis InferenceX (formerly InferenceMAX), glossary: tokens per dollar · Kiely §7.4.2 (cost estimation).</div>
+  <div class="src">SemiAnalysis InferenceX (formerly InferenceMAX), glossary: tokens per dollar; Kiely §7.4.2 (cost estimation).</div>
 </section>
 
 <section class="slide" data-title="Playbook">
@@ -823,20 +862,24 @@ $3/hr GPU at 8,000 tok/s → $0.10</div>
 
 <section class="slide" data-title="Exercises">
   <div class="run"><span>Close</span><span class="nb">Notebook</span></div>
-  <h2>Five exercises, all in the notebook</h2>
+  <h2>Seven exercises, all in the notebook</h2>
   <ol style="margin-top:18px;padding-left:24px;max-width:1000px">
     <li class="fade" style="--i:1"><b>Find your goodput.</b> Highest concurrency where every user still gets ≥ 30 tok/s. What's the system throughput there? <span class="mono small dc">§11</span></li>
     <li class="fade" style="--i:2"><b>Break prefix caching.</b> Put a timestamp at the top of the system prompt and watch warm TTFT. Then move it to the bottom. <span class="mono small dc">§12</span></li>
     <li class="fade" style="--i:3"><b>Compute your MBU.</b> Measured batch-1 tokens/s against the bandwidth ceiling for your GPU. Where's the gap coming from? <span class="mono small dc">§8</span></li>
     <li class="fade" style="--i:4"><b>Make spec decode lose.</b> Swap the code-edit prompt for open-ended writing, then raise concurrency. <span class="mono small dc">§18</span></li>
-    <li class="fade" style="--i:5"><b>Price your next eval.</b> Your prompt count × average output length, divided by throughput you measured, times your GPU rate. <span class="mono small dc">§7, §21</span></li>
+    <li class="fade" style="--i:5"><b>Find your ridge point.</b> Where does matmul time stop being flat as the batch grows? Compare it with the spec-sheet ops:byte ratio. <span class="mono small dc">§36</span></li>
+    <li class="fade" style="--i:6"><b>Plan a model you actually want.</b> Run the planner on a model from your backlog and your own hardware before downloading anything. <span class="mono small dc">§31</span></li>
+    <li class="fade" style="--i:7"><b>Price your next eval.</b> Your prompt count × average output length, divided by throughput you measured, times your GPU rate. <span class="mono small dc">§7, §21</span></li>
   </ol>
-  <p class="lede" style="margin-top:34px">Questions, then we open the notebook.</p>
+  <p class="lede" style="margin-top:22px">Questions, then we open the notebook.</p>
   <div class="src">Exercise format borrowed from kipply's <i>Transformer Inference Arithmetic</i>, which ends the same way.</div>
 </section>
 
+
+
 </div></div>
-<div id="help">← → · F fullscreen</div>
+<div id="help">arrow keys to move, F for fullscreen</div>
 
 <script>
 (function(){
@@ -867,7 +910,7 @@ $3/hr GPU at 8,000 tok/s → $0.10</div>
   const PAL=['#C8461E','#1F5FAD','#2E7A4C','#A86A12','#6B4FA0','#3D8DA8','#B5476E','#5C6B2E'];
   const A={
     ladder(s){
-      const el=s.querySelector('#ladder');const rows=[['On-chip SRAM (all SMs)',33000,'~33 MB','tiles'],['L2 cache',12000,'50 MB',''],['HBM3',3350,'80 GB','weights + KV'],['NVLink 4',900,'GPU↔GPU',''],['PCIe Gen5 x16',64,'GPU↔CPU',''],['CPU DRAM',300,'TBs','offload'],['NVMe SSD',10,'TBs','weight files']];
+      const el=s.querySelector('#ladder');const rows=[['On-chip SRAM (all SMs)',33000,'~33 MB','tiles'],['L2 cache',12000,'50 MB',''],['HBM3',3350,'80 GB','weights + KV'],['NVLink 4',900,'GPU↔GPU',''],['CPU DRAM',300,'100s of GB','offload'],['PCIe Gen5 x16',64,'GPU↔CPU link',''],['NVMe SSD',10,'TBs','weight files']];
       const lg=v=>Math.log10(v)/Math.log10(40000);
       el.innerHTML='<div class="label">Bandwidth, GB/s (log scale)</div>'+rows.map((r,i)=>'<div style="display:grid;grid-template-columns:170px 1fr 92px;gap:10px;align-items:center;margin:9px 0;font-size:14px"><span'+(i==2?' style="font-weight:600;color:'+DC+'"':'')+'>'+r[0]+'<br><span class="tiny mute">'+r[2]+'</span></span><div style="height:20px;background:'+RULE+'"><div class="lb" style="height:100%;width:0;background:'+(i==2?DC:INK)+';transition:width .9s cubic-bezier(.2,.7,.2,1) '+(i*0.18)+'s"></div></div><span class="mono small" style="text-align:right">'+r[1].toLocaleString()+'</span></div>').join('');
       requestAnimationFrame(()=>requestAnimationFrame(()=>el.querySelectorAll('.lb').forEach((b,i)=>b.style.width=(lg(rows[i][1])*100)+'%')));
@@ -898,7 +941,7 @@ $3/hr GPU at 8,000 tok/s → $0.10</div>
         const bar=$('m-bar');
         if(left<=0){bar.innerHTML='<div style="width:100%;background:'+PF+'"></div>';$('m-out').innerHTML='<b class="pf">Weights alone exceed the budget</b> ('+f(w)+' vs '+budget.toFixed(0)+' GB). Quantize or add GPUs.';return}
         bar.innerHTML='<div title="weights" style="width:'+(w/gpu*100)+'%;background:'+INK+'"></div><div title="KV cache" style="width:'+(left/gpu*100)+'%;background:'+DC+';opacity:.75"></div>';
-        $('m-out').innerHTML='Weights <b>'+f(w)+'</b> · KV per token <b>'+(kvTok/1024).toFixed(0)+' KiB</b> · KV room <b>'+f(left)+'</b><br>→ about <b>'+n.toLocaleString()+'</b> concurrent sequences at this context';
+        $('m-out').innerHTML='Weights <b>'+f(w)+'</b>, KV per token <b>'+(kvTok/1024).toFixed(0)+' KiB</b>, KV room <b>'+f(left)+'</b><br>→ about <b>'+n.toLocaleString()+'</b> concurrent sequences at this context';
       }
       ['m-preset','m-wp','m-kp','m-gpu','m-ctx'].forEach(id=>$(id).oninput=calc);calc();
     },
@@ -907,7 +950,7 @@ $3/hr GPU at 8,000 tok/s → $0.10</div>
       const x0=56,y0=290,x1=590,y1=16,peak=989,bw=3.35,ridge=peak/bw;
       const lx=v=>x0+Math.log10(v)/4*(x1-x0),ly=v=>y0-Math.log10(v)/3.2*(y0-y1);
       let g='<g font-family="IBM Plex Mono, monospace" font-size="11" fill="'+MUTE+'">';
-      [1,10,100,1000,10000].forEach(v=>{g+='<line x1="'+lx(v)+'" x2="'+lx(v)+'" y1="'+y1+'" y2="'+y0+'" stroke="'+RULE+'"/><text x="'+lx(v)+'" y="'+(y0+16)+'" text-anchor="middle">'+v+'</text>'});
+      [1,10,100,1000,10000].forEach(v=>{g+='<line x1="'+lx(v)+'" x2="'+lx(v)+'" y1="'+y1+'" y2="'+y0+'" stroke="'+RULE+'"/><text x="'+lx(v)+'" y="'+(y0+16)+'" text-anchor="'+(v===10000?'end':'middle')+'">'+v+'</text>'});
       [1,10,100,1000].forEach(v=>{g+='<line x1="'+x0+'" x2="'+x1+'" y1="'+ly(v)+'" y2="'+ly(v)+'" stroke="'+RULE+'"/><text x="'+(x0-6)+'" y="'+(ly(v)+4)+'" text-anchor="end">'+v+'</text>'});
       g+='<text x="'+((x0+x1)/2)+'" y="'+(y0+34)+'" text-anchor="middle">FLOPs per byte (log)</text><text x="14" y="'+((y0+y1)/2)+'" transform="rotate(-90 14 '+((y0+y1)/2)+')" text-anchor="middle">TFLOPS (log)</text></g>';
       g+='<polyline points="'+lx(1)+','+ly(bw)+' '+lx(ridge)+','+ly(peak)+' '+lx(10000)+','+ly(peak)+'" fill="none" stroke="'+INK+'" stroke-width="2"/>';
@@ -949,7 +992,7 @@ $3/hr GPU at 8,000 tok/s → $0.10</div>
       timers.push(setInterval(()=>{if(k>=128)return;for(const j of [k,k+1,k+2,k+3]){if(ca[j])ca[j].style.opacity=ca[j].dataset.o;if(cb[j])cb[j].style.opacity=cb[j].dataset.o}k+=4},30));
     }
   };
-  (function(){const el=document.getElementById('kvbars');if(!el)return;const rows=[['Llama-2-7B · MHA, 32 kv heads',512],['Llama-3.1-8B · GQA, 8 kv heads',128],['Qwen2.5-1.5B · GQA, 2 kv heads',28]];
+  (function(){const el=document.getElementById('kvbars');if(!el)return;const rows=[['Llama-2-7B (MHA, 32 KV heads)',512],['Llama-3.1-8B (GQA, 8 KV heads)',128],['Qwen2.5-1.5B (GQA, 2 KV heads)',28]];
     el.innerHTML=rows.map(([n,v])=>'<div style="display:grid;grid-template-columns:230px 1fr 70px;align-items:center;gap:10px;margin:10px 0;font-size:14px"><span>'+n+'</span><div style="height:18px;background:'+RULE+'"><div style="height:100%;width:'+(v/512*100)+'%;background:'+INK+'"></div></div><span class="mono">'+v+' KiB</span></div>').join('')})();
   const start=parseInt((location.hash||'#1').slice(1))-1||0;
   slides[0].classList.add('active');show(start);
