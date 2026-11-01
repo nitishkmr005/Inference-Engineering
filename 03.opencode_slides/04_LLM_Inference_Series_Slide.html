@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM Inference Engineering — Series Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FBFAF6;
+  --ink:#171A21;
+  --ink2:#414855;
+  --mute:#666E7D;
+  --faint:#9AA1AD;
+  --rule:rgba(23,26,33,.11);
+  --blue:#2C66BF;
+  --blue-deep:#17457F;
+  --orange:#C8552A;
+  --green:#2E7A4C;
+  --serif:'Source Serif 4',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#E9EAED;overflow:hidden;font-family:var(--sans);color:var(--ink)}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#slide{
+  width:1280px;height:720px;flex:none;position:relative;overflow:hidden;
+  transform-origin:center center;
+  background:
+    radial-gradient(920px 560px at 6% -16%, rgba(58,110,220,.13), transparent 62%),
+    radial-gradient(760px 520px at 106% 110%, rgba(255,107,61,.10), transparent 62%),
+    radial-gradient(640px 440px at 62% 118%, rgba(46,122,76,.07), transparent 60%),
+    linear-gradient(180deg,#FDFCF8 0%, #F8F7F3 55%, #F4F3EF 100%);
+  box-shadow:0 24px 70px rgba(20,30,60,.16);
+}
+#slide::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(1200px 700px at 50% 40%, transparent 45%, rgba(30,40,60,.07) 100%);
+}
+.grain{
+  position:absolute;inset:0;pointer-events:none;opacity:.04;z-index:5;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.glow{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none;z-index:0}
+.g1{width:420px;height:420px;left:-160px;top:-170px;background:rgba(74,124,240,.16);animation:drift 14s ease-in-out infinite}
+.g2{width:380px;height:380px;right:-150px;bottom:-160px;background:rgba(255,116,72,.10);animation:drift 18s ease-in-out infinite reverse}
+@keyframes drift{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(28px,22px,0)}}
+
+.content{position:relative;z-index:2;height:100%;padding:46px 64px 30px;display:flex;flex-direction:column}
+
+/* ---------- top bar ---------- */
+.top{display:flex;align-items:center;justify-content:space-between;padding-bottom:18px;border-bottom:1px solid var(--rule)}
+.brand{display:flex;align-items:center;gap:13px}
+.mark{width:26px;height:26px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:3px}
+.mark i{border-radius:1.5px;background:var(--blue)}
+.mark i:nth-child(1){opacity:.95}
+.mark i:nth-child(2){opacity:.62}
+.mark i:nth-child(3){opacity:.42}
+.mark i:nth-child(4){background:var(--orange);opacity:.95;box-shadow:0 0 10px rgba(200,85,42,.28)}
+.brandtxt{font-family:var(--mono);font-size:11px;letter-spacing:2.1px;color:var(--ink2);font-weight:500;white-space:nowrap}
+.brandtxt em{font-style:normal;color:var(--faint);letter-spacing:1.6px}
+.topright{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:10.5px;letter-spacing:1.7px;color:var(--mute);white-space:nowrap}
+.topright .sep{color:var(--faint)}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 8px rgba(46,122,76,.55);animation:blink 2.6s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.range{border:1px solid var(--rule);border-radius:999px;padding:4px 10px;color:var(--ink2);letter-spacing:1.4px}
+
+/* ---------- main ---------- */
+.main{flex:1;display:grid;grid-template-columns:1.02fr .98fr;gap:54px;align-items:center;padding:26px 0 20px}
+.hero{display:flex;flex-direction:column;align-items:flex-start}
+.eyebrow{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:10.5px;letter-spacing:3px;color:var(--mute);margin-bottom:20px}
+.eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 0 rgba(200,85,42,.45);animation:ring 3s ease-out infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(200,85,42,.45)}70%{box-shadow:0 0 0 9px rgba(200,85,42,0)}100%{box-shadow:0 0 0 0 rgba(200,85,42,0)}}
+h1{font-family:var(--serif);font-weight:600;font-size:77px;line-height:.97;letter-spacing:-2.6px;color:var(--ink)}
+h1 .it{font-style:italic;font-weight:600;background:linear-gradient(94deg,#0E3E85 4%,#2C66BF 50%,#6B4FA8 100%);-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:4px}
+.rule{display:flex;gap:6px;margin:24px 0 22px}
+.rule i{height:2px;border-radius:2px;display:block}
+.rule .b{width:66px;background:linear-gradient(90deg,var(--blue),rgba(44,102,191,.18))}
+.rule .o{width:34px;background:linear-gradient(90deg,var(--orange),rgba(200,85,42,.18))}
+.rule .g{width:18px;background:linear-gradient(90deg,var(--green),rgba(46,122,76,.18))}
+.tag{font-size:18px;line-height:1.58;color:var(--ink2);max-width:520px;font-weight:400}
+.tag code{font-family:var(--mono);font-size:.88em;color:var(--ink);background:rgba(23,26,33,.05);border:1px solid var(--rule);border-radius:4px;padding:1px 5px}
+.stats{display:flex;align-items:stretch;gap:0;margin-top:30px}
+.stat{padding:0 24px;border-left:1px solid var(--rule)}
+.stat:first-child{padding-left:0;border-left:0}
+.stat b{display:block;font-family:var(--serif);font-weight:600;font-size:31px;line-height:1;color:var(--ink);letter-spacing:-.5px}
+.stat span{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:2px;color:var(--mute);margin-top:7px;text-transform:uppercase}
+
+/* ---------- visual panel ---------- */
+.viz{
+  position:relative;border:1px solid var(--rule);border-radius:14px;
+  background:linear-gradient(180deg,#FFFFFF 0%,#F7F8FA 100%);
+  padding:20px 22px 18px;overflow:hidden;
+  box-shadow:0 18px 45px rgba(20,30,60,.10), inset 0 1px 0 #FFFFFF;
+}
+.viz::after{content:"";position:absolute;inset:0;border-radius:14px;pointer-events:none;background:radial-gradient(420px 180px at 78% -20%,rgba(44,102,191,.10),transparent 70%)}
+.vizhead{display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:9.5px;letter-spacing:2.2px;color:var(--mute);position:relative;z-index:2}
+.vizhead .right{display:flex;align-items:center;gap:7px;color:var(--ink2)}
+.vizhead .right i{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 7px rgba(46,122,76,.45)}
+
+.flow{display:flex;align-items:center;gap:0;margin:20px 0 18px;position:relative;z-index:2}
+.node{flex:none;width:112px}
+.node .k{font-family:var(--mono);font-size:8.5px;letter-spacing:1.6px;color:var(--faint);display:block;margin-bottom:5px}
+.node b{display:block;font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:1.9px;color:var(--ink)}
+.node em{display:block;font-style:normal;font-size:10.5px;color:var(--mute);margin-top:4px}
+.wire{flex:1;height:1px;margin:0 12px;background:linear-gradient(90deg,rgba(44,102,191,.25),rgba(200,85,42,.40));position:relative;overflow:visible}
+.wire i{position:absolute;top:-2px;left:0;width:5px;height:5px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px rgba(44,102,191,.50);animation:travel 3.2s linear infinite;animation-delay:var(--d)}
+.wire i:nth-child(2){background:var(--orange);box-shadow:0 0 8px rgba(200,85,42,.50)}
+@keyframes travel{0%{left:0;opacity:0}12%{opacity:1}88%{opacity:1}100%{left:calc(100% - 5px);opacity:0}}
+
+.cache{position:relative;z-index:2;border-top:1px solid var(--rule);padding-top:14px}
+.cachehead{display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:1.7px;color:var(--mute);margin-bottom:12px}
+.cachehead b{font-weight:500;color:var(--ink2)}
+.gridwrap{position:relative;overflow:hidden;padding:2px 0}
+#grid{display:grid;grid-template-columns:repeat(12,1fr);gap:5px;position:relative;z-index:2}
+#grid i{height:14px;border-radius:2px;display:block}
+#grid i.kv{background:linear-gradient(180deg,rgba(64,118,196,.96),rgba(30,66,122,.82));box-shadow:inset 0 1px 0 rgba(255,255,255,.28);opacity:.55}
+#grid i.kv.recent{background:linear-gradient(180deg,rgba(40,96,180,1),rgba(20,54,104,.92))}
+#grid i.free{background:#FCFCFA;border:1px solid rgba(23,26,33,.12);box-shadow:none}
+#grid i.new{background:linear-gradient(180deg,rgba(224,106,58,.98),rgba(168,60,24,.85));opacity:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.30),0 0 10px rgba(200,85,42,.18);animation:append 3.6s ease-in-out infinite;animation-delay:var(--d)}
+#grid i.new.hot{background:linear-gradient(180deg,#F0A07C,#D26230);box-shadow:0 0 16px rgba(200,85,42,.35)}
+@keyframes append{0%,8%{opacity:0;transform:scaleY(.4)}22%,72%{opacity:1;transform:scaleY(1)}92%,100%{opacity:0;transform:scaleY(.4)}}
+.sweep{position:absolute;top:0;bottom:0;width:90px;z-index:3;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(44,102,191,.10),transparent);animation:sweep 5.2s ease-in-out infinite}
+@keyframes sweep{0%{transform:translateX(-120px);opacity:0}15%{opacity:1}70%{transform:translateX(430px);opacity:0}100%{transform:translateX(430px);opacity:0}}
+.legend{display:flex;align-items:center;gap:16px;margin-top:13px;font-family:var(--mono);font-size:9px;letter-spacing:1.1px;color:var(--mute)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:8px;height:8px;border-radius:2px;display:block}
+.legend .l1{background:var(--blue)}
+.legend .l2{background:var(--orange)}
+.legend .l3{border:1px solid rgba(23,26,33,.18)}
+.caption{margin-top:10px;font-size:11.5px;line-height:1.45;color:var(--mute)}
+.caption b{color:var(--ink2);font-weight:500}
+
+/* ---------- session rail ---------- */
+.rail{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:6px}
+.card{
+  position:relative;border:1px solid var(--rule);border-radius:10px;padding:14px 16px 13px;
+  background:#FFFFFF;
+  display:flex;align-items:flex-start;gap:14px;overflow:hidden;
+  box-shadow:0 1px 2px rgba(20,30,60,.04);
+  transition:transform .25s ease,border-color .25s ease,background .25s ease,box-shadow .25s ease;
+}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--ac)}
+.card:hover{transform:translateY(-2px);border-color:rgba(23,26,33,.18);background:#FFFFFF;box-shadow:0 10px 24px rgba(20,30,60,.08)}
+.card .num{font-family:var(--serif);font-size:27px;line-height:1;color:var(--ac);opacity:.9;font-weight:600;letter-spacing:-1px;min-width:34px}
+.card .body{flex:1;min-width:0}
+.card h2{font-size:14.5px;font-weight:600;letter-spacing:.1px;color:var(--ink);margin-bottom:4px}
+.card p{font-size:10.5px;line-height:1.45;color:var(--mute)}
+.card .count{font-family:var(--mono);font-size:9px;letter-spacing:1.2px;color:var(--faint);text-align:right;white-space:nowrap;padding-top:3px}
+.card .count b{display:block;font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink2);letter-spacing:0;margin-bottom:1px}
+.c1{--ac:var(--blue)}
+.c2{--ac:var(--orange)}
+.c3{--ac:var(--green)}
+
+/* ---------- footer ---------- */
+.foot{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:12px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:9px;letter-spacing:1.4px;color:var(--faint)}
+.foot b{color:var(--mute);font-weight:500}
+.foot .l{display:flex;align-items:center;gap:8px}
+.foot .l i{width:4px;height:4px;border-radius:50%;background:var(--faint)}
+
+/* ---------- reveal ---------- */
+.rise{opacity:0;transform:translateY(12px);animation:rise .85s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:var(--dl,0s)}
+@keyframes rise{to{opacity:1;transform:none}}
+
+/* ---------- static export (?export=1) ---------- */
+html.export .rise{opacity:1;transform:none;animation:none}
+html.export #grid i.new{opacity:1!important;transform:none!important;animation:none!important}
+html.export .sweep{display:none}
+html.export .wire i{animation:none;opacity:1}
+html.export .wire i:first-child{left:32%}
+html.export .wire i:nth-child(2){left:68%}
+html.export .live-dot,html.export .pulse,html.export .g1,html.export .g2{animation:none}
+html.export #slide{box-shadow:none}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}
+  .rise{opacity:1;transform:none}
+  #grid i.new{opacity:1!important;transform:none!important}
+  .sweep{display:none}
+}
+@media print{
+  @page{size:1280px 720px;margin:0}
+  html,body{background:#fff}
+  #stage{position:static;display:block}
+  #slide{transform:none!important;box-shadow:none}
+}
+</style>
+</head>
+<body>
+<div id="stage">
+  <section id="slide" aria-label="LLM Inference Engineering series overview slide">
+    <div class="glow g1"></div>
+    <div class="glow g2"></div>
+    <div class="grain"></div>
+
+    <div class="content">
+      <header class="top rise" style="--dl:.05s">
+        <div class="brand">
+          <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span class="brandtxt">LLM INFERENCE&nbsp;&nbsp;<em>/&nbsp;&nbsp;SERIES 2026</em></span>
+        </div>
+        <div class="topright">
+          <span class="live-dot"></span>
+          <span>AI TEAM TECH TALK</span>
+          <span class="sep">·</span>
+          <span>OCTOBER 2026</span>
+          <span class="range">01—03</span>
+        </div>
+      </header>
+
+      <div class="main">
+        <div class="hero">
+          <div class="eyebrow rise" style="--dl:.12s"><span class="pulse"></span>THE COMPLETE PICTURE</div>
+          <h1 class="rise" style="--dl:.18s">LLM <span class="it">Inference</span><br>Engineering</h1>
+          <div class="rule rise" style="--dl:.24s"><i class="b"></i><i class="o"></i><i class="g"></i></div>
+          <p class="tag rise" style="--dl:.30s">What happens after <code>model.generate()</code> — how a model answers, what limits it, and the toolkit that makes serving fast, cheap and production-ready.</p>
+          <div class="stats rise" style="--dl:.36s">
+            <div class="stat"><b>83</b><span>slides</span></div>
+            <div class="stat"><b>3</b><span>sessions</span></div>
+            <div class="stat"><b>3</b><span>notebooks</span></div>
+          </div>
+        </div>
+
+        <aside class="viz rise" style="--dl:.42s" aria-label="Prefill and decode with a KV cache">
+          <div class="vizhead">
+            <span>SERVING LOOP</span>
+            <span class="right"><i></i>LIVE KV CACHE</span>
+          </div>
+
+          <div class="flow">
+            <div class="node">
+              <span class="k">STEP 01</span>
+              <b>PREFILL</b>
+              <em>read the prompt</em>
+            </div>
+            <div class="wire" aria-hidden="true"><i style="--d:0s"></i><i style="--d:1.6s"></i></div>
+            <div class="node" style="text-align:right">
+              <span class="k">STEP 02</span>
+              <b>DECODE</b>
+              <em>one token / step</em>
+            </div>
+          </div>
+
+          <div class="cache">
+            <div class="cachehead">
+              <span>KV CACHE · <b>REQUEST 04</b></span>
+              <span>seq 1,024 · 8 heads</span>
+            </div>
+            <div class="gridwrap">
+              <div id="grid" aria-hidden="true"></div>
+              <div class="sweep"></div>
+            </div>
+            <div class="legend">
+              <span><i class="l1"></i>cached KV</span>
+              <span><i class="l2"></i>new token row</span>
+              <span><i class="l3"></i>free slots</span>
+            </div>
+            <p class="caption"><b>Decode reuses the cache</b> and computes only the new row.</p>
+          </div>
+        </aside>
+      </div>
+
+      <section class="rail" aria-label="The three sessions">
+        <article class="card c1 rise" style="--dl:.50s">
+          <div class="num">01</div>
+          <div class="body">
+            <h2>Basics</h2>
+            <p>Prefill &amp; decode · KV cache<br>GPU arithmetic · first vLLM</p>
+          </div>
+          <div class="count"><b>30</b>slides</div>
+        </article>
+        <article class="card c2 rise" style="--dl:.56s">
+          <div class="num">02</div>
+          <div class="body">
+            <h2>Intermediate</h2>
+            <p>Batching · paging · quantization<br>speculative decoding</p>
+          </div>
+          <div class="count"><b>27</b>slides</div>
+        </article>
+        <article class="card c3 rise" style="--dl:.62s">
+          <div class="num">03</div>
+          <div class="body">
+            <h2>Advanced</h2>
+            <p>Tensor parallelism · disaggregation<br>hosting at scale</p>
+          </div>
+          <div class="count"><b>26</b>slides</div>
+        </article>
+      </section>
+
+      <footer class="foot rise" style="--dl:.68s">
+        <div class="l">
+          <span>SOURCE</span><i></i>
+          <span><b>slides/</b> Session 1–3</span><i></i>
+          <span><b>notebooks/</b> 1–3</span>
+        </div>
+        <div class="r">FROM MODEL.GENERATE() TO PRODUCTION&nbsp;&nbsp;→</div>
+      </footer>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  const EXPORT = new URLSearchParams(location.search).has('export');
+  if (EXPORT) document.documentElement.classList.add('export');
+  const grid = document.getElementById('grid');
+  const ROWS = 8, COLS = 12;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = document.createElement('i');
+      if (r < ROWS - 1) {
+        cell.className = 'kv' + (c === COLS - 1 ? ' recent' : '');
+        cell.style.opacity = (0.55 + r * 0.06).toFixed(2);
+      } else {
+        cell.className = 'new' + (c === COLS - 1 ? ' hot' : '');
+        cell.style.setProperty('--d', (c * 0.075).toFixed(2) + 's');
+      }
+      grid.appendChild(cell);
+    }
+  }
+  for (let c = 0; c < COLS; c++) {
+    const cell = document.createElement('i');
+    cell.className = 'free';
+    grid.appendChild(cell);
+  }
+
+  const slide = document.getElementById('slide');
+  function fit(){
+    const k = EXPORT ? 1 : Math.min(window.innerWidth / 1280, window.innerHeight / 720) * 0.96;
+    slide.style.transform = 'scale(' + k + ')';
+  }
+  window.addEventListener('resize', fit, {passive:true});
+  fit();
+})();
+</script>
+</body>
+</html>

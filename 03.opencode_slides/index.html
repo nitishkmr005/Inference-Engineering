@@ -1,0 +1,1486 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM Inference Engineering — Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&display=swap" rel="stylesheet">
+<script>if(new URLSearchParams(location.search).has('static'))document.documentElement.classList.add('static');</script>
+<style>
+:root{
+  --bg:#FBFAF6;
+  --paper:#FDFCF8;
+  --ink:#171A21;
+  --ink2:#3F4653;
+  --mute:#687080;
+  --faint:#9AA1AD;
+  --rule:rgba(23,26,33,.11);
+  --rule2:rgba(23,26,33,.18);
+  --blue:#2C66BF;
+  --blue-deep:#17457F;
+  --blue-soft:#EAF0FB;
+  --orange:#C8552A;
+  --orange-soft:#FBEDE7;
+  --green:#2E7A4C;
+  --green-soft:#EAF5EF;
+  --serif:'Source Serif 4',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  overflow:hidden;color:var(--ink);font-family:var(--sans);
+  background:
+    radial-gradient(1000px 620px at 50% -18%,rgba(255,255,255,.92),transparent 65%),
+    radial-gradient(760px 560px at 8% 108%,rgba(44,102,191,.07),transparent 64%),
+    #E6E8EB;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+a{color:inherit;text-decoration:none}
+kbd{font-family:var(--mono);font-size:8px;line-height:1;border:1px solid var(--rule2);border-radius:4px;padding:3px 5px;background:rgba(255,255,255,.72);color:var(--ink2)}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#deck{width:1280px;height:720px;flex:none;position:relative;transform-origin:center center}
+.slide{
+  position:absolute;inset:0;width:1280px;height:720px;overflow:hidden;
+  background:
+    radial-gradient(780px 500px at 10% -14%,rgba(var(--accent-rgb),.13),transparent 63%),
+    radial-gradient(620px 460px at 106% 112%,rgba(200,85,42,.065),transparent 66%),
+    radial-gradient(540px 400px at 68% 118%,rgba(46,122,76,.045),transparent 64%),
+    linear-gradient(180deg,#FDFCF8 0%,#F8F7F3 58%,#F4F3EF 100%);
+  box-shadow:0 28px 80px rgba(20,30,60,.17);
+  opacity:0;visibility:hidden;pointer-events:none;transform:translateY(10px);
+  transition:opacity .42s ease,transform .42s cubic-bezier(.2,.7,.2,1),visibility .42s;
+  --accent:#2C66BF;--accent-rgb:44,102,191;--accent-soft:#EAF0FB;
+}
+.slide.is-active{opacity:1;visibility:visible;pointer-events:auto;transform:none;z-index:2}
+.slide[data-track="basics"]{--accent:#2C66BF;--accent-rgb:44,102,191;--accent-soft:#EAF0FB}
+.slide[data-track="intermediate"]{--accent:#C8552A;--accent-rgb:200,85,42;--accent-soft:#FBEDE7}
+.slide[data-track="advanced"]{--accent:#2E7A4C;--accent-rgb:46,122,76;--accent-soft:#EAF5EF}
+.slide::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(1150px 720px at 50% 38%,transparent 44%,rgba(30,40,60,.055) 100%);
+}
+.grain{
+  position:absolute;inset:0;pointer-events:none;opacity:.035;z-index:8;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.chrome{
+  position:absolute;top:28px;left:54px;right:54px;height:36px;z-index:5;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--rule);padding-bottom:13px;
+}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.mark{width:24px;height:24px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:3px;flex:none}
+.mark i{border-radius:1.5px;background:var(--blue)}
+.mark i:nth-child(1){opacity:.95}
+.mark i:nth-child(2){opacity:.56}
+.mark i:nth-child(3){opacity:.34}
+.mark i:nth-child(4){background:var(--orange);opacity:.96;box-shadow:0 0 10px rgba(200,85,42,.24)}
+.brand-txt{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--ink2);font-weight:500;white-space:nowrap}
+.brand-txt em{font-style:normal;color:var(--faint);letter-spacing:1.5px}
+.chrome-meta{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:9px;letter-spacing:1.6px;color:var(--mute);white-space:nowrap}
+.chrome-meta .sep{color:var(--faint)}
+.chrome-meta .live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 8px rgba(46,122,76,.5);animation:blink 2.7s ease-in-out infinite}
+.chrome-chip{border:1px solid var(--rule);border-radius:999px;padding:4px 8px;color:var(--ink2);background:rgba(255,255,255,.4);letter-spacing:1.2px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.foot{
+  position:absolute;left:54px;right:54px;bottom:18px;z-index:5;height:24px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-top:1px solid var(--rule);padding-top:11px;
+  font-family:var(--mono);font-size:8px;letter-spacing:1.45px;color:var(--faint);
+}
+.foot b{font-weight:500;color:var(--mute)}
+.foot-right{display:flex;align-items:center;gap:6px}
+.foot-right b{color:var(--faint);font-weight:400}
+.progress{position:absolute;left:0;right:0;bottom:0;height:2px;background:rgba(23,26,33,.05);z-index:6}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),rgba(var(--accent-rgb),.28));transition:width .45s ease}
+.page{position:absolute;inset:90px 54px 50px;z-index:4;min-height:0}
+.page.split{display:grid;grid-template-columns:398px minmax(0,1fr);gap:42px;align-items:center}
+.copy{min-width:0;display:flex;flex-direction:column;justify-content:center}
+.kicker{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:8.5px;letter-spacing:2.2px;color:var(--mute);margin-bottom:14px}
+.kicker .knum{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:18px;padding:0 6px;border:1px solid rgba(var(--accent-rgb),.25);border-radius:999px;color:var(--accent);background:rgba(var(--accent-rgb),.06);letter-spacing:1.2px;font-weight:500}
+h2{font-family:var(--serif);font-weight:600;font-size:47px;line-height:1.01;letter-spacing:-1.7px;color:var(--ink)}
+.dek{font-size:14px;line-height:1.56;color:var(--mute);margin-top:16px;max-width:390px}
+.points{list-style:none;display:flex;flex-direction:column;gap:9px;margin-top:20px;max-width:390px}
+.points li{display:grid;grid-template-columns:16px 1fr;gap:8px;font-size:10.5px;line-height:1.44;color:var(--mute)}
+.points li::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent);margin-top:5px;box-shadow:0 0 0 3px rgba(var(--accent-rgb),.09)}
+.points b{color:var(--ink2);font-weight:600}
+.canvas{
+  height:100%;min-width:0;position:relative;overflow:hidden;
+  border:1px solid var(--rule);border-radius:16px;
+  background:linear-gradient(180deg,rgba(255,255,255,.84),rgba(250,250,248,.68));
+  box-shadow:0 20px 52px rgba(20,30,60,.065),inset 0 1px 0 #fff;
+  padding:18px 20px 16px;display:flex;flex-direction:column;
+}
+.canvas::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.6;
+  background-image:linear-gradient(rgba(23,26,33,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(23,26,33,.035) 1px,transparent 1px);
+  background-size:28px 28px;
+  -webkit-mask-image:radial-gradient(620px 430px at 55% 45%,#000 0%,transparent 78%);
+  mask-image:radial-gradient(620px 430px at 55% 45%,#000 0%,transparent 78%);
+}
+.canvas::after{content:"";position:absolute;inset:0;border-radius:16px;pointer-events:none;background:radial-gradient(440px 190px at 82% -18%,rgba(var(--accent-rgb),.1),transparent 70%)}
+.canvas>*{position:relative;z-index:2}
+.viz-head{display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:8px;letter-spacing:1.8px;color:var(--mute);padding-bottom:12px;border-bottom:1px solid var(--rule);flex:none}
+.viz-head .right{display:flex;align-items:center;gap:6px;color:var(--ink2);white-space:nowrap}
+.viz-head .right i{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 7px rgba(46,122,76,.45)}
+.viz-head .tag{border:1px solid var(--rule);border-radius:999px;padding:3px 7px;color:var(--ink2);letter-spacing:1.2px;background:rgba(255,255,255,.55)}
+.viz-body{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;position:relative}
+.viz-note{font-size:9.5px;line-height:1.4;color:var(--mute);border-top:1px solid var(--rule);padding-top:9px;margin-top:9px;flex:none}
+.viz-note b{color:var(--ink2);font-weight:600}
+.tag-mono{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;color:var(--mute)}
+.reveal{opacity:0;transform:translateY(10px)}
+.is-active .reveal{animation:rise .72s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(.055s * var(--i,0))}
+@keyframes rise{to{opacity:1;transform:none}}
+.cover{--accent:#2C66BF;--accent-rgb:44,102,191;--accent-soft:#EAF0FB}
+.cover .page{inset:88px 54px 48px;display:flex;flex-direction:column;gap:18px}
+.cover-main{flex:1;min-height:0;display:grid;grid-template-columns:1.02fr .98fr;gap:48px;align-items:center}
+.cover-copy{display:flex;flex-direction:column;align-items:flex-start}
+.eyebrow{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:9px;letter-spacing:2.8px;color:var(--mute);margin-bottom:16px}
+.eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 0 rgba(200,85,42,.4);animation:ring 3s ease-out infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(200,85,42,.4)}70%{box-shadow:0 0 0 9px rgba(200,85,42,0)}100%{box-shadow:0 0 0 0 rgba(200,85,42,0)}}
+.cover h1{font-family:var(--serif);font-weight:600;font-size:78px;line-height:.94;letter-spacing:-3.4px;color:var(--ink)}
+.cover h1 .it{font-style:italic;background:linear-gradient(94deg,#0E3E85 2%,#2C66BF 52%,#6B4FA8 100%);-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:5px}
+.thin-rule{display:flex;gap:5px;margin:21px 0 18px}
+.thin-rule i{height:2px;border-radius:2px;display:block}
+.thin-rule .b{width:64px;background:linear-gradient(90deg,var(--blue),rgba(44,102,191,.15))}
+.thin-rule .o{width:32px;background:linear-gradient(90deg,var(--orange),rgba(200,85,42,.15))}
+.thin-rule .g{width:16px;background:linear-gradient(90deg,var(--green),rgba(46,122,76,.15))}
+.cover .lead{font-size:15px;line-height:1.56;color:var(--ink2);max-width:470px}
+.cover .lead code{font-family:var(--mono);font-size:.86em;color:var(--ink);background:rgba(23,26,33,.05);border:1px solid var(--rule);border-radius:4px;padding:1px 5px}
+.stats{display:flex;align-items:stretch;margin-top:24px}
+.stat{padding:0 22px;border-left:1px solid var(--rule)}
+.stat:first-child{padding-left:0;border-left:0}
+.stat b{display:block;font-family:var(--serif);font-weight:600;font-size:28px;line-height:1;letter-spacing:-.5px}
+.stat span{display:block;font-family:var(--mono);font-size:8px;letter-spacing:1.8px;color:var(--mute);margin-top:7px;text-transform:uppercase}
+.cover-panel{
+  position:relative;border:1px solid var(--rule);border-radius:15px;padding:16px 18px 14px;
+  background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(247,248,250,.72));
+  box-shadow:0 18px 46px rgba(20,30,60,.09),inset 0 1px 0 #fff;overflow:hidden;
+}
+.cover-panel::after{content:"";position:absolute;inset:0;border-radius:15px;pointer-events:none;background:radial-gradient(380px 160px at 78% -20%,rgba(44,102,191,.11),transparent 72%)}
+.cp-head{display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:8px;letter-spacing:1.9px;color:var(--mute);position:relative;z-index:2}
+.cp-head .live{display:flex;align-items:center;gap:6px;color:var(--ink2)}
+.cp-head .live i{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 7px rgba(46,122,76,.5);animation:blink 2.7s ease-in-out infinite}
+.cp-flow{display:flex;align-items:center;gap:0;margin:18px 0 15px;position:relative;z-index:2}
+.cp-node{flex:none;width:116px}
+.cp-node .k{display:block;font-family:var(--mono);font-size:7.5px;letter-spacing:1.4px;color:var(--faint);margin-bottom:4px}
+.cp-node b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:1.6px;color:var(--ink)}
+.cp-node em{display:block;font-style:normal;font-size:9.5px;color:var(--mute);margin-top:3px}
+.cp-link{flex:1;height:1px;margin:0 10px;background:linear-gradient(90deg,rgba(44,102,191,.25),rgba(200,85,42,.45));position:relative}
+.cp-link i{position:absolute;top:-2px;left:0;width:5px;height:5px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px rgba(44,102,191,.5);animation:travel 3.2s linear infinite}
+.cp-link i:nth-child(2){background:var(--orange);box-shadow:0 0 8px rgba(200,85,42,.5);animation-delay:1.6s}
+@keyframes travel{0%{left:0;opacity:0}12%{opacity:1}88%{opacity:1}100%{left:calc(100% - 5px);opacity:0}}
+.cp-cache{position:relative;z-index:2;border-top:1px solid var(--rule);padding-top:12px}
+.cp-cache-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:7.5px;letter-spacing:1.5px;color:var(--mute);margin-bottom:9px}
+.cp-cache-head b{font-weight:500;color:var(--ink2)}
+.cp-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:4px}
+.cp-grid i{height:12px;border-radius:2px;display:block}
+.cp-grid i.kv{background:linear-gradient(180deg,rgba(64,118,196,.96),rgba(30,66,122,.82));box-shadow:inset 0 1px 0 rgba(255,255,255,.28);opacity:.58}
+.cp-grid i.kv.recent{opacity:1;background:linear-gradient(180deg,rgba(40,96,180,1),rgba(20,54,104,.9))}
+.cp-grid i.new{background:linear-gradient(180deg,rgba(224,106,58,.98),rgba(168,60,24,.86));box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 0 9px rgba(200,85,42,.2);opacity:0}
+.is-active .cp-grid i.new{animation:append 3.6s ease-in-out infinite;animation-delay:var(--d)}
+@keyframes append{0%,8%{opacity:0;transform:scaleY(.4)}22%,72%{opacity:1;transform:scaleY(1)}92%,100%{opacity:0;transform:scaleY(.4)}}
+.cp-grid i.free{background:rgba(255,255,255,.42);border:1px solid rgba(23,26,33,.12)}
+.cp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:12px;border-top:1px solid var(--rule);padding-top:10px}
+.cp-stats div{padding-left:12px;border-left:1px solid var(--rule)}
+.cp-stats div:first-child{padding-left:0;border-left:0}
+.cp-stats b{display:block;font-family:var(--serif);font-size:18px;line-height:1;font-weight:600}
+.cp-stats span{display:block;font-family:var(--mono);font-size:7px;letter-spacing:1.4px;color:var(--mute);margin-top:4px}
+.track-rail{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;flex:none}
+.track-card{
+  position:relative;display:flex;align-items:flex-start;gap:13px;text-align:left;
+  border:1px solid var(--rule);border-radius:11px;padding:13px 14px 12px;background:rgba(255,255,255,.72);
+  box-shadow:0 1px 2px rgba(20,30,60,.03);overflow:hidden;
+  transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease,background .25s ease;
+}
+.track-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--tc)}
+.track-card:hover{transform:translateY(-2px);border-color:rgba(23,26,33,.18);background:#fff;box-shadow:0 12px 26px rgba(20,30,60,.08)}
+.track-card .tc-num{font-family:var(--serif);font-size:25px;line-height:1;font-weight:600;color:var(--tc);letter-spacing:-.8px;min-width:30px}
+.track-card .tc-body{flex:1;min-width:0}
+.track-card h3{font-size:12.5px;font-weight:600;letter-spacing:.1px;margin-bottom:4px}
+.track-card p{font-size:9.5px;line-height:1.4;color:var(--mute)}
+.track-card .tc-count{white-space:nowrap;text-align:right;font-family:var(--mono);font-size:7.5px;letter-spacing:1.1px;color:var(--faint);padding-top:2px}
+.track-card .tc-count b{display:block;font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink2);letter-spacing:0;margin-bottom:1px}
+.tc-basics{--tc:var(--blue)}
+.tc-intermediate{--tc:var(--orange)}
+.tc-advanced{--tc:var(--green)}
+.section-slide .page{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+.section-copy{position:relative;z-index:2}
+.section-num{
+  position:absolute;left:-10px;top:-108px;font-family:var(--serif);font-weight:600;font-size:250px;line-height:.8;
+  color:rgba(var(--accent-rgb),.075);letter-spacing:-12px;pointer-events:none;z-index:-1;
+}
+.section-copy .kicker{margin-bottom:20px}
+.section-copy h2{font-size:76px;letter-spacing:-3px;line-height:.95}
+.section-dek{font-size:15px;line-height:1.6;color:var(--mute);max-width:470px;margin-top:20px}
+.section-meta{display:flex;align-items:center;gap:12px;margin-top:26px;font-family:var(--mono);font-size:8px;letter-spacing:1.7px;color:var(--mute)}
+.section-meta span{border:1px solid var(--rule);border-radius:999px;padding:5px 9px;background:rgba(255,255,255,.55)}
+.section-meta span:first-child{color:var(--accent);border-color:rgba(var(--accent-rgb),.24);background:rgba(var(--accent-rgb),.06)}
+.section-list{position:relative;z-index:2;border-left:1px solid var(--rule);padding-left:26px;display:flex;flex-direction:column;gap:8px}
+.section-list-head{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--faint);margin-bottom:7px}
+.sec-item{display:grid;grid-template-columns:24px 1fr 18px;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--rule);border-radius:9px;background:rgba(255,255,255,.5);transition:background .2s,border-color .2s,transform .2s}
+.sec-item:hover{background:#fff;border-color:rgba(23,26,33,.17);transform:translateX(3px)}
+.sec-item b{font-family:var(--mono);font-size:8px;color:var(--accent);letter-spacing:1px}
+.sec-item span{font-size:11px;color:var(--ink2)}
+.sec-item em{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--faint);text-align:right}
+.track-switch{position:absolute;right:54px;top:29px;display:flex;gap:5px;z-index:6}
+.track-switch i{width:22px;height:3px;border-radius:3px;background:rgba(23,26,33,.11)}
+.track-switch i.on{background:var(--accent)}
+.index-slide .page{display:flex;flex-direction:column}
+.index-head{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;flex:none;margin-bottom:20px}
+.index-head h2{font-size:58px;letter-spacing:-2.5px}
+.index-head p{font-size:12px;line-height:1.5;color:var(--mute);max-width:360px;text-align:right;padding-bottom:6px}
+.index-cols{flex:1;min-height:0;display:grid;grid-template-columns:1.06fr 1.18fr .82fr;gap:28px}
+.index-col{min-width:0;display:flex;flex-direction:column;border-top:2px solid var(--accent);padding-top:10px}
+.index-col-head{display:flex;align-items:baseline;justify-content:space-between;padding-bottom:7px;margin-bottom:5px;border-bottom:1px solid var(--rule)}
+.index-col-head b{font-family:var(--mono);font-size:9px;letter-spacing:1.8px;color:var(--accent)}
+.index-col-head span{font-family:var(--mono);font-size:7.5px;letter-spacing:1.2px;color:var(--faint)}
+.index-chips{display:flex;flex-direction:column;gap:3px}
+.index-chip{display:grid;grid-template-columns:24px 1fr;gap:6px;align-items:center;text-align:left;padding:4px 6px;border-radius:5px;transition:background .18s,transform .18s}
+.index-chip:hover{background:rgba(var(--accent-rgb),.075);transform:translateX(2px)}
+.index-chip b{font-family:var(--mono);font-size:7.5px;letter-spacing:.8px;color:var(--faint);font-weight:500}
+.index-chip span{font-size:9.5px;line-height:1.25;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.closing-slide .page{display:grid;grid-template-columns:1.1fr .9fr;gap:58px;align-items:center}
+.close-copy h2{font-size:86px;line-height:.91;letter-spacing:-4px}
+.close-copy h2 em{font-style:italic;color:var(--accent)}
+.close-copy .dek{font-size:14px;max-width:440px;margin-top:22px}
+.close-cards{display:flex;flex-direction:column;gap:11px}
+.close-card{display:grid;grid-template-columns:32px 1fr;gap:14px;padding:14px 16px;border:1px solid var(--rule);border-radius:10px;background:rgba(255,255,255,.62)}
+.close-card b{font-family:var(--serif);font-size:24px;line-height:1;color:var(--accent);font-weight:600}
+.close-card h3{font-size:12px;font-weight:600;margin-bottom:4px}
+.close-card p{font-size:9.5px;line-height:1.4;color:var(--mute)}
+.close-source{grid-column:1/-1;display:flex;justify-content:space-between;border-top:1px solid var(--rule);padding-top:11px;font-family:var(--mono);font-size:8px;letter-spacing:1.5px;color:var(--faint)}
+#hud{position:fixed;right:22px;bottom:18px;z-index:60;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:8px;letter-spacing:1.2px;color:var(--mute)}
+#hud .counter{min-width:58px;text-align:right;color:var(--ink2)}
+#ovBtn{display:flex;align-items:center;gap:7px;border:1px solid rgba(23,26,33,.13);border-radius:999px;padding:6px 10px;background:rgba(255,255,255,.76);backdrop-filter:blur(8px);transition:background .2s,border-color .2s}
+#ovBtn:hover{background:#fff;border-color:rgba(23,26,33,.24)}
+#overview{
+  position:fixed;inset:0;z-index:100;display:none;padding:34px;background:rgba(236,238,241,.88);backdrop-filter:blur(16px);
+}
+#overview.open{display:flex;flex-direction:column}
+.ov-top{display:flex;align-items:flex-end;justify-content:space-between;max-width:1240px;width:100%;margin:0 auto 18px;flex:none}
+.ov-top .kicker{margin-bottom:6px}
+.ov-top h2{font-size:34px;letter-spacing:-1.2px}
+.ov-close{display:flex;align-items:center;gap:8px;border:1px solid var(--rule2);border-radius:999px;padding:8px 12px;background:rgba(255,255,255,.8);font-family:var(--mono);font-size:8px;letter-spacing:1.2px;color:var(--ink2)}
+.ov-grid{width:100%;max-width:1240px;margin:0 auto;overflow:auto;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;padding:2px 2px 26px}
+.ov-item{position:relative;text-align:left;border:1px solid var(--rule);border-radius:8px;background:rgba(255,255,255,.72);padding:8px 9px 8px 12px;min-height:48px;transition:background .18s,border-color .18s,transform .18s}
+.ov-item::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;border-radius:2px 0 0 2px;background:var(--oc,var(--blue))}
+.ov-item[data-track="intermediate"]{--oc:var(--orange)}
+.ov-item[data-track="advanced"]{--oc:var(--green)}
+.ov-item:hover{background:#fff;border-color:rgba(23,26,33,.2);transform:translateY(-1px)}
+.ov-item.is-current{background:#fff;border-color:rgba(23,26,33,.24);box-shadow:0 6px 16px rgba(20,30,60,.07)}
+.ov-item b{display:block;font-family:var(--mono);font-size:6.8px;letter-spacing:1px;color:var(--faint);font-weight:500;margin-bottom:3px}
+.ov-item span{display:block;font-size:9px;line-height:1.25;color:var(--ink2)}
+.ov-item em{display:block;font-style:normal;font-family:var(--mono);font-size:6.5px;letter-spacing:.9px;color:var(--oc);margin-top:4px;text-transform:uppercase}
+.ov-item.plain{--oc:var(--faint)}
+html.static .reveal,html.static .slide,html.static .slide.is-active{opacity:1!important;transform:none!important;visibility:visible!important}
+html.static .reveal{animation:none!important}
+html.static .slide{display:none}
+html.static .slide.is-active{display:block}
+html.static #hud,html.static #overview{display:none!important}
+html.static .cp-grid i.new{opacity:1!important;animation:none!important;transform:none!important}
+html.static .cp-link i{animation:none!important;opacity:1;left:42%}
+html.static .cp-link i:nth-child(2){left:68%}
+html.static .live-dot,html.static .pulse,html.static .cp-head .live i{animation:none!important}
+html.static .draw{stroke-dashoffset:0!important;animation:none!important}
+html.static .grow{animation:none!important;transform:scaleX(1)!important}
+html.static .pop{animation:none!important;opacity:1!important;transform:none!important}
+html.static .flow-link i,html.static .travel{animation:none!important;opacity:1!important;left:48%!important}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}
+  .reveal{opacity:1;transform:none}
+}
+@media print{
+  @page{size:1280px 720px;margin:0}
+  html,body{background:#fff}
+  #stage{position:static;display:block}
+  #deck{transform:none!important}
+  #hud,#overview{display:none!important}
+  .slide{box-shadow:none;display:none}
+  .slide.is-active{display:block}
+}
+.stream-panel{border:1px solid var(--rule);border-radius:11px;background:rgba(255,255,255,.6);padding:14px 15px;position:relative;overflow:hidden}
+.stream-panel::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(100deg,transparent 35%,rgba(44,102,191,.05) 50%,transparent 65%)}
+.stream-prompt{display:flex;align-items:center;gap:9px;font-size:10px;padding-bottom:12px;border-bottom:1px solid var(--rule)}
+.sp-label{font-family:var(--mono);font-size:7px;letter-spacing:1.5px;color:var(--faint)}
+.sp-text{color:var(--ink2)}
+.caret{display:inline-block;width:1px;height:12px;background:var(--accent);animation:blink 1.1s step-end infinite}
+.stream-out{display:flex;flex-wrap:wrap;gap:4px;padding:14px 0 13px;min-height:100px;align-content:flex-start}
+.stream-tok{font-family:var(--mono);font-size:10px;padding:4px 6px;border-radius:4px;background:var(--accent-soft);color:var(--blue-deep);border:1px solid rgba(var(--accent-rgb),.13);opacity:0}
+.is-active .stream-tok{animation:pop .34s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(.1s + var(--i) * .06s)}
+@keyframes pop{from{opacity:0;transform:translateY(5px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes growy{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.stream-meta{display:flex;gap:14px;font-family:var(--mono);font-size:7.5px;letter-spacing:1.2px;color:var(--faint);border-top:1px solid var(--rule);padding-top:10px}
+.stream-meta b{color:var(--ink2);font-weight:500}
+.stream-stamps{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:11px}
+.stamp{border:1px solid var(--rule);border-radius:8px;padding:9px 10px;background:rgba(255,255,255,.54)}
+.stamp b{display:block;font-family:var(--mono);font-size:8px;letter-spacing:1.3px;color:var(--accent);margin-bottom:3px}
+.stamp span{font-size:9px;line-height:1.35;color:var(--mute)}
+.cmp-grid{display:grid;grid-template-columns:1fr 28px 1fr;gap:8px;align-items:stretch}
+.cmp-side{border:1px solid var(--rule);border-radius:11px;padding:15px 15px 13px;background:rgba(255,255,255,.6);display:flex;flex-direction:column;min-height:288px}
+.cmp-side.infer{background:linear-gradient(180deg,rgba(255,255,255,.78),rgba(234,240,251,.48));border-color:rgba(44,102,191,.2)}
+.cmp-side.train{background:linear-gradient(180deg,rgba(255,255,255,.68),rgba(251,237,231,.4));border-color:rgba(200,85,42,.16)}
+.cmp-tag{font-family:var(--mono);font-size:7px;letter-spacing:1.5px;color:var(--faint);margin-bottom:8px}
+.cmp-side h3{font-family:var(--serif);font-size:30px;line-height:1;letter-spacing:-1px;margin-bottom:13px}
+.cmp-side ul{list-style:none;display:flex;flex-direction:column;gap:6px;flex:1}
+.cmp-side li{font-size:9.5px;line-height:1.35;color:var(--mute);padding-left:10px;position:relative}
+.cmp-side li::before{content:"";position:absolute;left:0;top:5px;width:3px;height:3px;border-radius:50%;background:var(--faint)}
+.cmp-stat{border-top:1px solid var(--rule);padding-top:9px;margin-top:8px}
+.cmp-stat b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--ink)}
+.cmp-stat span{display:block;font-size:8.5px;color:var(--mute);margin-top:3px}
+.cmp-vs{align-self:center;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:7px;letter-spacing:1px;color:var(--faint);width:28px;height:28px;border:1px solid var(--rule);border-radius:50%;background:rgba(255,255,255,.8)}
+.flow-row{display:flex;align-items:stretch;gap:0;margin:8px 0 0}
+.flow-node{flex:1;min-width:0;border:1px solid var(--rule);border-radius:8px;padding:9px 7px;background:rgba(255,255,255,.62);text-align:left}
+.flow-node.hot{border-color:rgba(var(--accent-rgb),.3);background:rgba(var(--accent-rgb),.055)}
+.flow-node .fn-k{display:block;font-family:var(--mono);font-size:6.5px;letter-spacing:1px;color:var(--faint);margin-bottom:4px}
+.flow-node b{display:block;font-family:var(--mono);font-size:8px;line-height:1.2;letter-spacing:.8px;color:var(--ink);white-space:nowrap}
+.flow-node em{display:block;font-style:normal;font-size:8px;line-height:1.25;color:var(--mute);margin-top:3px}
+.flow-link{position:relative;flex:0 0 14px;margin:0 1px}
+.flow-link::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:linear-gradient(90deg,rgba(var(--accent-rgb),.2),rgba(200,85,42,.35))}
+.flow-link i{position:absolute;top:calc(50% - 2px);left:0;width:4px;height:4px;border-radius:50%;background:var(--accent);opacity:0}
+.is-active .flow-link i{animation:travel 2.8s linear infinite;animation-delay:var(--d)}
+.flow-loop{display:flex;align-items:center;gap:9px;margin-top:14px;font-family:var(--mono);font-size:7.5px;letter-spacing:1.2px;color:var(--mute)}
+.flow-loop .line{flex:1;height:1px;border-top:1px dashed rgba(var(--accent-rgb),.3);position:relative}
+.flow-loop .line::after{content:"";position:absolute;right:0;top:-3px;width:5px;height:5px;border-top:1px solid var(--accent);border-right:1px solid var(--accent);transform:rotate(45deg)}
+.phase-stack{display:flex;flex-direction:column;gap:11px}
+.phase-card{border:1px solid var(--rule);border-radius:11px;padding:12px 14px;background:rgba(255,255,255,.62)}
+.phase-card.prefill{border-color:rgba(44,102,191,.2);background:linear-gradient(100deg,rgba(234,240,251,.58),rgba(255,255,255,.55))}
+.phase-card.decode{border-color:rgba(200,85,42,.18);background:linear-gradient(100deg,rgba(251,237,231,.55),rgba(255,255,255,.55))}
+.phase-top{display:flex;align-items:baseline;gap:9px;margin-bottom:10px}
+.phase-top b{font-family:var(--mono);font-size:9px;letter-spacing:1.4px;color:var(--ink)}
+.phase-top span{font-size:9px;color:var(--mute);flex:1}
+.phase-top em{font-family:var(--mono);font-style:normal;font-size:7px;letter-spacing:1px;color:var(--accent)}
+.phase-blocks{display:flex;gap:3px;height:28px}
+.phase-blocks i{flex:1;border-radius:3px;background:linear-gradient(180deg,rgba(58,112,190,.92),rgba(28,66,122,.84));box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.phase-card.decode .phase-blocks i{flex:0 0 12px;background:rgba(255,255,255,.45);border:1px solid rgba(200,85,42,.3);box-shadow:none}
+.phase-card.decode .phase-blocks i.on{background:linear-gradient(180deg,#E06A3A,#B64A20);border-color:transparent;box-shadow:0 0 9px rgba(200,85,42,.18)}
+.phase-tags{display:flex;gap:5px;margin-top:9px;font-family:var(--mono);font-size:6.5px;letter-spacing:1px;color:var(--mute)}
+.phase-tags span{border:1px solid var(--rule);border-radius:999px;padding:3px 6px;background:rgba(255,255,255,.55)}
+.phase-meters{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px;font-family:var(--mono);font-size:6.5px;letter-spacing:1px;color:var(--faint)}
+.phase-meter b{display:block;font-weight:500;color:var(--ink2);margin-bottom:4px}
+.phase-meter .meter{height:3px;border-radius:3px;background:rgba(23,26,33,.07);overflow:hidden}
+.phase-meter .meter i{display:block;height:100%;background:var(--accent);transform-origin:left}
+.layer-wrap{display:grid;grid-template-columns:1fr 52px;gap:14px;align-items:center}
+.layer-stack{display:flex;flex-direction:column;gap:5px}
+.layer-row{display:grid;grid-template-columns:26px 1fr 1fr;gap:9px;align-items:center;border:1px solid var(--rule);border-radius:6px;padding:8px 9px;background:rgba(255,255,255,.58);border-left:2px solid transparent}
+.layer-row.attn{border-left-color:var(--blue);background:rgba(234,240,251,.56)}
+.layer-row.ffn{border-left-color:var(--orange);background:rgba(251,237,231,.45)}
+.layer-row.head{border-left-color:var(--green);background:rgba(234,245,239,.5)}
+.layer-row .lr-k{font-family:var(--mono);font-size:6.5px;letter-spacing:.8px;color:var(--faint)}
+.layer-row b{font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--ink)}
+.layer-row em{font-style:normal;font-size:8px;color:var(--mute);text-align:right}
+.layer-side{display:flex;flex-direction:column;align-items:center;gap:8px;font-family:var(--mono);font-size:7px;letter-spacing:1.1px;color:var(--mute);text-align:center}
+.layer-side .bracket{width:1px;height:170px;border-left:1px solid var(--rule2);position:relative}
+.layer-side .bracket::before,.layer-side .bracket::after{content:"";position:absolute;left:-4px;width:8px;height:1px;background:var(--rule2)}
+.layer-side .bracket::before{top:0}.layer-side .bracket::after{bottom:0}
+.layer-side b{font-weight:500;color:var(--accent);font-size:12px;font-family:var(--serif)}
+.token-strip{display:flex;flex-wrap:wrap;gap:5px;padding:12px 12px 10px;border:1px solid var(--rule);border-radius:10px;background:rgba(255,255,255,.6);align-content:flex-start;min-height:118px}
+.token-chip{display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 7px;border:1px solid rgba(var(--accent-rgb),.18);border-radius:5px;background:rgba(var(--accent-rgb),.055);opacity:0}
+.is-active .token-chip{animation:pop .38s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(.08s + var(--i) * .045s)}
+.token-chip b{font-family:var(--mono);font-size:8.5px;font-weight:500;color:var(--ink)}
+.token-chip span{font-family:var(--mono);font-size:6px;letter-spacing:.5px;color:var(--faint)}
+.ctx-card{border:1px solid var(--rule);border-radius:9px;padding:10px 12px;background:rgba(255,255,255,.55);margin-top:9px}
+.ctx-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:7px;letter-spacing:1.2px;color:var(--mute);margin-bottom:7px}
+.ctx-head b{font-weight:500;color:var(--ink2)}
+.ctx-bar{height:8px;border-radius:6px;background:rgba(23,26,33,.06);overflow:hidden;display:flex}
+.ctx-bar i{height:100%;display:block}
+.ctx-bar .used{background:linear-gradient(90deg,var(--accent),rgba(var(--accent-rgb),.55));width:7%}
+.ctx-bar .out{background:repeating-linear-gradient(135deg,rgba(200,85,42,.4) 0 4px,rgba(200,85,42,.18) 4px 8px);width:13%}
+.ctx-bar .free{flex:1;background:rgba(23,26,33,.035)}
+.ctx-legend{display:flex;gap:12px;margin-top:7px;font-family:var(--mono);font-size:6.5px;letter-spacing:.8px;color:var(--faint)}
+.ctx-legend span{display:flex;align-items:center;gap:4px}
+.ctx-legend i{width:5px;height:5px;border-radius:1px;display:block}
+.ctx-legend .a{background:var(--accent)}.ctx-legend .b{background:rgba(200,85,42,.6)}.ctx-legend .c{border:1px solid var(--rule2)}
+.token-facts{display:flex;gap:8px;margin-top:10px}
+.token-fact{flex:1;border:1px solid var(--rule);border-radius:7px;padding:7px 8px;background:rgba(255,255,255,.52)}
+.token-fact b{display:block;font-family:var(--mono);font-size:8px;color:var(--ink2);margin-bottom:2px}
+.token-fact span{font-size:7.5px;line-height:1.3;color:var(--mute)}
+.kv-layout{display:grid;grid-template-columns:1fr 168px;gap:16px;align-items:center}
+.kv-matrix-wrap{border:1px solid var(--rule);border-radius:10px;padding:12px;background:rgba(255,255,255,.58)}
+.kv-axis{display:flex;justify-content:space-between;font-family:var(--mono);font-size:6.5px;letter-spacing:1px;color:var(--faint);margin-bottom:7px}
+.kv-matrix{display:grid;grid-template-columns:repeat(12,1fr);gap:3px}
+.kv-cell{height:15px;border-radius:2px;background:linear-gradient(180deg,rgba(64,118,196,.92),rgba(30,66,122,.78));opacity:.58;box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.kv-cell.recent{opacity:1;background:linear-gradient(180deg,rgba(40,96,180,1),rgba(20,54,104,.9))}
+.kv-cell.new{background:linear-gradient(180deg,#E06A3A,#B64A20);opacity:0;box-shadow:0 0 8px rgba(200,85,42,.2)}
+.is-active .kv-cell.new{animation:append 3.4s ease-in-out infinite;animation-delay:var(--d)}
+.kv-cell.free{background:rgba(255,255,255,.45);border:1px solid rgba(23,26,33,.12);box-shadow:none;opacity:1}
+.kv-side{display:flex;flex-direction:column;gap:7px}
+.kv-stat{border:1px solid var(--rule);border-radius:8px;padding:8px 9px;background:rgba(255,255,255,.55)}
+.kv-stat b{display:block;font-family:var(--serif);font-size:18px;line-height:1;font-weight:600;color:var(--ink)}
+.kv-stat span{display:block;font-size:7.5px;color:var(--mute);margin-top:3px}
+.kv-formula{border:1px solid rgba(var(--accent-rgb),.18);border-radius:8px;padding:8px 9px;background:rgba(var(--accent-rgb),.05);font-family:var(--mono);font-size:7px;line-height:1.5;letter-spacing:.4px;color:var(--ink2)}
+.dist-head{font-family:var(--mono);font-size:7.5px;letter-spacing:1px;color:var(--mute);margin-bottom:9px}
+.dist-head b{color:var(--ink2);font-weight:500}
+.dist-rows{display:flex;flex-direction:column;gap:7px}
+.dist-row{display:grid;grid-template-columns:74px 1fr 38px;gap:9px;align-items:center;font-size:9.5px}
+.dist-row .dr-label{font-family:var(--mono);font-size:8px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dr-track{height:16px;border-radius:4px;background:rgba(23,26,33,.045);overflow:hidden;position:relative}
+.dr-track i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,rgba(var(--accent-rgb),.42),rgba(var(--accent-rgb),.8));transform-origin:left}
+.is-active .dr-track i{animation:grow .8s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(.15s + var(--i) * .06s)}
+.dist-row.pick .dr-track i{background:linear-gradient(90deg,rgba(46,122,76,.55),rgba(46,122,76,.9))}
+.dist-row.pick .dr-label{color:var(--green);font-weight:600}
+.dist-row.blocked{opacity:.4}
+.dist-row b{font-family:var(--mono);font-size:7.5px;font-weight:500;color:var(--mute);text-align:right}
+.dist-row.pick b{color:var(--green)}
+.dist-foot{display:flex;gap:6px;margin-top:12px}
+.dist-foot span{border:1px solid var(--rule);border-radius:999px;padding:4px 7px;font-family:var(--mono);font-size:6.5px;letter-spacing:1px;color:var(--mute);background:rgba(255,255,255,.5)}
+.lat-card{border:1px solid var(--rule);border-radius:10px;padding:13px 14px 11px;background:rgba(255,255,255,.58);position:relative}
+.lat-scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:6.5px;letter-spacing:.8px;color:var(--faint);margin-bottom:7px}
+.lat-line{height:34px;border-radius:5px;overflow:hidden;display:flex;border:1px solid rgba(23,26,33,.07)}
+.lat-ttft{flex:0 0 7%;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,#C8552A,#E07B52);color:#fff;font-family:var(--mono);font-size:6px;letter-spacing:.6px}
+.lat-gen{flex:1;background:repeating-linear-gradient(90deg,rgba(44,102,191,.22) 0 2px,transparent 2px 7px),rgba(44,102,191,.09);position:relative}
+.lat-gen::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:linear-gradient(90deg,var(--blue),rgba(44,102,191,.35))}
+.lat-e2e{display:flex;align-items:center;gap:7px;margin-top:8px;font-family:var(--mono);font-size:6.5px;letter-spacing:1px;color:var(--mute)}
+.lat-e2e .bracket{flex:1;height:4px;border-left:1px solid var(--rule2);border-right:1px solid var(--rule2);border-bottom:1px solid var(--rule2);border-radius:0 0 3px 3px}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:9px}
+.metric-card{border:1px solid var(--rule);border-radius:7px;padding:8px 8px 7px;background:rgba(255,255,255,.55)}
+.metric-card b{display:block;font-family:var(--serif);font-size:18px;line-height:1;font-weight:600;color:var(--ink);letter-spacing:-.3px}
+.metric-card b em{font-family:var(--mono);font-style:normal;font-size:6.5px;color:var(--mute);letter-spacing:0;margin-left:2px}
+.metric-card span{display:block;font-family:var(--mono);font-size:6.5px;letter-spacing:1px;color:var(--faint);margin-top:4px}
+.metric-card.good b{color:var(--green)}
+.slo-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:6.5px;letter-spacing:.8px;color:var(--mute);margin-top:8px;border-top:1px solid var(--rule);padding-top:8px}
+.slo-row b{color:var(--green);font-weight:500}
+.param-panel{border:1px solid var(--rule);border-radius:10px;padding:13px 14px;background:rgba(255,255,255,.58);display:flex;flex-direction:column;gap:10px}
+.param-row{display:grid;grid-template-columns:88px 1fr 44px;gap:10px;align-items:center}
+.pr-label{font-family:var(--mono);font-size:7px;letter-spacing:1px;color:var(--mute)}
+.pr-track{height:4px;border-radius:3px;background:rgba(23,26,33,.07);position:relative}
+.pr-track i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,rgba(var(--accent-rgb),.35),var(--accent));width:var(--w)}
+.pr-track em{position:absolute;top:-4px;left:var(--w);width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--accent);transform:translateX(-6px);box-shadow:0 1px 4px rgba(20,30,60,.15)}
+.param-row>b{font-family:var(--mono);font-size:8px;font-weight:500;color:var(--ink);text-align:right}
+.param-effects{display:flex;gap:6px;margin-top:10px}
+.param-effects span{flex:1;border:1px solid var(--rule);border-radius:6px;padding:6px 7px;font-family:var(--mono);font-size:6.5px;letter-spacing:.8px;color:var(--mute);background:rgba(255,255,255,.5);text-align:center}
+.param-effects b{display:block;color:var(--ink2);font-weight:500;margin-bottom:2px}
+.chat-panel{display:flex;flex-direction:column;gap:6px}
+.chat-msg{border:1px solid var(--rule);border-left:2px solid var(--rule2);border-radius:7px;padding:8px 10px;background:rgba(255,255,255,.58)}
+.chat-msg.sys{border-left-color:var(--orange);background:rgba(251,237,231,.38)}
+.chat-msg.user{border-left-color:var(--blue);background:rgba(234,240,251,.4)}
+.chat-msg.assistant{border-left-color:var(--green);background:rgba(234,245,239,.38)}
+.cm-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:6.5px;letter-spacing:1.1px;color:var(--faint);margin-bottom:4px}
+.cm-head b{font-weight:500;color:var(--ink2)}
+.chat-msg p{font-size:9px;line-height:1.4;color:var(--mute)}
+.chat-msg p b{color:var(--ink2);font-weight:600}
+.ctx-budget{border:1px solid var(--rule);border-radius:8px;padding:9px 11px;background:rgba(255,255,255,.55);margin-top:8px}
+.ctx-budget .ctx-head{margin-bottom:6px}
+.ctx-budget .ctx-bar{height:7px}
+.schema-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:12px;align-items:stretch}
+.schema-code{border:1px solid var(--rule);border-radius:9px;background:rgba(24,27,34,.95);padding:11px 12px;overflow:hidden}
+.sc-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:6.5px;letter-spacing:1.2px;color:rgba(255,255,255,.42);margin-bottom:8px}
+.sc-head span{color:#8CC4A2}
+.schema-code pre{font-family:var(--mono);font-size:8px;line-height:1.55;color:#DCE1EA;white-space:pre-wrap}
+.jk{color:#9CC4FA}.js{color:#F1B48F}.jn{color:#A8D8B8}.jp{color:#C9B6F5}
+.schema-side{display:flex;flex-direction:column;gap:7px}
+.mask-card{border:1px solid var(--rule);border-radius:7px;padding:8px 9px;background:rgba(255,255,255,.56);display:flex;justify-content:space-between;align-items:center}
+.mask-card span{font-family:var(--mono);font-size:6.5px;letter-spacing:1px;color:var(--faint)}
+.mask-card b{font-family:var(--mono);font-size:8px;font-weight:500}
+.mask-card.ok{border-color:rgba(46,122,76,.2);background:rgba(234,245,239,.45)}.mask-card.ok b{color:var(--green)}
+.mask-card.no{border-color:rgba(200,85,42,.18);background:rgba(251,237,231,.35)}.mask-card.no b{color:var(--orange)}
+.mode-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.mode-list span{border:1px solid var(--rule);border-radius:999px;padding:3px 6px;font-family:var(--mono);font-size:6px;letter-spacing:.8px;color:var(--mute);background:rgba(255,255,255,.55)}
+.hub-layout{display:grid;grid-template-columns:.9fr 54px 1.35fr;gap:0;align-items:stretch}
+.hub-host{border:1px solid rgba(var(--accent-rgb),.25);border-radius:9px;padding:11px 12px;background:rgba(var(--accent-rgb),.055);display:flex;flex-direction:column;justify-content:center}
+.hub-host>span,.hub-server span,.hub-backends span{font-family:var(--mono);font-size:6.5px;letter-spacing:1.1px;color:var(--faint)}
+.hub-host b{display:block;font-size:11px;font-weight:600;margin:4px 0 2px}
+.hub-host em{font-style:normal;font-size:8px;color:var(--mute)}
+.hub-client{margin-top:9px;border:1px solid rgba(var(--accent-rgb),.2);border-radius:5px;padding:4px 6px;font-family:var(--mono);font-size:6px;letter-spacing:1px;color:var(--accent);background:rgba(255,255,255,.55);text-align:center}
+.hub-protocol{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.hub-protocol i{flex:1;width:1px;background:linear-gradient(180deg,rgba(var(--accent-rgb),.2),rgba(200,85,42,.45))}
+.hub-protocol span{font-family:var(--mono);font-size:6.5px;letter-spacing:1px;color:var(--mute);padding:4px 0;writing-mode:vertical-rl;text-orientation:mixed}
+.hub-servers{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.hub-server{border:1px solid var(--rule);border-radius:7px;padding:7px 8px;background:rgba(255,255,255,.55)}
+.hub-server b{display:block;font-family:var(--mono);font-size:7.5px;letter-spacing:.8px;color:var(--ink2);margin-bottom:3px}
+.hub-server span{font-size:7px;color:var(--mute);display:block;line-height:1.25}
+.hub-backends{display:flex;flex-wrap:wrap;gap:4px;margin-top:9px}
+.hub-backends span{border:1px solid var(--rule);border-radius:999px;padding:3px 6px;background:rgba(255,255,255,.55);color:var(--mute);font-size:6px}
+.batch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-items:stretch}
+.batch-mode{border:1px solid var(--rule);border-radius:8px;padding:9px 8px 8px;background:rgba(255,255,255,.55);display:flex;flex-direction:column}
+.batch-mode.cont{border-color:rgba(46,122,76,.28);background:rgba(234,245,239,.4)}
+.bm-head{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:6.5px;letter-spacing:.9px;color:var(--mute);margin-bottom:6px}
+.bm-head b{font-size:9px;color:var(--green);font-weight:500}
+.bm-lanes{display:flex;flex-direction:column;gap:3px;flex:1}
+.bm-lane{position:relative;height:17px;border-radius:3px;background:rgba(23,26,33,.045);overflow:hidden}
+.bm-req{position:absolute;top:2px;bottom:2px;border-radius:2px;background:var(--c);transform-origin:left;opacity:.85}
+.is-active .bm-req{animation:grow .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(.15s + var(--i) * .04s)}
+.bm-foot{font-family:var(--mono);font-size:6px;letter-spacing:.7px;color:var(--faint);margin-top:6px;line-height:1.3}
+.bm-foot b{color:var(--ink2);font-weight:500}
+.chunk-grid{display:flex;flex-direction:column;gap:12px}
+.chunk-row{display:grid;grid-template-columns:48px 1fr;gap:9px;align-items:center}
+.cr-label{font-family:var(--mono);font-size:6.5px;letter-spacing:1px;color:var(--mute)}
+.chunk-lane{display:flex;gap:3px;height:36px;align-items:stretch}
+.chunk-block{display:flex;align-items:center;justify-content:center;border-radius:4px;font-family:var(--mono);font-size:6px;letter-spacing:.4px;color:#fff;min-width:0;overflow:hidden;white-space:nowrap}
+.chunk-block.pf{background:linear-gradient(180deg,#DE7B52,#B64A20)}
+.chunk-block.dec{background:linear-gradient(180deg,#4C7DC8,#24568F)}
+.chunk-block.gap{background:rgba(23,26,33,.045);color:transparent}
+.chunk-row.good .chunk-block.pf{background:linear-gradient(180deg,#E7A17F,#C9653B)}
+.chunk-note{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:3px}
+.chunk-note div{border:1px solid var(--rule);border-radius:6px;padding:6px 8px;font-size:7.5px;line-height:1.3;color:var(--mute);background:rgba(255,255,255,.52)}
+.chunk-note b{display:block;font-family:var(--mono);font-size:6px;letter-spacing:.8px;margin-bottom:2px}
+.chunk-note .bad b{color:var(--orange)}.chunk-note .ok b{color:var(--green)}
+.mem-card{border:1px solid var(--rule);border-radius:10px;padding:12px 13px;background:rgba(255,255,255,.58)}
+.mem-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:6.8px;letter-spacing:1px;color:var(--mute);margin-bottom:8px}
+.mem-head b{color:var(--ink2);font-weight:500}
+.mem-bar{height:35px;border-radius:5px;background:rgba(23,26,33,.04);border:1px solid rgba(23,26,33,.08);display:flex;overflow:hidden}
+.mem-bar i{height:100%;display:block}
+.mem-bar .weights{background:linear-gradient(180deg,#4C7DC8,#24568F);width:20.1%}
+.mem-bar .kv{background:linear-gradient(180deg,#DE7B52,#B64A20);width:10%}
+.mem-bar .act{background:linear-gradient(180deg,#5A9B72,#2E7A4C);width:1.75%}
+.mem-bar .over{background:repeating-linear-gradient(135deg,rgba(23,26,33,.28) 0 4px,rgba(23,26,33,.13) 4px 8px);width:3.1%}
+.mem-bar .free{flex:1;background:rgba(255,255,255,.4)}
+.mem-scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:6px;letter-spacing:.6px;color:var(--faint);margin-top:5px}
+.mem-legend{display:grid;grid-template-columns:1fr 1fr;gap:5px 12px;margin-top:9px}
+.ml-item{display:flex;align-items:center;gap:6px;font-size:7.5px;color:var(--mute)}
+.ml-item i{width:7px;height:7px;border-radius:2px;display:block;flex:none}
+.ml-item b{margin-left:auto;color:var(--ink2);font-family:var(--mono);font-size:6.5px;font-weight:500}
+.ml-item .w{background:#3B6FB7}.ml-item .k{background:#CB6137}.ml-item .a{background:#3F8A5D}.ml-item .o{background:rgba(23,26,33,.3)}
+.formula-strip{border:1px solid rgba(var(--accent-rgb),.18);border-radius:7px;padding:8px 10px;background:rgba(var(--accent-rgb),.05);font-family:var(--mono);font-size:7px;line-height:1.5;letter-spacing:.3px;color:var(--ink2);margin-top:8px}
+.formula-strip b{color:var(--accent);font-weight:500}
+.gpu-rows{display:flex;flex-direction:column;gap:6px}
+.gpu-row{display:grid;grid-template-columns:118px 1fr 62px;gap:9px;align-items:center}
+.gr-name b{display:block;font-family:var(--mono);font-size:7.5px;letter-spacing:.7px;color:var(--ink2);font-weight:500}
+.gr-name span{display:block;font-size:6.5px;color:var(--faint);margin-top:2px}
+.gr-meter{height:9px;border-radius:5px;background:rgba(23,26,33,.05);overflow:hidden}
+.gr-meter i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,rgba(var(--accent-rgb),.35),var(--accent));transform-origin:left}
+.is-active .gr-meter i{animation:grow .9s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(.15s + var(--i) * .07s)}
+.gr-val{text-align:right;font-family:var(--mono);font-size:7px;color:var(--mute)}
+.gr-val b{display:block;font-family:var(--serif);font-size:16px;font-weight:600;color:var(--ink);line-height:1}
+.gr-val span{font-size:6px;letter-spacing:.7px}
+.gpu-foot{display:flex;justify-content:space-between;font-family:var(--mono);font-size:6.3px;letter-spacing:.7px;color:var(--faint);border-top:1px solid var(--rule);padding-top:8px;margin-top:8px}
+.quant-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;align-items:stretch}
+.q-card{border:1px solid var(--rule);border-radius:8px;padding:8px 7px;background:rgba(255,255,255,.55);display:flex;flex-direction:column;min-height:250px}
+.q-card.hot{border-color:rgba(46,122,76,.26);background:rgba(234,245,239,.4)}
+.q-top{border-bottom:1px solid var(--rule);padding-bottom:6px;margin-bottom:6px}
+.q-top b{display:block;font-family:var(--mono);font-size:8px;letter-spacing:.5px;color:var(--ink)}
+.q-top span{display:block;font-family:var(--mono);font-size:6px;letter-spacing:.7px;color:var(--faint);margin-top:2px}
+.q-bits{display:flex;flex-direction:column-reverse;gap:2px;flex:1;margin-bottom:6px}
+.q-bits i{display:block;height:3px;border-radius:1px;background:rgba(var(--accent-rgb),.2)}
+.q-bits i.on{background:var(--accent)}
+.q-size{font-family:var(--serif);font-size:18px;line-height:1;font-weight:600;color:var(--ink);margin-bottom:2px}
+.q-size em{font-family:var(--mono);font-style:normal;font-size:6px;letter-spacing:.5px;color:var(--faint);margin-left:2px}
+.q-q{font-family:var(--mono);font-size:6px;letter-spacing:.7px;color:var(--faint);margin-bottom:3px}
+.q-meter{height:3px;border-radius:3px;background:rgba(23,26,33,.07);overflow:hidden}
+.q-meter i{display:block;height:100%;border-radius:3px;background:var(--green);transform-origin:left}
+.is-active .q-meter i{animation:grow .8s ease both;animation-delay:calc(.2s + var(--i) * .05s)}
+.q-card p{font-size:7px;line-height:1.3;color:var(--mute);margin-top:5px;min-height:27px}
+.kvm-formula{border:1px solid rgba(var(--accent-rgb),.2);border-radius:9px;padding:11px 12px;background:rgba(var(--accent-rgb),.055);text-align:center}
+.kvm-formula span{display:block;font-family:var(--mono);font-size:7px;letter-spacing:1.4px;color:var(--accent);margin-bottom:6px}
+.kvm-formula b{font-family:var(--serif);font-size:21px;font-weight:600;color:var(--ink);letter-spacing:-.3px}
+.kvm-formula b sub{font-size:9px;font-family:var(--mono);font-weight:400;letter-spacing:0}
+.kvm-plug{display:flex;align-items:baseline;justify-content:center;gap:7px;margin:8px 0 10px;font-family:var(--mono);font-size:8px;letter-spacing:.3px;color:var(--mute)}
+.kvm-plug b{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--accent)}
+.kvm-scale{display:flex;flex-direction:column;gap:6px}
+.kvm-row{display:grid;grid-template-columns:130px 1fr 58px;gap:8px;align-items:center}
+.kvm-row span{font-family:var(--mono);font-size:6.8px;letter-spacing:.6px;color:var(--mute)}
+.kvm-row .track{height:8px;border-radius:4px;background:rgba(23,26,33,.05);overflow:hidden}
+.kvm-row .track i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,rgba(var(--accent-rgb),.4),var(--accent));transform-origin:left}
+.is-active .kvm-row .track i{animation:grow .9s ease both;animation-delay:calc(.2s + var(--i) * .08s)}
+.kvm-row b{text-align:right;font-family:var(--mono);font-size:7.5px;font-weight:500;color:var(--ink2)}
+.kvm-note{font-size:7.5px;line-height:1.4;color:var(--mute);margin-top:8px;border-top:1px solid var(--rule);padding-top:7px}
+.kvm-note b{color:var(--green);font-weight:600}
+.page-compare{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.pg-panel{border:1px solid var(--rule);border-radius:9px;padding:10px 11px;background:rgba(255,255,255,.55);display:flex;flex-direction:column}
+.pg-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:6.5px;letter-spacing:1px;color:var(--mute);margin-bottom:8px}
+.pg-head span{color:var(--orange)}.pg-panel.paged .pg-head span{color:var(--green)}
+.pg-req{margin-bottom:5px}
+.pg-req>span{display:block;font-family:var(--mono);font-size:5.8px;letter-spacing:.6px;color:var(--faint);margin-bottom:2px}
+.pg-block{display:flex;height:13px;border:1px solid rgba(23,26,33,.1);border-radius:3px;overflow:hidden;background:#fff}
+.pg-block .u{display:block;height:100%;background:linear-gradient(90deg,#4C7DC8,#24568F);width:var(--w)}
+.pg-block .w{flex:1;background:repeating-linear-gradient(135deg,rgba(200,85,42,.16) 0 4px,rgba(200,85,42,.06) 4px 8px)}
+.pg-blocks{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-bottom:7px}
+.pg-blocks i{height:14px;border-radius:2px;background:rgba(23,26,33,.06);border:1px solid rgba(23,26,33,.07)}
+.pg-blocks i.on{background:linear-gradient(180deg,rgba(70,125,200,.95),rgba(36,85,143,.85));border-color:transparent}
+.pg-blocks i.share{background:linear-gradient(180deg,rgba(200,85,42,.8),rgba(160,64,30,.72));border-color:transparent}
+.pg-table{display:flex;justify-content:space-between;font-family:var(--mono);font-size:5.8px;letter-spacing:.6px;color:var(--faint);border-top:1px solid var(--rule);padding-top:6px}
+.pg-table b{color:var(--ink2);font-weight:500}
+.pg-util{display:flex;justify-content:space-between;font-family:var(--mono);font-size:6.2px;letter-spacing:.7px;margin-top:auto;padding-top:7px;color:var(--orange)}
+.pg-util.good{color:var(--green)}
+.prefix-wrap{border:1px solid var(--rule);border-radius:10px;padding:12px;background:rgba(255,255,255,.55)}
+.prefix-shared{display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(46,122,76,.25);border-radius:6px;padding:7px 9px;background:rgba(234,245,239,.45);font-family:var(--mono);font-size:6.5px;letter-spacing:.8px;color:var(--ink2)}
+.prefix-shared b{color:var(--green);font-weight:500}
+.prefix-stem{width:1px;height:14px;background:var(--rule2);margin:0 auto}
+.prefix-branches{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;position:relative}
+.prefix-branches::before{content:"";position:absolute;left:16%;right:16%;top:-7px;height:1px;background:var(--rule2)}
+.branch-card{position:relative;border:1px solid var(--rule);border-radius:6px;padding:7px 8px;background:rgba(255,255,255,.58)}
+.branch-card::before{content:"";position:absolute;left:50%;top:-7px;width:1px;height:7px;background:var(--rule2)}
+.branch-card b{display:block;font-family:var(--mono);font-size:6.8px;letter-spacing:.6px;color:var(--ink2);margin-bottom:3px}
+.branch-card span{display:block;font-size:7px;line-height:1.3;color:var(--mute)}
+.branch-card em{display:block;font-family:var(--mono);font-style:normal;font-size:6.5px;color:var(--green);margin-top:4px}
+.ttft-duo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+.ttft-card{border:1px solid var(--rule);border-radius:7px;padding:8px 9px;background:rgba(255,255,255,.55)}
+.ttft-card span{display:block;font-family:var(--mono);font-size:6px;letter-spacing:1px;color:var(--faint)}
+.ttft-card b{display:block;font-family:var(--serif);font-size:20px;font-weight:600;line-height:1;margin-top:3px}
+.ttft-card.cold b{color:var(--orange)}.ttft-card.warm b{color:var(--green)}
+.tiers{display:flex;flex-direction:column;gap:8px;position:relative}
+.tier{display:grid;grid-template-columns:72px 1fr 94px;gap:9px;align-items:center;border:1px solid var(--rule);border-radius:8px;padding:8px 10px;background:rgba(255,255,255,.55)}
+.tier.hot{border-color:rgba(44,102,191,.24);background:rgba(234,240,251,.38)}
+.tier.warm{border-color:rgba(200,85,42,.2);background:rgba(251,237,231,.3)}
+.tier.cold{border-color:rgba(23,26,33,.13);background:rgba(245,245,244,.55)}
+.tier-id{font-family:var(--mono);font-size:7.5px;letter-spacing:1px;color:var(--ink2)}
+.tier-id em{display:block;font-style:normal;font-size:6px;letter-spacing:.8px;color:var(--faint);margin-top:2px}
+.tier-blocks{display:flex;gap:3px}
+.tier-blocks i{height:18px;flex:1;border-radius:2px;background:rgba(var(--accent-rgb),.28)}
+.tier.hot .tier-blocks i{background:linear-gradient(180deg,#4C7DC8,#24568F)}
+.tier.warm .tier-blocks i{background:linear-gradient(180deg,#DE7B52,#B64A20);opacity:.75}
+.tier.cold .tier-blocks i{background:rgba(23,26,33,.18)}
+.tier-spec{text-align:right;font-family:var(--mono);font-size:6.5px;color:var(--mute)}
+.tier-spec b{display:block;font-family:var(--serif);font-size:15px;font-weight:600;color:var(--ink);line-height:1}
+.tier-spec span{font-size:5.8px;letter-spacing:.4px}
+.offload-note{display:flex;justify-content:space-between;margin-top:8px;font-family:var(--mono);font-size:6.2px;letter-spacing:.7px;color:var(--faint)}
+.offload-note b{color:var(--ink2);font-weight:500}
+.tool-flow{display:flex;align-items:stretch;gap:0;margin-top:2px}
+.tool-node{flex:1;min-width:0;border:1px solid var(--rule);border-radius:7px;padding:9px 7px;background:rgba(255,255,255,.58);text-align:center}
+.tool-node span{display:block;font-family:var(--mono);font-size:6px;letter-spacing:.8px;color:var(--faint);margin-bottom:4px}
+.tool-node b{display:block;font-family:var(--mono);font-size:7.5px;letter-spacing:.7px;color:var(--ink);line-height:1.2}
+.tool-node.model{border-color:rgba(var(--accent-rgb),.24);background:rgba(var(--accent-rgb),.055)}
+.tool-node.tool{border-color:rgba(200,85,42,.22);background:rgba(251,237,231,.35)}
+.tool-link{position:relative;flex:0 0 18px}
+.tool-link::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:var(--rule2)}
+.tool-link span{position:absolute;left:50%;top:28%;transform:translateX(-50%);font-family:var(--mono);font-size:5px;letter-spacing:.4px;color:var(--faint);white-space:nowrap}
+.tool-return{margin-top:8px;border:1px dashed rgba(var(--accent-rgb),.3);border-radius:6px;padding:6px 8px;font-family:var(--mono);font-size:6.2px;letter-spacing:.7px;color:var(--accent);text-align:center;background:rgba(var(--accent-rgb),.035)}
+.tool-guards{display:flex;gap:5px;margin-top:8px}
+.tool-guards span{flex:1;border:1px solid var(--rule);border-radius:5px;padding:5px 4px;text-align:center;font-family:var(--mono);font-size:5.8px;letter-spacing:.6px;color:var(--mute);background:rgba(255,255,255,.5)}
+.api-wrap{border:1px solid var(--rule);border-radius:10px;overflow:hidden;background:rgba(255,255,255,.55)}
+.api-route{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--rule);font-family:var(--mono);font-size:7px}
+.api-route .method{background:var(--green);color:#fff;border-radius:3px;padding:2px 5px;font-size:6px;letter-spacing:.6px}
+.api-route b{font-weight:500;color:var(--ink);letter-spacing:.2px}
+.api-route .pill{margin-left:auto;border:1px solid var(--rule);border-radius:999px;padding:2px 6px;font-size:5.8px;letter-spacing:.7px;color:var(--mute)}
+.api-code{background:rgba(24,27,34,.96);color:#DCE1EA;padding:11px 12px;font-family:var(--mono);font-size:7.8px;line-height:1.55;white-space:pre-wrap;min-height:208px}
+.api-code .k{color:#9CC4FA}.api-code .s{color:#F1B48F}.api-code .n{color:#A8D8B8}.api-code .c{color:#7F8A9C}
+.api-foot{display:flex;justify-content:space-between;padding:7px 10px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:6px;letter-spacing:.8px;color:var(--faint);background:rgba(255,255,255,.45)}
+.agent-wrap{display:flex;flex-direction:column;align-items:center}
+.agent-wheel{position:relative;width:320px;height:300px;margin:0 auto}
+.aw-ring{position:absolute;inset:14px;width:292px;height:272px;overflow:visible}
+.aw-ring circle,.aw-ring path{fill:none;stroke:rgba(var(--accent-rgb),.25);stroke-width:1;stroke-dasharray:3 4}
+.aw-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:118px;height:118px;border-radius:50%;border:1px solid rgba(var(--accent-rgb),.28);background:radial-gradient(circle at 40% 30%,#fff,rgba(var(--accent-rgb),.07));display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:0 8px 24px rgba(20,30,60,.07)}
+.aw-center span{font-family:var(--mono);font-size:6px;letter-spacing:1.2px;color:var(--faint)}
+.aw-center b{font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--ink);margin:4px 0}
+.aw-center em{font-style:normal;font-size:6.5px;line-height:1.3;color:var(--mute)}
+.aw-node{position:absolute;border:1px solid var(--rule);border-radius:6px;padding:6px 9px;background:rgba(255,255,255,.78);font-family:var(--mono);font-size:7px;letter-spacing:.9px;color:var(--ink2);box-shadow:0 2px 8px rgba(20,30,60,.04)}
+.aw-node.n1{left:50%;top:2px;transform:translateX(-50%)}
+.aw-node.n2{right:4px;top:50%;transform:translateY(-50%)}
+.aw-node.n3{left:50%;bottom:2px;transform:translateX(-50%)}
+.aw-node.n4{left:4px;top:50%;transform:translateY(-50%)}
+.agent-chips{display:flex;gap:5px;margin-top:4px}
+.agent-chips span{border:1px solid var(--rule);border-radius:999px;padding:3px 6px;font-family:var(--mono);font-size:5.8px;letter-spacing:.6px;color:var(--mute);background:rgba(255,255,255,.5)}
+.quadrant{position:relative;padding:0 0 22px 26px}
+.q-plane{position:relative;height:336px;border-left:1px solid var(--rule2);border-bottom:1px solid var(--rule2);background:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,.06))}
+.q-line{position:absolute;background:rgba(23,26,33,.06)}
+.q-line.v{left:50%;top:0;bottom:0;width:1px}.q-line.h{top:50%;left:0;right:0;height:1px}
+.q-y{position:absolute;left:-6px;top:40%;transform:rotate(-90deg) translateX(-50%);font-family:var(--mono);font-size:6.5px;letter-spacing:1.2px;color:var(--faint)}
+.q-x{position:absolute;bottom:0;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:6.5px;letter-spacing:1.2px;color:var(--faint)}
+.q-label{position:absolute;font-family:var(--mono);font-size:5.8px;letter-spacing:.7px;color:var(--faint);line-height:1.3}
+.q-label.tl{left:8px;top:8px}.q-label.tr{right:8px;top:8px;text-align:right}.q-label.bl{left:8px;bottom:8px}.q-label.br{right:8px;bottom:8px;text-align:right}
+.q-bubble{position:absolute;transform:translate(-50%,-50%);border:1px solid rgba(var(--accent-rgb),.3);background:rgba(var(--accent-rgb),.1);border-radius:999px;padding:6px 9px;font-family:var(--mono);font-size:6.5px;letter-spacing:.5px;color:var(--ink2);white-space:nowrap;box-shadow:0 3px 10px rgba(20,30,60,.05)}
+.q-bubble.big{padding:8px 11px;background:rgba(200,85,42,.1);border-color:rgba(200,85,42,.3)}
+.q-bubble.mid{background:rgba(46,122,76,.09);border-color:rgba(46,122,76,.28)}
+.matrix-chips{display:flex;gap:5px;margin-top:8px}
+.matrix-chips span{border:1px solid var(--rule);border-radius:999px;padding:3px 6px;font-family:var(--mono);font-size:5.8px;letter-spacing:.6px;color:var(--mute);background:rgba(255,255,255,.5)}
+.fw-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.fw-card{border:1px solid var(--rule);border-radius:8px;padding:9px 9px 8px;background:rgba(255,255,255,.55);min-height:105px}
+.fw-card b{display:block;font-family:var(--mono);font-size:8px;letter-spacing:.5px;color:var(--ink);margin-bottom:5px}
+.fw-card span{display:block;font-size:7.5px;line-height:1.35;color:var(--mute);min-height:30px}
+.fw-card em{display:block;font-style:normal;font-family:var(--mono);font-size:5.8px;letter-spacing:.5px;color:var(--accent);margin-top:7px;border-top:1px solid var(--rule);padding-top:5px}
+.adapter-wrap{display:grid;grid-template-columns:1fr 1.15fr;gap:13px;align-items:stretch}
+.base-model{border:1px solid rgba(var(--accent-rgb),.25);border-radius:9px;padding:10px 11px;background:rgba(var(--accent-rgb),.045);display:flex;flex-direction:column}
+.base-model>span{font-family:var(--mono);font-size:6px;letter-spacing:1px;color:var(--accent)}
+.base-model>b{font-family:var(--serif);font-size:22px;font-weight:600;line-height:1;margin:5px 0 9px}
+.base-layers{display:flex;flex-direction:column;gap:4px;flex:1}
+.base-layers i{display:block;height:16px;border-radius:3px;background:rgba(var(--accent-rgb),.12);border:1px solid rgba(var(--accent-rgb),.1)}
+.base-layers i:nth-child(2n){opacity:.75}
+.adapter-side{display:flex;flex-direction:column;gap:6px;justify-content:center}
+.adapter-card{border:1px solid var(--rule);border-radius:6px;padding:7px 8px;background:rgba(255,255,255,.58);display:grid;grid-template-columns:1fr auto;gap:5px;align-items:center}
+.adapter-card b{font-family:var(--mono);font-size:7px;letter-spacing:.4px;color:var(--ink2)}
+.adapter-card span{font-family:var(--mono);font-size:5.8px;letter-spacing:.5px;color:var(--accent)}
+.adapter-card em{grid-column:1/-1;font-style:normal;font-size:6.5px;line-height:1.3;color:var(--mute)}
+.adapter-formula{margin-top:8px;border:1px dashed rgba(var(--accent-rgb),.25);border-radius:6px;padding:6px;text-align:center;font-family:var(--mono);font-size:7px;letter-spacing:.6px;color:var(--ink2);background:rgba(var(--accent-rgb),.03)}
+.distill-wrap{display:grid;grid-template-columns:1fr 54px 1fr;gap:0;align-items:center}
+.model-card{border:1px solid var(--rule);border-radius:9px;padding:11px 12px;background:rgba(255,255,255,.58)}
+.model-card.teacher{border-color:rgba(200,85,42,.22);background:rgba(251,237,231,.3)}
+.model-card.student{border-color:rgba(46,122,76,.22);background:rgba(234,245,239,.33)}
+.model-card>span{font-family:var(--mono);font-size:6px;letter-spacing:1.1px;color:var(--faint)}
+.model-card>b{display:block;font-family:var(--serif);font-size:25px;line-height:1;font-weight:600;margin:5px 0 8px}
+.logits{display:flex;align-items:flex-end;gap:4px;height:72px;padding-top:5px;border-top:1px solid var(--rule)}
+.logits i{flex:1;display:block;border-radius:2px 2px 0 0;background:linear-gradient(180deg,rgba(200,85,42,.72),rgba(200,85,42,.25));transform-origin:bottom}
+.model-card.student .logits i{background:linear-gradient(180deg,rgba(46,122,76,.72),rgba(46,122,76,.25))}
+.is-active .logits i{animation:growy .8s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(.2s + var(--i) * .04s)}
+.model-card em{display:block;font-style:normal;font-size:6.5px;color:var(--mute);margin-top:6px}
+.distill-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:var(--mono);font-size:6px;letter-spacing:.6px;color:var(--mute)}
+.distill-arrow b{font-family:var(--serif);font-size:14px;color:var(--accent);font-weight:600}
+.distill-arrow .a{font-size:14px;color:var(--accent)}
+.distill-note{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:9px}
+.distill-note span{border:1px solid var(--rule);border-radius:5px;padding:5px 6px;font-family:var(--mono);font-size:6px;letter-spacing:.5px;color:var(--mute);text-align:center;background:rgba(255,255,255,.5)}
+.chart-card{border:1px solid var(--rule);border-radius:10px;padding:10px 10px 7px;background:rgba(255,255,255,.58)}
+.bench-svg{width:100%;height:236px;display:block}
+.bench-svg text{font-family:var(--mono);font-size:6px;fill:var(--faint);letter-spacing:.4px}
+.bench-svg .axis{stroke:rgba(23,26,33,.15);stroke-width:1}
+.bench-svg .grid{stroke:rgba(23,26,33,.055);stroke-width:1}
+.bench-svg .tg{stroke:var(--green);stroke-width:1.7;fill:none}
+.bench-svg .lat{stroke:var(--orange);stroke-width:1.7;fill:none}
+.bench-svg .dot{fill:#fff;stroke-width:1.4}
+.bench-svg .dot.g{stroke:var(--green)}.bench-svg .dot.o{stroke:var(--orange)}
+.bench-svg .area{fill:url(#benchArea);opacity:.7}
+.bench-svg .draw{stroke-dasharray:100;stroke-dashoffset:100}
+.is-active .bench-svg .draw{animation:draw 1.25s ease forwards .3s}
+@keyframes draw{to{stroke-dashoffset:0}}
+.bench-foot{display:flex;justify-content:space-between;font-family:var(--mono);font-size:6.2px;letter-spacing:.7px;color:var(--faint);border-top:1px solid var(--rule);padding-top:7px;margin-top:6px}
+.bench-foot b{color:var(--ink2);font-weight:500}
+.job-flow{display:flex;align-items:stretch;gap:0}
+.job-node{flex:1;min-width:0;border:1px solid var(--rule);border-radius:8px;padding:10px 10px 9px;background:rgba(255,255,255,.55)}
+.job-node span{display:block;font-family:var(--mono);font-size:6px;letter-spacing:1px;color:var(--faint);margin-bottom:4px}
+.job-node b{display:block;font-family:var(--mono);font-size:8px;letter-spacing:.7px;color:var(--ink2);line-height:1.2}
+.job-node em{display:block;font-style:normal;font-size:7px;color:var(--mute);margin-top:4px;line-height:1.3}
+.job-node.engine{border-color:rgba(var(--accent-rgb),.24);background:rgba(var(--accent-rgb),.055)}
+.job-arrow{position:relative;flex:0 0 24px}
+.job-arrow::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:var(--rule2)}
+.job-arrow::after{content:"";position:absolute;right:0;top:calc(50% - 3px);width:6px;height:6px;border-top:1px solid var(--mute);border-right:1px solid var(--mute);transform:rotate(45deg)}
+.job-cost{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+.job-cost div{border:1px solid var(--rule);border-radius:6px;padding:7px 8px;background:rgba(255,255,255,.55)}
+.job-cost span{display:block;font-family:var(--mono);font-size:5.8px;letter-spacing:.7px;color:var(--faint)}
+.job-cost b{display:block;font-family:var(--serif);font-size:18px;font-weight:600;line-height:1;margin-top:3px}
+.job-cost .off b{color:var(--green)}
+.spec-wrap{display:flex;flex-direction:column;gap:8px}
+.draft-line{display:grid;grid-template-columns:82px 1fr;gap:10px;align-items:center}
+.spec-model{border:1px solid rgba(var(--accent-rgb),.22);border-radius:7px;padding:8px 9px;background:rgba(var(--accent-rgb),.05);font-family:var(--mono);font-size:6px;letter-spacing:.8px;color:var(--accent);text-align:center}
+.spec-model b{display:block;font-family:var(--serif);font-size:15px;font-weight:600;color:var(--ink);margin-top:2px;letter-spacing:0}
+.spec-tokens{display:flex;gap:4px;align-items:center}
+.spec-tok{flex:1;min-width:0;border:1px solid rgba(46,122,76,.24);border-radius:5px;padding:8px 6px;background:rgba(234,245,239,.45);text-align:center;position:relative}
+.spec-tok b{display:block;font-family:var(--mono);font-size:7.5px;letter-spacing:.4px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spec-tok span{display:block;font-family:var(--mono);font-size:5.5px;letter-spacing:.6px;color:var(--green);margin-top:3px}
+.spec-tok.reject{border-color:rgba(200,85,42,.25);background:rgba(251,237,231,.4)}
+.spec-tok.reject span{color:var(--orange)}
+.spec-verify{border:1px dashed rgba(var(--accent-rgb),.28);border-radius:6px;padding:6px 8px;font-family:var(--mono);font-size:6.2px;letter-spacing:.7px;color:var(--accent);text-align:center;background:rgba(var(--accent-rgb),.03)}
+.spec-target{display:grid;grid-template-columns:82px 1fr;gap:10px;align-items:center}
+.spec-verifyline{height:30px;border:1px solid rgba(var(--accent-rgb),.2);border-radius:5px;background:repeating-linear-gradient(90deg,rgba(var(--accent-rgb),.1) 0 2px,transparent 2px 7px),rgba(var(--accent-rgb),.035);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:6px;letter-spacing:.6px;color:var(--mute)}
+.spec-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:2px}
+.spec-stats div{border:1px solid var(--rule);border-radius:5px;padding:6px 7px;background:rgba(255,255,255,.55)}
+.spec-stats span{display:block;font-family:var(--mono);font-size:5.5px;letter-spacing:.6px;color:var(--faint)}
+.spec-stats b{display:block;font-family:var(--serif);font-size:15px;font-weight:600;color:var(--ink);line-height:1;margin-top:2px}
+.flash-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:center}
+.flash-matrix{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;border:1px solid var(--rule);border-radius:7px;padding:7px;background:rgba(255,255,255,.5)}
+.flash-cell{aspect-ratio:1;border-radius:1px;background:rgba(23,26,33,.055)}
+.flash-cell.tile{background:rgba(var(--accent-rgb),.23)}
+.flash-cell.hot{background:linear-gradient(180deg,rgba(200,85,42,.7),rgba(200,85,42,.38))}
+.flash-side{display:flex;flex-direction:column;gap:7px}
+.sram-card{border:1px solid rgba(46,122,76,.25);border-radius:7px;padding:8px 9px;background:rgba(234,245,239,.42);font-family:var(--mono);font-size:6.5px;letter-spacing:.8px;color:var(--green)}
+.sram-card b{display:block;font-family:var(--serif);font-size:15px;letter-spacing:0;color:var(--ink);font-weight:600;margin-top:3px}
+.flash-arrow{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:5.8px;letter-spacing:.6px;color:var(--faint)}
+.flash-arrow .line{flex:1;height:1px;background:var(--rule2)}
+.flash-arrow .line::after{content:"";display:block;width:5px;height:5px;border-top:1px solid var(--mute);border-right:1px solid var(--mute);transform:rotate(45deg) translate(1px,-3px);float:right}
+.fuse-chips{display:flex;flex-wrap:wrap;gap:4px}
+.fuse-chips span{border:1px solid var(--rule);border-radius:999px;padding:3px 6px;font-family:var(--mono);font-size:5.8px;letter-spacing:.5px;color:var(--mute);background:rgba(255,255,255,.5)}
+.gpuarch{display:grid;grid-template-columns:1.05fr .95fr;gap:14px;align-items:center}
+.sm-wrap{border:1px solid var(--rule);border-radius:8px;padding:10px;background:rgba(255,255,255,.52)}
+.sm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.sm-cell{height:34px;border-radius:3px;background:rgba(var(--accent-rgb),.1);border:1px solid rgba(var(--accent-rgb),.12);position:relative}
+.sm-cell.hot{background:linear-gradient(180deg,rgba(var(--accent-rgb),.58),rgba(var(--accent-rgb),.26));border-color:rgba(var(--accent-rgb),.4)}
+.sm-cell.hot::after{content:"SM";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:5.5px;color:#fff;letter-spacing:.5px}
+.sm-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:5.8px;letter-spacing:.7px;color:var(--faint);margin-top:6px}
+.gpu-side{display:flex;flex-direction:column;gap:6px}
+.warp-card{border:1px solid var(--rule);border-radius:6px;padding:7px 8px;background:rgba(255,255,255,.52)}
+.warp-card span{display:block;font-family:var(--mono);font-size:5.8px;letter-spacing:.8px;color:var(--faint);margin-bottom:5px}
+.warp-lanes{display:grid;grid-template-columns:repeat(16,1fr);gap:1px}
+.warp-lanes i{height:7px;border-radius:1px;background:rgba(var(--accent-rgb),.34)}
+.warp-lanes i:nth-child(-n+8){background:rgba(var(--accent-rgb),.7)}
+.mem-tier{display:flex;align-items:center;gap:6px;border:1px solid var(--rule);border-radius:5px;padding:4px 7px;background:rgba(255,255,255,.5);font-family:var(--mono);font-size:5.8px;letter-spacing:.5px;color:var(--mute)}
+.mem-tier b{width:38px;font-weight:500;color:var(--ink2)}
+.mem-tier span{margin-left:auto;color:var(--faint)}
+.roof-svg{width:100%;height:282px;display:block}
+.roof-svg text{font-family:var(--mono);font-size:6px;fill:var(--faint);letter-spacing:.4px}
+.roof-svg .axis{stroke:rgba(23,26,33,.15);stroke-width:1}
+.roof-svg .grid{stroke:rgba(23,26,33,.055);stroke-width:1}
+.roof-svg .roof{stroke:var(--accent);stroke-width:1.8;fill:none}
+.roof-svg .dot{fill:#fff;stroke-width:1.4}
+.roof-svg .dot.d{stroke:var(--green)}.roof-svg .dot.p{stroke:var(--orange)}
+.roof-svg .draw{stroke-dasharray:100;stroke-dashoffset:100}
+.is-active .roof-svg .draw{animation:draw 1.3s ease forwards .25s}
+.roof-tools{display:flex;gap:5px;margin-top:5px}
+.roof-tools span{flex:1;border:1px solid var(--rule);border-radius:5px;padding:5px 4px;text-align:center;font-family:var(--mono);font-size:5.8px;letter-spacing:.5px;color:var(--mute);background:rgba(255,255,255,.5)}
+.topo{display:flex;align-items:center;gap:0}
+.topo-node{flex:1;min-width:0;border:1px solid rgba(var(--accent-rgb),.22);border-radius:8px;padding:9px;background:rgba(var(--accent-rgb),.04)}
+.tn-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:6px;letter-spacing:.7px;color:var(--accent);margin-bottom:5px}
+.tn-head span{color:var(--faint)}
+.gpu-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
+.gpu-grid i{height:22px;border-radius:2px;background:rgba(var(--accent-rgb),.24);border:1px solid rgba(var(--accent-rgb),.18)}
+.gpu-grid i.edge{background:rgba(46,122,76,.28);border-color:rgba(46,122,76,.25)}
+.tn-tag{display:block;font-family:var(--mono);font-size:5.8px;letter-spacing:.5px;color:var(--mute);margin-top:5px;text-align:center}
+.topo-link{flex:0 0 64px;position:relative;text-align:center}
+.topo-link .line{height:1px;border-top:1px dashed rgba(200,85,42,.5);position:absolute;left:0;right:0;top:50%}
+.topo-link span{position:relative;z-index:2;font-family:var(--mono);font-size:5.8px;letter-spacing:.7px;color:var(--orange);background:#fff;padding:0 4px}
+.topo-legend{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:9px}
+.topo-legend span{border:1px solid var(--rule);border-radius:5px;padding:4px 5px;text-align:center;font-family:var(--mono);font-size:5.8px;letter-spacing:.5px;color:var(--mute);background:rgba(255,255,255,.5)}
+.topo-legend b{color:var(--ink2);font-weight:500}
+.disagg{display:grid;grid-template-columns:1fr 76px 1fr;gap:0;align-items:stretch}
+.pool{border:1px solid var(--rule);border-radius:8px;padding:10px;background:rgba(255,255,255,.55)}
+.pool.prefill{border-color:rgba(44,102,191,.24);background:rgba(234,240,251,.38)}
+.pool.decode{border-color:rgba(200,85,42,.22);background:rgba(251,237,231,.3)}
+.pool>span{font-family:var(--mono);font-size:6px;letter-spacing:.8px;color:var(--faint)}
+.pool>b{display:block;font-family:var(--mono);font-size:7px;letter-spacing:.6px;color:var(--ink2);margin:4px 0 7px}
+.pool-gpus{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
+.pool-gpus i{height:26px;border-radius:3px;background:rgba(44,102,191,.25);border:1px solid rgba(44,102,191,.18)}
+.pool.decode .pool-gpus i{background:rgba(200,85,42,.24);border-color:rgba(200,85,42,.2)}
+.kv-wire{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-family:var(--mono);font-size:5.8px;letter-spacing:.5px;color:var(--mute)}
+.kv-wire .wire{width:100%;height:1px;background:var(--rule2);position:relative}
+.kv-wire .wire i{position:absolute;top:-2px;left:0;width:5px;height:5px;border-radius:50%;background:var(--orange);box-shadow:0 0 7px rgba(200,85,42,.4);animation:travel 2.4s linear infinite}
+.kv-wire .wire i:nth-child(3){animation-delay:.8s}.kv-wire .wire i:nth-child(4){animation-delay:1.6s}
+.gain-row{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:9px}
+.gain-row span{border:1px solid var(--rule);border-radius:5px;padding:5px;text-align:center;font-family:var(--mono);font-size:5.8px;letter-spacing:.5px;color:var(--mute);background:rgba(255,255,255,.5)}
+.router-layout{display:grid;grid-template-columns:130px 28px 1fr;gap:0;align-items:center}
+.router-core{border:1px solid rgba(var(--accent-rgb),.28);border-radius:9px;padding:11px 10px;background:rgba(var(--accent-rgb),.06);text-align:center}
+.router-core span{display:block;font-family:var(--mono);font-size:5.8px;letter-spacing:1px;color:var(--faint)}
+.router-core b{display:block;font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--ink);margin:4px 0}
+.router-core em{font-style:normal;font-size:6.5px;line-height:1.35;color:var(--mute)}
+.router-arms{display:flex;flex-direction:column;gap:12px}
+.router-arms i{display:block;height:1px;border-top:1px dashed rgba(var(--accent-rgb),.36);position:relative}
+.router-arms i::after{content:"";position:absolute;right:0;top:-3px;width:5px;height:5px;border-top:1px solid var(--accent);border-right:1px solid var(--accent);transform:rotate(45deg)}
+.router-targets{display:flex;flex-direction:column;gap:5px}
+.route-card{border:1px solid var(--rule);border-radius:6px;padding:7px 8px;background:rgba(255,255,255,.55)}
+.route-card b{display:block;font-family:var(--mono);font-size:6.8px;letter-spacing:.6px;color:var(--ink2)}
+.route-card span{display:block;font-size:6.5px;line-height:1.3;color:var(--mute);margin-top:2px}
+.router-signals{display:flex;gap:4px;margin-top:8px}
+.router-signals span{flex:1;border:1px solid var(--rule);border-radius:4px;padding:4px 3px;text-align:center;font-family:var(--mono);font-size:5.5px;letter-spacing:.4px;color:var(--faint);background:rgba(255,255,255,.5)}
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.dash-card{border:1px solid var(--rule);border-radius:7px;padding:7px 8px;background:rgba(255,255,255,.58)}
+.dash-card span{display:block;font-family:var(--mono);font-size:5.5px;letter-spacing:.7px;color:var(--faint)}
+.dash-card b{display:block;font-family:var(--serif);font-size:17px;font-weight:600;line-height:1;margin-top:3px}
+.dash-card b em{font-family:var(--mono);font-style:normal;font-size:5.5px;color:var(--mute);margin-left:2px}
+.dash-card.good b{color:var(--green)}.dash-card.warn b{color:var(--orange)}
+.dash-chart{grid-column:1/-1;border:1px solid var(--rule);border-radius:7px;padding:7px 8px;background:rgba(255,255,255,.52)}
+.dash-chart .dc-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:5.5px;letter-spacing:.7px;color:var(--faint);margin-bottom:3px}
+.dash-spark{width:100%;height:44px;display:block}
+.dash-spark polyline{fill:none;stroke:var(--green);stroke-width:1.2}
+.dash-spark .area{fill:rgba(46,122,76,.09)}
+.dash-alert{grid-column:1/-1;display:flex;align-items:center;gap:6px;border:1px solid rgba(200,85,42,.2);border-radius:5px;padding:5px 8px;background:rgba(251,237,231,.35);font-family:var(--mono);font-size:5.8px;letter-spacing:.5px;color:var(--orange)}
+.dash-alert i{width:5px;height:5px;border-radius:50%;background:var(--orange);box-shadow:0 0 6px rgba(200,85,42,.4);animation:blink 2s ease-in-out infinite}
+.ops-loop{display:flex;gap:4px;margin-top:7px}
+.ops-loop span{flex:1;border:1px solid var(--rule);border-radius:4px;padding:4px 3px;text-align:center;font-family:var(--mono);font-size:5.3px;letter-spacing:.4px;color:var(--mute);background:rgba(255,255,255,.5)}
+.world-wrap{display:grid;grid-template-columns:1.25fr .75fr;gap:12px;align-items:stretch}
+.world-map{position:relative;border:1px solid var(--rule);border-radius:9px;background:radial-gradient(ellipse at 50% 50%,rgba(var(--accent-rgb),.07),transparent 70%),rgba(255,255,255,.46);min-height:280px;overflow:hidden}
+.world-map::before{content:"";position:absolute;inset:20px;background-image:radial-gradient(circle,rgba(23,26,33,.10) 1px,transparent 1px);background-size:18px 18px;opacity:.4}
+.world-lines{position:absolute;inset:0;width:100%;height:100%}
+.world-lines path{fill:none;stroke:rgba(var(--accent-rgb),.32);stroke-width:1;stroke-dasharray:3 4}
+.world-lines path.hot{stroke:rgba(200,85,42,.45)}
+.region{position:absolute;border:1px solid rgba(var(--accent-rgb),.25);border-radius:5px;padding:5px 6px;background:rgba(255,255,255,.82);box-shadow:0 3px 10px rgba(20,30,60,.05)}
+.region b{display:block;font-family:var(--mono);font-size:6px;letter-spacing:.7px;color:var(--ink2)}
+.region span{display:block;font-family:var(--mono);font-size:5.3px;letter-spacing:.4px;color:var(--faint);margin-top:2px}
+.region.r1{left:12%;top:30%}.region.r2{left:43%;top:54%}.region.r3{right:10%;top:26%}
+.world-side{display:flex;flex-direction:column;gap:6px}
+.ws-card{border:1px solid var(--rule);border-radius:6px;padding:7px 8px;background:rgba(255,255,255,.55)}
+.ws-card span{display:block;font-family:var(--mono);font-size:5.5px;letter-spacing:.7px;color:var(--faint)}
+.ws-card b{display:block;font-size:7.5px;line-height:1.3;color:var(--ink2);margin-top:2px}
+.unit-cost{margin-top:auto;border:1px solid rgba(46,122,76,.22);border-radius:6px;padding:8px;background:rgba(234,245,239,.38)}
+.unit-cost span{font-family:var(--mono);font-size:5.5px;letter-spacing:.7px;color:var(--green)}
+.unit-cost b{display:block;font-family:var(--serif);font-size:15px;font-weight:600;line-height:1.2;color:var(--ink);margin-top:2px}
+.unit-cost em{display:block;font-style:normal;font-size:6px;line-height:1.3;color:var(--mute);margin-top:3px}
+</style>
+</head>
+<body>
+<div id="stage"><div id="deck"></div></div>
+<div id="hud"><span class="counter" id="counter">01 / 48</span><button id="ovBtn" aria-label="Open slide overview">MAP <kbd>O</kbd></button></div>
+<div id="overview" aria-hidden="true">
+  <div class="ov-top">
+    <div><div class="kicker">SLIDE MAP / 42 CONCEPTS</div><h2>The whole deck</h2></div>
+    <button class="ov-close" id="ovClose">CLOSE <kbd>ESC</kbd></button>
+  </div>
+  <div class="ov-grid" id="ovGrid"></div>
+</div>
+<script>
+(function(){
+'use strict';
+const qs=new URLSearchParams(location.search);
+const STATIC=qs.has('static');
+const TRACKS={
+  basics:{
+    key:'basics',num:'01',label:'Basics',title:'Foundations',count:14,range:'01—14',
+    topics:'Inference & transformers · prefill, decode & KV cache · sampling & metrics · GPUs, APIs & prompting',
+    blurb:'The mental model: what a model actually does between a prompt and its answer, and which numbers decide whether serving is fast enough.',
+    sectionItems:[
+      {id:'b01',label:'What inference is'},
+      {id:'b03',label:'Prefill vs decode'},
+      {id:'b06',label:'The KV cache'},
+      {id:'b08',label:'Latency, throughput & goodput'}
+    ]
+  },
+  intermediate:{
+    key:'intermediate',num:'02',label:'Intermediate',title:'Optimization',count:17,range:'01—17',
+    topics:'Batching & paging · quantization & cache sizing · APIs, tools & agents · fine-tuning & distillation',
+    blurb:'The optimization toolkit: keep the GPU busy, shrink the bytes it moves, and turn raw model calls into reliable product features.',
+    sectionItems:[
+      {id:'i01',label:'Batching, static to continuous'},
+      {id:'i05',label:'Quantization'},
+      {id:'i07',label:'PagedAttention'},
+      {id:'i10',label:'Function calling & MCP'}
+    ]
+  },
+  advanced:{
+    key:'advanced',num:'03',label:'Advanced',title:'Scale',count:11,range:'01—11',
+    topics:'Benchmarks & profiling · speculative decoding · distributed inference · disaggregation, routing & InferenceOps',
+    blurb:'From one GPU to a fleet: split the model and the work, measure the real bottleneck, and operate inference as a production system.',
+    sectionItems:[
+      {id:'a01',label:'Benchmarks that tell the truth'},
+      {id:'a03',label:'Speculative decoding'},
+      {id:'a07',label:'Parallelism & topology'},
+      {id:'a09',label:'Routing & InferenceOps'}
+    ]
+  }
+};
+const SLIDES=[
+{type:'cover',title:'Three tracks: Basics, Intermediate, Advanced'},
+{type:'section',track:'basics',title:'Foundations',subtitle:'From prompt to token'},
+{type:'concept',id:'b01',track:'basics',num:'01',kicker:'WHAT HAPPENS',title:'What is LLM inference?',dek:'The model reads a prompt, predicts one token, appends it, and repeats — a serving-time loop with no learning.',points:[['Serve, don’t train.','Weights are frozen; every request is a forward pass.'],['One token at a time.','Generation is autoregressive: each token conditions on all prior tokens.'],['Constrained by physics.','Latency, memory bandwidth, and cost decide what is possible.']],viz:'stream',data:{label:'INFERENCE IS A LOOP',right:'FORWARD ONLY',prompt:'Explain the KV cache in one paragraph',tokens:['A',' KV',' cache',' stores',' keys',' and',' values',' so',' decode',' reuses',' them','.'],meta:['<b>41</b> TOKENS OUT','<b>0</b> GRADIENTS','<b>1</b> FORWARD PASS'],stamps:[{b:'FROZEN',s:'no weight updates'},{b:'CAUSAL',s:'each token sees the past'},{b:'BOUNDED',s:'latency + cost per token'}],note:'<b>Autoregressive:</b> the output of one step becomes part of the input to the next.'}},
+{type:'concept',id:'b02',track:'basics',num:'02',kicker:'THE PIPELINE',title:'How inference works',dek:'Text is tokenized, embedded, passed through every Transformer layer, projected to logits, then sampled back into text.',points:[['Tokenize.','Text becomes IDs from the model’s vocabulary.'],['Transform.','Attention mixes tokens; the feed-forward network transforms each position.'],['Loop.','The sampled token is appended and the next decode step begins.']],viz:'flow',data:{label:'AUTOREGRESSIVE PIPELINE',right:'ONE PASS PER TOKEN',nodes:[{k:'01',t:'TOKENIZE',s:'text → IDs'},{k:'02',t:'EMBED',s:'+ position'},{k:'03',t:'TRANSFORM',s:'attention + FFN'},{k:'04',t:'LOGITS',s:'vocab scores'},{k:'05',t:'SAMPLE',s:'pick one'},{k:'06',t:'DETOKENIZE',s:'IDs → text'}],loopLeft:'sample → append token',loopRight:'decode again',note:'<b>Prefill</b> runs the prompt through this pipeline in parallel. <b>Decode</b> repeats it for one new token at a time.'}},
+{type:'concept',id:'b03',track:'basics',num:'03',kicker:'TWO PHASES',title:'Prefill vs decode',dek:'Two phases, two bottlenecks. Prefill reads the whole prompt in parallel; decode writes one token at a time.',points:[['Prefill is compute-heavy.','A single pass over all prompt tokens sets TTFT and fills the KV cache.'],['Decode is bandwidth-heavy.','Every new token reads weights and cache but does little math.'],['Optimize differently.','Prefill likes big matrix multiplies; decode likes batching and fewer bytes.']],viz:'phases',data:{label:'THE SERVING SPLIT',right:'TTFT ← PREFILL · TPOT ← DECODE',prefill:{name:'PREFILL',sub:'prompt tokens in parallel',metric:'SETS TTFT',n:11,tags:['COMPUTE-BOUND','PARALLEL','FILLS KV CACHE']},decode:{name:'DECODE',sub:'one token per step',metric:'SETS TPOT',n:12,tags:['BANDWIDTH-BOUND','SEQUENTIAL','READS KV CACHE']},meters:[{label:'PREFILL COMPUTE INTENSITY',pct:84},{label:'DECODE MEMORY PRESSURE',pct:74}],note:'<b>Context changes the regime:</b> a very large prompt can be bandwidth-bound too, and a very large decode batch can become compute-bound.'}},
+{type:'concept',id:'b04',track:'basics',num:'04',kicker:'ARCHITECTURE',title:'Inside a Transformer',dek:'A decoder-only stack: embeddings, repeated attention and feed-forward blocks, then a vocabulary-sized output head.',points:[['Attention mixes context.','Queries, keys, and values let each token gather from the past.'],['FFN transforms each token.','Most parameters live here; it is a large matrix multiply.'],['KV cache is the shortcut.','Store past keys and values so decode does not recompute them.']],viz:'layers',data:{label:'DECODER-ONLY STACK',right:'PAST → PRESENT → NEXT',layers:[{k:'06',name:'LM HEAD',note:'logits over vocab',cls:'head'},{k:'05',name:'RMSNORM',note:'stabilize',cls:''},{k:'04',name:'FEED-FORWARD',note:'token-wise MLP',cls:'ffn'},{k:'03',name:'SELF-ATTENTION',note:'Q · K · V',cls:'attn'},{k:'02',name:'RMSNORM',note:'stabilize',cls:''},{k:'01',name:'EMBED + ROPE',note:'IDs + position',cls:''}],bracketTop:'REPEATED',bracket:'× L',bracketBottom:'LAYERS',note:'<b>Most inference optimizations</b> target either attention or the KV cache that attention reads during generation.'}},
+{type:'concept',id:'b05',track:'basics',num:'05',kicker:'THE INPUT',title:'Tokens, context & position',dek:'The model never sees characters or words. It sees token IDs, capped by a context window and ordered by position.',points:[['Tokenization is model-specific.','The same sentence can become a different number of tokens.'],['Context is a budget.','Prompt plus generated output must fit inside the window.'],['Position is encoded.','RoPE rotates queries and keys so order changes attention.']],viz:'tokens',data:{label:'TOKENIZATION',right:'TOKENS ≠ WORDS',tokens:[{t:'The',id:976},{t:' quick',id:4853},{t:' brown',id:19705},{t:' fox',id:68347},{t:' jumps',id:65613},{t:' over',id:1072},{t:' the',id:290},{t:' lazy',id:29082},{t:' dog',id:6446},{t:'.',id:13}],context:{used:'10',total:'128K',usedPct:7,outPct:13},facts:[{b:'1 TOKEN',s:'≈ 0.75 words in English'},{b:'PROMPT + OUTPUT',s:'must fit the window'},{b:'RoPE',s:'encodes relative order'}],note:'<b>Cost follows tokens,</b> not words. Long system prompts and retrieved context are paid for on every request.'}},
+{type:'concept',id:'b06',track:'basics',num:'06',kicker:'THE TRADE',title:'The KV cache',dek:'Cache the keys and values of every past token once, then reuse them at each decode step instead of recomputing the sequence.',points:[['A memory-for-compute trade.','It makes decode much cheaper but consumes GPU memory.'],['It grows with context.','Longer chats and larger batches multiply the footprint.'],['It is the center of serving.','Paging, prefix caching, offloading, and disaggregation all manage it.']],viz:'kv',data:{label:'DECODE WITH A KV CACHE',right:'REQUEST 04 · LIVE',rows:7,cols:12,promptRows:5,newRow:5,freeRow:6,recentCol:11,side:[{b:'100%',s:'of prompt recomputed without cache'},{b:'1 row',s:'computed per new token with cache'},{b:'2 × L × H × d',s:'vectors stored per token'}],formula:'K and V for every past token, every layer.',note:'<b>The cache is why decode is fast.</b> It is also why long-context serving is memory-hungry.'}},
+{type:'concept',id:'b07',track:'basics',num:'07',kicker:'THE CHOICE',title:'Sampling & token selection',dek:'Logits become probabilities. Temperature, top-p, and top-k decide which token actually leaves the model.',points:[['Logits are raw scores.','Softmax turns them into a distribution over the vocabulary.'],['Greedy is deterministic.','Sampling adds controlled randomness through temperature and truncation.'],['Parameters change behavior.','Temperature, top-p, top-k, and penalties shape style and repetition.']],viz:'dist',data:{label:'NEXT TOKEN · “THE CAPITAL OF FRANCE IS”',right:'T 0.70 · TOP-P 0.95',candidates:[{t:'Paris',p:.62,pick:true},{t:'Lyon',p:.18},{t:'Marseille',p:.09},{t:'Nice',p:.05},{t:'Other',p:.06,blocked:true}],controls:['TEMPERATURE 0.70','TOP-P 0.95','TOP-K 50'],note:'<b>Greedy</b> picks the top token every time. <b>Sampling</b> can produce different valid answers from the same prompt.'}},
+{type:'concept',id:'b08',track:'basics',num:'08',kicker:'THE SCOREBOARD',title:'Latency, throughput & goodput',dek:'Four numbers describe a serving system: TTFT, TPOT, end-to-end latency, and throughput that still meets its SLO.',points:[['TTFT is time to first token.','Queueing, prefill, and network all count.'],['TPOT is time per output token.','It governs how smooth streaming feels.'],['Goodput is the honest number.','It counts only requests that meet the latency target.']],viz:'metrics',data:{label:'ONE REQUEST · 180 OUTPUT TOKENS',right:'SLO: TTFT < 500ms · TPOT < 30ms',ttftPct:7,scale:['0','1s','2s','3s','4.2s'],cards:[{v:'280',u:'ms',l:'TTFT'},{v:'22',u:'ms',l:'TPOT'},{v:'4.22',u:'s',l:'END-TO-END'},{v:'41',u:'/s',l:'GOODPUT',good:true}],slo:'SLO COMPLIANT',note:'<b>Throughput</b> counts tokens or requests. <b>Goodput</b> counts only the work that still meets the latency target.'}},
+{type:'concept',id:'b09',track:'basics',num:'09',kicker:'THE DIFFERENCE',title:'Training vs inference',dek:'Training updates weights with forward and backward passes. Inference freezes them and runs forward-only under a latency budget.',points:[['Different math.','Backprop is absent at serving time; only the forward pass remains.'],['Different bottleneck.','Training is compute-heavy; decode is often memory-bandwidth-bound.'],['Different success.','Training optimizes loss; inference optimizes latency, throughput, quality, and cost.']],viz:'compare',data:{left:{tag:'TRAINING',title:'Learn',lines:['Forward + backward pass','Update every weight','Minimize loss over a dataset','Throughput-oriented'],value:'samples / second',metric:'optimize the model'},right:{tag:'INFERENCE',title:'Serve',lines:['Forward pass only','Weights stay frozen','Predict the next token','Latency + cost oriented'],value:'tokens / second',metric:'optimize the experience'},note:'<b>Same architecture, different objective.</b> Serving constraints are measured in milliseconds and dollars, not loss curves.'}},
+{type:'concept',id:'b10',track:'basics',num:'10',kicker:'THE SILICON',title:'CPU vs GPU vs TPU',dek:'The same model runs on very different silicon. Choose by memory, bandwidth, software, availability, and cost.',points:[['CPU: flexible.','Great for small models and edge; limited parallel throughput.'],['GPU: the default.','Thousands of cores and high-bandwidth HBM for serious serving.'],['TPU: compiler-first.','Systolic matrix engines; strongest inside its ecosystem.']],viz:'hardware',data:{label:'PICK THE MACHINE',right:'MEMORY · BANDWIDTH · SOFTWARE',cards:[{b:'CPU',s:'Few strong cores, large DRAM, maximum flexibility.',tags:['EDGE','SMALL MODELS','FLEXIBLE'],m:[['PARALLELISM',30],['BANDWIDTH',22],['FLEXIBILITY',92]]},{b:'GPU',s:'Thousands of cores plus HBM; the workhorse for LLM serving.',tags:['HBM','TENSOR CORES','CUDA'],m:[['PARALLELISM',92],['BANDWIDTH',86],['FLEXIBILITY',72]]},{b:'TPU',s:'Systolic matrix engines and XLA; compiler-first scaling.',tags:['MXU','XLA','PODS'],m:[['PARALLELISM',88],['BANDWIDTH',80],['FLEXIBILITY',44]]}],note:'<b>There is no universal winner.</b> The best chip is the one your model, framework, and operations team can actually use.'}},
+{type:'concept',id:'b11',track:'basics',num:'11',kicker:'THE CONTROLS',title:'Inference parameters',dek:'A small control panel changes cost, latency, and personality — often more than a model swap.',points:[['Output length dominates.','<code>max_tokens</code> is the biggest lever on cost and latency.'],['Sampling controls style.','Temperature and top-p trade determinism for variety.'],['Stopping matters.','Stop sequences and seeds make behavior bounded and reproducible.']],viz:'params',data:{label:'REQUEST CONTROL PANEL',right:'DEFAULTS ARE NOT UNIVERSAL',rows:[{label:'TEMPERATURE',value:'0.70',w:70},{label:'TOP-P',value:'0.95',w:95},{label:'TOP-K',value:'50',w:50},{label:'MAX TOKENS',value:'512',w:64},{label:'REP. PENALTY',value:'1.05',w:42}],effects:[{b:'STYLE',s:'sampling'},{b:'COST',s:'output length'},{b:'LATENCY',s:'tokens / step'}],note:'<b>Read the defaults.</b> Frameworks, APIs, and model families disagree on parameter names, ranges, and behavior.'}},
+{type:'concept',id:'b12',track:'basics',num:'12',kicker:'THE PROGRAM',title:'Prompt engineering',dek:'Prompts are programs for a frozen model: instructions, context, examples, and output constraints all compete for tokens.',points:[['Roles set behavior.','System, user, and assistant turns are not interchangeable.'],['Context is expensive.','Every prompt token is paid for on every request.'],['Constraints beat wishes.','Explicit formats and examples outperform vague style requests.']],viz:'chat',data:{label:'PROMPT AS CONTEXT',right:'BUDGET: 2,000 / 128K',messages:[{role:'SYSTEM',tokens:'42 TOK',text:'You are a terse inference engineer. Answer in one paragraph. Cite the trade-off.'},{role:'USER',tokens:'18 TOK',text:'When should I use chunked prefill instead of disaggregation?'},{role:'ASSISTANT',tokens:'96 TOK',text:'Chunked prefill first: it smooths ITL without a second pool. Disaggregate when prefill and decode need independent scaling.'}],budgetLabel:'PROMPT + RESERVED OUTPUT',budget:'2,096 / 128,000',usedPct:2,outPct:8,note:'<b>Prompt tokens are not free.</b> Retrieved documents and long system prompts are re-read on every request unless the prefix is cached.'}},
+{type:'concept',id:'b13',track:'basics',num:'13',kicker:'THE CONTRACT',title:'Structured outputs',dek:'Constrain decoding to a JSON schema, regex, grammar, or fixed choice so the response is machine-readable by construction.',points:[['Shape is guaranteed.','The decoder masks tokens that would violate the grammar.'],['Truth is not.','A valid schema can still contain wrong values.'],['Great for tools.','Structured output is the bridge from text to reliable software.']],viz:'schema',data:{label:'GRAMMAR-CONSTRAINED DECODE',right:'SHAPE ≠ TRUTH',modes:['JSON SCHEMA','REGEX','CHOICE','GRAMMAR'],note:'<b>Masking happens at decode time.</b> Invalid tokens are removed from the distribution, so the model cannot produce malformed JSON.'}},
+{type:'concept',id:'b14',track:'basics',num:'14',kicker:'THE CONNECTION',title:'Model Context Protocol',dek:'MCP is an open client-server standard that lets assistants discover and use external tools, data, and services.',points:[['Host, client, server.','The host owns the assistant; clients connect to servers; servers reach backends.'],['One protocol, many sources.','Files, databases, APIs, and repos plug into the same surface.'],['Context on demand.','Tools are discovered and called at inference time, not baked into weights.']],viz:'hub',data:{label:'MCP TOPOLOGY',right:'OPEN STANDARD',servers:[{b:'FILES',s:'local docs'},{b:'POSTGRES',s:'SQL data'},{b:'GITHUB',s:'repos + issues'},{b:'HTTP API',s:'internal service'}],backends:['FILESYSTEM','ROW STORE','REMOTE API','ISSUE TRACKER'],note:'<b>MCP standardizes discovery and transport,</b> not permissions. Authentication, sandboxing, and data boundaries remain your responsibility.'}},
+{type:'section',track:'intermediate',title:'Optimization',subtitle:'Squeeze the machine'},
+{type:'concept',id:'i01',track:'intermediate',num:'01',kicker:'THE SCHEDULER',title:'Batching: static to continuous',dek:'Batching reuses loaded weights across requests. Continuous batching also refills the batch as soon as any sequence finishes.',points:[['Static: wait for a fixed batch.','Simple, but short requests stall behind long ones.'],['Dynamic: launch on a timer.','Better latency, still waits for the longest sequence.'],['Continuous: schedule every iteration.','Finished sequences are replaced immediately.']],viz:'batch',data:{label:'THREE SCHEDULERS · SAME GPU',right:'UTILIZATION 38% → 92%',modes:[{name:'STATIC',util:'38%',cls:'',foot:'Batch ends when the slowest request ends.',lanes:[[{s:0,w:82,t:'a'}],[{s:0,w:56,t:'b'}],[{s:0,w:100,t:'c'}],[{s:0,w:44,t:'d'}]]},{name:'DYNAMIC',util:'61%',cls:'',foot:'A time window decides when to launch.',lanes:[[{s:0,w:52,t:'a'},{s:70,w:30,t:'c'}],[{s:8,w:58,t:'b'}],[{s:20,w:62,t:'d'}],[{s:40,w:54,t:'e'}]]},{name:'CONTINUOUS',util:'92%',cls:'cont',foot:'Finished sequences are replaced each step.',lanes:[[{s:0,w:34,t:'a'},{s:34,w:28,t:'d'},{s:62,w:38,t:'g'}],[{s:8,w:32,t:'b'},{s:40,w:30,t:'e'}],[{s:18,w:32,t:'c'},{s:50,w:28,t:'f'}],[{s:28,w:38,t:'d'},{s:66,w:34,t:'a'}]]}],note:'<b>Continuous batching</b> is the default in modern engines. It needs a KV allocator that can grow, shrink, and free sequences independently.'}},
+{type:'concept',id:'i02',track:'intermediate',num:'02',kicker:'THE SMOOTHER',title:'Chunked prefill',dek:'Split a long prompt into chunks and interleave prefill with decode so one large request cannot freeze everyone else.',points:[['Protect decode.','Smaller prefill chunks keep inter-token latency smooth.'],['Tune the trade.','Larger chunks improve TTFT; smaller chunks protect TPOT.'],['Not disaggregation.','Compute still shares the same GPU; only the schedule changes.']],viz:'chunked',data:{label:'PREFILL MEETS DECODE',right:'SMOOTH THE ITL SPIKE',before:[{t:'PREFILL 8K',f:58,c:'pf'},{t:'D',f:7,c:'dec'},{t:'D',f:7,c:'dec'},{t:'D',f:7,c:'dec'},{t:'D',f:7,c:'dec'},{t:'D',f:7,c:'dec'}],after:[{t:'P1',f:15,c:'pf'},{t:'D',f:5,c:'dec'},{t:'P2',f:15,c:'pf'},{t:'D',f:5,c:'dec'},{t:'P3',f:15,c:'pf'},{t:'D',f:5,c:'dec'},{t:'P4',f:15,c:'pf'},{t:'D',f:5,c:'dec'}],note:'<b>The knob is the chunk size.</b> Too large and decode stalls; too small and prefill pays more scheduling overhead.'}},
+{type:'concept',id:'i03',track:'intermediate',num:'03',kicker:'THE BUDGET',title:'GPU memory math',dek:'Before launch, add up weights, KV cache, activations, and runtime overhead — then leave real headroom.',points:[['Weights are fixed.','Parameters × bytes per parameter.'],['KV cache scales with traffic.','Batch × sequence × layers × KV heads × head dim × 2 × bytes.'],['Overhead is real.','CUDA graphs, fragmentation, and workspace can consume gigabytes.']],viz:'memory',data:{label:'LLAMA 3.1 8B · BF16 · 8K CTX · BATCH 8',right:'80 GB H100',segments:[{cls:'weights',label:'WEIGHTS',value:'16.1 GB',pct:20.1},{cls:'kv',label:'KV CACHE',value:'8.0 GB',pct:10},{cls:'act',label:'ACTIVATIONS',value:'1.4 GB',pct:1.75},{cls:'over',label:'OVERHEAD',value:'2.5 GB',pct:3.1}],used:'28 GB USED',free:'52 GB HEADROOM',scale:['0','20','40','60','80 GB'],formula:'KV = 2 × L × H<sub>kv</sub> × d<sub>head</sub> × seq × batch × bytes',note:'<b>Sizing is a subtraction problem.</b> If the total is even close to capacity, fragmentation and a traffic spike will finish the job.'}},
+{type:'concept',id:'i04',track:'intermediate',num:'04',kicker:'THE HARDWARE',title:'Choosing the right GPU',dek:'For decode, memory bandwidth often matters more than raw FLOPS. Capacity decides what fits; bandwidth sets the token ceiling.',points:[['Fit first.','Weights, KV cache, and headroom must fit in HBM.'],['Bandwidth sets decode.','Tokens/s ≈ bandwidth ÷ bytes read per token.'],['Interconnect sets scale.','NVLink for tensor parallel; PCIe or InfiniBand changes the math.']],viz:'gpu',data:{label:'THEORETICAL DECODE CEILING · 8B BF16',right:'WEIGHTS ONLY · NOT A BENCHMARK',rows:[{name:'H100 SXM',spec:'80 GB HBM3 · 3.35 TB/s',pct:42,tps:'209'},{name:'H200',spec:'141 GB HBM3e · 4.8 TB/s',pct:60,tps:'300'},{name:'B200',spec:'192 GB HBM3e · 8.0 TB/s',pct:100,tps:'500'},{name:'MI300X',spec:'192 GB HBM3 · 5.3 TB/s',pct:66,tps:'331'},{name:'RTX 4090',spec:'24 GB GDDR6X · 1.0 TB/s',pct:13,tps:'63'}],footLeft:'CEILING ≈ HBM BANDWIDTH ÷ MODEL BYTES',footRight:'BATCH, KV, AND OVERHEAD LOWER THE REAL NUMBER',note:'<b>This is an upper bound,</b> not a promised throughput. Real decode also reads KV cache, activations, and runtime overhead.'}},
+{type:'concept',id:'i05',track:'intermediate',num:'05',kicker:'FEWER BITS',title:'Quantization',dek:'Store weights and sometimes activations in fewer bits. Less memory and bandwidth usually mean faster, cheaper decode.',points:[['W4A16 is a decode win.','Keep activations at 16-bit, shrink weights to 4-bit.'],['FP8 is a balanced default.','Good hardware support and smaller quality loss than 4-bit.'],['Always evaluate.','Perplexity and task evals can hide regressions; test your workload.']],viz:'quant',data:{label:'FORMAT LADDER · 8B MODEL',right:'SIZE / QUALITY / SPEED',cards:[{name:'BF16',bits:16,size:'16',unit:'GB',quality:100,note:'baseline',tag:'REFERENCE'},{name:'FP8',bits:8,size:'8',unit:'GB',quality:97,note:'best default',tag:'HARDWARE FP8',hot:true},{name:'INT8',bits:8,size:'8',unit:'GB',quality:94,note:'mature kernels',tag:'W8A8'},{name:'NF4',bits:4,size:'4',unit:'GB',quality:86,note:'QLoRA style',tag:'GROUP 64'},{name:'INT4',bits:4,size:'4',unit:'GB',quality:78,note:'needs tuning',tag:'GROUP 128'}],note:'<b>The win depends on the kernel.</b> A format that halves bytes but falls back to a slow path can be slower than BF16.'}},
+{type:'concept',id:'i06',track:'intermediate',num:'06',kicker:'THE CAPACITY',title:'KV cache sizing',dek:'The KV cache is often the real capacity limit. Compute bytes per token, then multiply by context and concurrency.',points:[['Per token:','2 × layers × KV heads × head dim × bytes.'],['Per request:','Per-token bytes × sequence length.'],['Per server:','Per-request bytes × concurrent sequences + weights + headroom.']],viz:'kvmath',data:{label:'LLAMA 3.1 8B · BF16 KV',right:'GQA: 8 KV HEADS, NOT 32',plug:'2 × 32 × 8 × 128 × 2 B = <b>128 KiB</b>',rows:[{s:'1 request · 8K context',pct:7,v:'1 GiB'},{s:'8 requests · 8K',pct:55,v:'8 GiB'},{s:'32 requests · 8K',pct:100,v:'32 GiB'}],note:'<b>GQA buys 4× KV capacity</b> versus MHA with 32 KV heads. Long context and high concurrency multiply the bill.'}},
+{type:'concept',id:'i07',track:'intermediate',num:'07',kicker:'THE ALLOCATOR',title:'PagedAttention',dek:'Store the KV cache in fixed-size blocks with a lookup table, so memory is allocated on demand and can be shared.',points:[['Kill fragmentation.','No more reserving max sequence length per request.'],['Share blocks.','Common prefixes and beam branches can point to the same pages.'],['Enable the stack.','Continuous batching, prefix caching, and offloading become practical.']],viz:'paging',data:{label:'CONTIGUOUS VS PAGED KV',right:'BLOCK TABLE + ON-DEMAND PAGES',available:24,note:'<b>The win is in the allocator,</b> not a faster attention kernel: less waste means more concurrent sequences and higher batch size.'}},
+{type:'concept',id:'i08',track:'intermediate',num:'08',kicker:'THE REUSE',title:'Prefix caching',dek:'If many requests share a system prompt or document, compute its KV once and reuse it across calls.',points:[['Hash the prefix.','The engine keys cached blocks by token content and position.'],['Cut TTFT.','Warm requests skip prefill for the shared portion.'],['Respect tenants.','Shared cache must not leak data across users or organizations.']],viz:'prefix',data:{label:'SHARED PREFIX · THREE REQUESTS',right:'CACHE HIT → SKIP PREFILL',branches:[{b:'REQUEST A',s:'summarize section 3',ttft:'180ms'},{b:'REQUEST B',s:'compare section 3 to 4',ttft:'192ms'},{b:'REQUEST C',s:'extract risks',ttft:'176ms'}],cold:'820ms',warm:'180ms',note:'<b>Prefix caching is a locality optimization.</b> It pays when prompts share a stable head; random prompts see little benefit.'}},
+{type:'concept',id:'i09',track:'intermediate',num:'09',kicker:'THE TIERS',title:'KV cache offloading',dek:'Keep hot KV blocks in HBM and move cold blocks to CPU memory or NVMe when capacity runs short.',points:[['Capacity vs latency.','Offload buys concurrency at the cost of transfer time.'],['Tier by heat.','Recent tokens stay on GPU; idle sessions move down the hierarchy.'],['Measure the fabric.','PCIe and NVLink bandwidth decide whether it pays.']],viz:'offload',data:{label:'KV MEMORY HIERARCHY',right:'HOT → WARM → COLD',tiers:[{id:'HBM',sub:'GPU',blocks:10,size:'80 GB',bw:'3.3 TB/s',cls:'hot'},{id:'CPU DRAM',sub:'HOST',blocks:9,size:'512 GB',bw:'64 GB/s',cls:'warm'},{id:'NVMe',sub:'DISK',blocks:8,size:'8 TB',bw:'7 GB/s',cls:'cold'}],note:'<b>Offloading is a capacity tool,</b> not a latency tool. A cache miss that crosses PCIe can erase the throughput gain.'}},
+{type:'concept',id:'i10',track:'intermediate',num:'10',kicker:'THE TOOL',title:'Function calling',dek:'The model emits a structured tool call; your runtime executes it and feeds the result back as context.',points:[['The model does not run code.','It only proposes a call and arguments.'],['Validate everything.','Schemas, auth, timeouts, and sandboxing belong to the runtime.'],['Close the loop.','Tool output returns as a message and the model continues.']],viz:'tool',data:{label:'MODEL → TOOL → OBSERVATION',right:'THE RUNTIME OWNS SAFETY',nodes:[{k:'01',t:'USER',s:'question'},{k:'02',t:'MODEL',s:'tool call'},{k:'03',t:'RUNTIME',s:'validate + auth'},{k:'04',t:'TOOL',s:'execute'}],labels:['PROMPT','TOOL CALL','EXECUTE'],guards:['SCHEMA','AUTH','TIMEOUT','SANDBOX'],note:'<b>Function calling is an inference pattern,</b> not an execution sandbox. The runtime, not the model, decides what is allowed.'}},
+{type:'concept',id:'i11',track:'intermediate',num:'11',kicker:'THE SURFACE',title:'OpenAI-compatible APIs',dek:'A common HTTP surface lets existing SDKs and tools point at a new engine with minimal code changes.',points:[['Familiar routes.','<code>/v1/chat/completions</code>, <code>/v1/completions</code>, <code>/v1/embeddings</code>.'],['Streaming is SSE.','Tokens arrive as server-sent events, not one final blob.'],['Compatible is not identical.','Check tokenizer, tool-call, and parameter semantics.']],viz:'api',data:{label:'OPENAI-COMPATIBLE SURFACE',right:'DROP-IN CLIENT',method:'POST',route:'/v1/chat/completions',pill:'SSE STREAM',code:`{\n  <span class="k">"model"</span>: <span class="s">"your-model"</span>,\n  <span class="k">"messages"</span>: [\n    {<span class="k">"role"</span>: <span class="s">"user"</span>,\n     <span class="k">"content"</span>: <span class="s">"Explain KV cache"</span>}\n  ],\n  <span class="k">"stream"</span>: <span class="n">true</span>\n}\n\n<span class="c">data: {"choices":[{"delta":</span>\n<span class="c">  {"content":"A KV cache"}}]}</span>`,foot:['EXISTING SDK','PARAMETER SEMANTICS VARY'],note:'<b>Compatibility is a contract you must test.</b> Tokenizers, stop sequences, tool-call formats, and error shapes can differ.'}},
+{type:'concept',id:'i12',track:'intermediate',num:'12',kicker:'THE SURFACE',title:'Anthropic-compatible APIs',dek:'The Messages API exposes system prompts, typed content blocks, tool use, and streaming events in a different shape.',points:[['<code>/v1/messages</code> is the center.','System is a top-level parameter, not a message role.'],['Content is typed.','Text, image, tool_use, and tool_result blocks compose a turn.'],['Events are granular.','Streaming emits message, content block, and delta events.']],viz:'api',data:{label:'ANTHROPIC-COMPATIBLE SURFACE',right:'MESSAGES API',method:'POST',route:'/v1/messages',pill:'EVENT STREAM',code:`{\n  <span class="k">"model"</span>: <span class="s">"your-model"</span>,\n  <span class="k">"system"</span>: <span class="s">"You are terse."</span>,\n  <span class="k">"messages"</span>: [\n    {<span class="k">"role"</span>: <span class="s">"user"</span>,\n     <span class="k">"content"</span>: <span class="s">"Explain KV cache"</span>}\n  ],\n  <span class="k">"max_tokens"</span>: <span class="n">512</span>\n}\n\n<span class="c">event: content_block_delta</span>\n<span class="c">data: {"delta":{"text":"A KV"}}</span>`,foot:['TYPED CONTENT BLOCKS','SYSTEM IS TOP-LEVEL'],note:'<b>Tool use is expressed as content blocks.</b> The request and response are typed, so clients must handle more event shapes.'}},
+{type:'concept',id:'i13',track:'intermediate',num:'13',kicker:'THE LOOP',title:'Agent harnesses',dek:'An agent is an inference loop with tools, memory, planning, and guardrails wrapped around the model.',points:[['The harness owns control.','It decides when to plan, call a tool, retry, or stop.'],['Context is the scarce resource.','Every observation and tool result competes for the window.'],['Evaluate the whole loop.','Model quality alone does not predict agent reliability.']],viz:'agent',data:{label:'HARNESS CONTROL LOOP',right:'MODEL + TOOLS + STATE',chips:['CONTEXT BUDGET','RETRIES','GUARDRAILS','TRACING','EVALS'],note:'<b>The agent is the system,</b> not the model. Most reliability comes from the harness: state, tool contracts, limits, and observability.'}},
+{type:'concept',id:'i14',track:'intermediate',num:'14',kicker:'THE CHOICE',title:'Choosing the right model',dek:'Quality is only one axis. Latency, cost, context, licensing, tool support, and operational fit decide the choice.',points:[['Start small.','A smaller model with a strong prompt often beats a larger model with a weak one.'],['Measure on your data.','Public benchmarks rarely match your prompts and output lengths.'],['Design for switching.','Keep the API surface stable so models can be swapped.']],viz:'matrix',data:{label:'QUALITY VS COST / LATENCY',right:'SMALLEST MODEL THAT CLEARS THE BAR',bubbles:[{l:'7B',x:20,y:70,cls:'mid'},{l:'fine-tuned 7B',x:35,y:42,cls:''},{l:'70B',x:62,y:30,cls:'big'},{l:'frontier',x:82,y:14,cls:'big'}],chips:['CONTEXT','TOOLS','LICENSE','LATENCY','OPS'],note:'<b>Model selection is an eval problem.</b> Build a small, representative test set before you argue about benchmarks.'}},
+{type:'concept',id:'i15',track:'intermediate',num:'15',kicker:'THE ENGINE',title:'Choosing the inference framework',dek:'vLLM, SGLang, TensorRT-LLM, MAX, llama.cpp, and TGI optimize different hardware and workloads.',points:[['Match hardware first.','NVIDIA, AMD, Apple Silicon, and CPU each narrow the field.'],['Match the feature set.','Structured outputs, multi-LoRA, disaggregation, and tool parsers vary.'],['Benchmark your workload.','Use your prompts, output lengths, and concurrency.']],viz:'frameworks',data:{label:'SERVING STACKS',right:'BENCHMARK, DON’T VIBE-CHECK',cards:[{b:'vLLM',s:'Broad model support, PagedAttention, continuous batching.',tag:'GENERAL DEFAULT'},{b:'SGLang',s:'RadixAttention, fast structured generation, agent-friendly.',tag:'PREFIX + STRUCTURED'},{b:'TensorRT-LLM',s:'Compiled NVIDIA kernels and maximum performance.',tag:'NVIDIA PEAK'},{b:'MAX',s:'Modular stack with portable kernels and serving.',tag:'PORTABLE'},{b:'llama.cpp',s:'CPU, Apple Silicon, and GGUF quantization.',tag:'EDGE / LOCAL'},{b:'TGI',s:'Hugging Face serving stack with a familiar model hub.',tag:'HF ECOSYSTEM'}],note:'<b>The framework is part of the product.</b> Feature gaps and upgrade cadence matter as much as tokens per second.'}},
+{type:'concept',id:'i16',track:'intermediate',num:'16',kicker:'THE ADAPTER',title:'Fine-tuning',dek:'Update a small set of weights, or all of them, to teach format, style, or domain behavior rather than fresh facts.',points:[['LoRA is the default.','Train low-rank adapters and keep the base model frozen.'],['Serve many adapters.','Multi-LoRA lets one base model host per-tenant specialization.'],['Evaluate before and after.','Fine-tuning can improve format and harm general reasoning.']],viz:'adapters',data:{label:'FROZEN BASE + LOW-RANK ADAPTERS',right:'W′ = W + BA',cards:[{b:'tenant-a',tag:'r=16',s:'support tone'},{b:'tenant-b',tag:'r=32',s:'JSON extraction'},{b:'tenant-c',tag:'r=8',s:'domain jargon'}],note:'<b>Fine-tuning changes behavior, not the knowledge cutoff.</b> For fresh facts, use retrieval or tools instead.'}},
+{type:'concept',id:'i17',track:'intermediate',num:'17',kicker:'THE TRANSFER',title:'Distillation',dek:'Train a smaller student to imitate a larger teacher’s behavior, using soft targets that carry more signal than labels.',points:[['Teacher → student.','The student learns the full distribution, not just the top token.'],['Soft targets help.','Logit distillation transfers similarity structure and uncertainty.'],['Smaller, not free.','Distillation trades training compute for lower serving cost.']],viz:'distill',data:{label:'TEACHER → STUDENT',right:'SOFT TARGETS',teacher:{name:'TEACHER',size:'70B',bars:[88,62,44,28,18,10]},student:{name:'STUDENT',size:'8B',bars:[82,58,46,25,14,9]},note:'<b>The goal is behavioral compression.</b> Distillation works best when the student has enough capacity for the task and enough data to learn it.'}},
+{type:'section',track:'advanced',title:'Scale',subtitle:'From one GPU to a fleet'},
+{type:'concept',id:'a01',track:'advanced',num:'01',kicker:'THE MEASUREMENT',title:'Performance benchmarks',dek:'Measure your workload, not a demo. Report TTFT, TPOT, end-to-end latency, throughput, and goodput across load.',points:[['Control the inputs.','Input and output length distributions change everything.'],['Sweep concurrency.','A single number hides the latency-throughput curve.'],['Report tails.','p50 is not an SLO; p95 and p99 are where users live.']],viz:'bench',data:{label:'LOAD SWEEP',right:'THROUGHPUT ↑ · LATENCY ↑',note:'<b>Goodput is the intersection:</b> the throughput you can sustain while every request still meets its SLO.'}},
+{type:'concept',id:'a02',track:'advanced',num:'02',kicker:'THE JOB',title:'Offline batch inference',dek:'When no human is waiting, maximize throughput and cost efficiency with large batches, quantization, and spot capacity.',points:[['Different objective.','Goodput per dollar, not interactive latency.'],['Batch big.','Long queues and large batches keep the GPU saturated.'],['Make it restartable.','Checkpoint outputs and tolerate preemption.']],viz:'batchjob',data:{label:'OFFLINE PIPELINE',right:'NO HUMAN IN THE LOOP',nodes:[{k:'QUEUE',b:'50K',s:'prompts'},{k:'BATCH ENGINE',b:'MAX BATCH',s:'FP8 · spot · checkpointed'},{k:'OUTPUT',b:'JSONL',s:'object store'}],cost:[{l:'INTERACTIVE',v:'1.00×',cls:''},{l:'OFFLINE',v:'0.38×',cls:'off'}],note:'<b>Relative cost index, illustrative.</b> The real win comes from saturation, cheaper capacity, and restart tolerance.'}},
+{type:'concept',id:'a03',track:'advanced',num:'03',kicker:'MORE THAN ONE',title:'Speculative decoding',dek:'A draft model proposes several tokens; the target model verifies them in one forward pass and keeps the longest accepted prefix.',points:[['Draft cheaply.','A small model or n-gram proposer generates k candidates.'],['Verify exactly.','The target computes all candidates in parallel; rejection preserves the distribution.'],['Acceptance is king.','Speedup ≈ E / (k × cost + 1); a weak draft can lose.']],viz:'spec',data:{label:'DRAFT 4 · VERIFY IN ONE PASS',right:'ACCEPT THE LONGEST PREFIX',tokens:[{t:'The',ok:true},{t:' capital',ok:true},{t:' of',ok:true},{t:' France',ok:false}],stats:[{l:'ACCEPTED',v:'3 / 4'},{l:'SPEEDUP',v:'2.4×'},{l:'TARGET PASSES',v:'1'}],note:'<b>Acceptance matters more than draft length.</b> A longer draft with a weak model buys more verification work, not more speed.'}},
+{type:'concept',id:'a04',track:'advanced',num:'04',kicker:'THE KERNEL',title:'FlashAttention & fusion',dek:'Attention is IO-bound. FlashAttention tiles Q, K, and V through SRAM instead of materializing the full score matrix in HBM.',points:[['Tile, don’t store.','Compute attention in blocks and keep intermediates on chip.'],['Fuse the small ops.','RMSNorm, RoPE, SiLU, residual adds, and CUDA graphs cut launch overhead.'],['Measure the win.','Benefits grow with sequence length and shrink on tiny contexts.']],viz:'flash',data:{label:'IO-AWARE ATTENTION',right:'HBM → SRAM → COMPUTE',note:'<b>The N × N attention matrix never has to touch HBM.</b> That saves capacity and, more importantly, memory traffic.'}},
+{type:'concept',id:'a05',track:'advanced',num:'05',kicker:'THE MACHINE',title:'GPU architecture',dek:'An NVIDIA GPU is a grid of streaming multiprocessors with a deep memory hierarchy and specialized matrix units.',points:[['SMs run warps.','Threads are grouped into 32-thread warps and scheduled in blocks.'],['Memory is tiered.','Registers, shared memory/L1, L2, and HBM trade size for latency.'],['Tensor Cores do the math.','Matrix tiles need the right shape, dtype, and layout to hit peak.']],viz:'gpuarch',data:{label:'INSIDE AN NVIDIA GPU',right:'THROUGHPUT MACHINE',tiers:[['REGISTERS','fastest'],['SHARED / L1','per SM'],['L2 CACHE','shared'],['HBM','largest']],note:'<b>Performance is a data-movement problem.</b> The math is fast; keeping the right bytes close to the right cores is the hard part.'}},
+{type:'concept',id:'a06',track:'advanced',num:'06',kicker:'THE METHOD',title:'Kernel optimization & tools',dek:'Find the bottleneck first: compute, memory bandwidth, or launch overhead. Then choose the optimization that moves it.',points:[['Roofline the kernel.','Arithmetic intensity tells you whether more FLOPs or more bandwidth will help.'],['Profile before tuning.','Nsight, ncu, and engine metrics show where time actually goes.'],['Reduce overhead.','Fusion, CUDA graphs, and <code>torch.compile</code> matter most at small batch.']],viz:'roofline',data:{label:'ROOFLINE · H100-ISH',right:'COMPUTE OR BANDWIDTH?',tools:['NSIGHT','NCU','CUDA GRAPHS','TORCH.COMPILE'],note:'<b>Decode usually sits on the bandwidth roof.</b> Prefill and large batches move right toward the compute ceiling.'}},
+{type:'concept',id:'a07',track:'advanced',num:'07',kicker:'THE TOPOLOGY',title:'Distributed inference & parallelism',dek:'When the model or traffic outgrows one GPU, split parameters, layers, requests, experts, or context across devices.',points:[['Tensor parallel: split matrices.','Fast inside NVLink, expensive across nodes.'],['Pipeline parallel: split layers.','Fills the bubble with micro-batches.'],['Data and expert parallel.','Replicate dense models; shard MoE experts. Match topology to traffic.']],viz:'parallel',data:{label:'2 NODES · 8 GPUs EACH',right:'MATCH LINKS TO TRAFFIC',note:'<b>All-reduce is the tax.</b> Tensor parallelism pays off only when the interconnect is fast enough to hide it.'}},
+{type:'concept',id:'a08',track:'advanced',num:'08',kicker:'THE SPLIT',title:'Prefill/decode disaggregation',dek:'Run prefill and decode on separate GPU pools, transfer the KV cache, and tune each phase without interference.',points:[['Different shapes.','Prefill is compute-heavy; decode is bandwidth-heavy.'],['Transfer the cache.','Fast interconnect is mandatory; the KV becomes the message.'],['Chunked prefill may be enough.','Disaggregation adds operational complexity.']],viz:'disagg',data:{label:'TWO POOLS · ONE KV TRANSFER',right:'TUNE EACH PHASE',note:'<b>Disaggregation is a scaling move,</b> not a free win. Measure whether phase interference is actually your bottleneck first.'}},
+{type:'concept',id:'a09',track:'advanced',num:'09',kicker:'THE ROUTE',title:'Inference routing',dek:'Send each request to the worker, model, or region that can serve it fastest and cheapest within its SLO.',points:[['Route by shape.','Prompt length, output length, cache locality, and tenant change the best target.'],['Route by state.','Load, queue depth, KV hit rate, and GPU health matter more than round-robin.'],['Always fall back.','A router without timeouts and retries becomes a single point of failure.']],viz:'router',data:{label:'POLICY-AWARE ROUTING',right:'LOAD · SLO · CACHE',targets:[{b:'FAST POOL',s:'short prompts, low TTFT'},{b:'LONG-CONTEXT POOL',s:'cached prefixes, big windows'},{b:'REGION B',s:'overflow + residency'}],signals:['LOAD','CACHE','SLO','TENANT'],note:'<b>A router is a load balancer with context.</b> It should know more than round-robin, and fail more gracefully.'}},
+{type:'concept',id:'a10',track:'advanced',num:'10',kicker:'THE CONTROL LOOP',title:'InferenceOps & observability',dek:'Serving is a control loop: deploy, observe, scale, and roll back. Instrument the queue, the cache, and the user.',points:[['Page on symptoms.','TTFT, TPOT, error rate, queue depth, and goodput, not just GPU utilization.'],['Trace requests end to end.','Separate queueing, prefill, decode, network, and tool time.'],['Operate with runbooks.','Capacity, rollout, rollback, and incident procedures are part of the product.']],viz:'dash',data:{label:'SERVING DASHBOARD',right:'SLO-FIRST',metrics:[{l:'TTFT P95',v:'380',u:'ms',cls:''},{l:'TPOT P99',v:'31',u:'ms',cls:''},{l:'GOODPUT',v:'41',u:'/s',cls:'good'},{l:'ERROR RATE',v:'0.2',u:'%',cls:'warn'}],alert:'QUEUE DEPTH > 12 FOR 4 MINUTES · SCALE DECODE POOL',note:'<b>GPU utilization is not a user-facing metric.</b> A busy GPU can still miss every SLO; a healthy service is measured in goodput.'}},
+{type:'concept',id:'a11',track:'advanced',num:'11',kicker:'THE FLEET',title:'Infrastructure at scale',dek:'Multi-cloud, cross-region, fast scaling, and multi-model pipelines turn inference into a capacity and unit-economics problem.',points:[['Place near data.','Egress, latency, residency, and quotas shape the topology.'],['Scale before the spike.','Warm pools, image caching, and pre-provisioned GPUs beat reactive autoscaling.'],['Know the unit cost.','Dollars per million input and output tokens includes idle capacity.']],viz:'world',data:{label:'MULTI-REGION TOPOLOGY',right:'CAPACITY + UNIT COST',regions:[{b:'US-EAST',s:'primary · H100'},{b:'EU-WEST',s:'residency · H200'},{b:'AP-SOUTH',s:'overflow · B200'}],cards:[{l:'EGRESS',v:'cross-region KV + data transfer'},{l:'QUOTA',v:'GPU capacity is regional'},{l:'WARM POOL',v:'pre-provisioned decode capacity'}],unit:'$ / 1M TOKENS',unitNote:'compute + idle + egress + ops',note:'<b>At scale, the model is a line item.</b> Capacity planning, regional placement, and warm pools often dominate token-level optimization.'}},
+{type:'index',title:'Concept map: all 42 ideas'},
+{type:'closing',title:'Measure. Optimize. Operate.'}
+];
+const CONCEPTS=SLIDES.filter(s=>s.type==='concept');
+const TONES={a:'#3B6FB7',b:'#5E8BC9',c:'#C8552A',d:'#D98562',e:'#3F8A5D',f:'#6AA37E',g:'#8B72B8'};
+const esc=(s='')=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const pad=n=>String(n).padStart(2,'0');
+const vizHead=(label,right='')=>`<div class="viz-head"><span>${esc(label)}</span><span class="right">${right}</span></div>`;
+const vizNote=n=>n?`<div class="viz-note">${n}</div>`:'';
+const pointsHTML=pts=>`<ul class="points">${pts.map((p,i)=>`<li class="reveal" style="--i:${i+3}"><span><b>${p[0]}</b> ${p[1]}</span></li>`).join('')}</ul>`;
+const rightLabel=t=>`<i></i>${esc(t)}`;
+
+function vStream(d){
+  const toks=d.tokens.map((t,i)=>`<span class="stream-tok" style="--i:${i}">${esc(t)}</span>`).join('');
+  const stamps=d.stamps.map((x,i)=>`<div class="stamp reveal" style="--i:${i+3}"><b>${esc(x.b)}</b><span>${esc(x.s)}</span></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body">
+    <div class="stream-panel reveal" style="--i:1">
+      <div class="stream-prompt"><span class="sp-label">PROMPT</span><span class="sp-text">${esc(d.prompt)}</span><i class="caret"></i></div>
+      <div class="stream-out">${toks}</div>
+      <div class="stream-meta">${d.meta.map(x=>`<span>${x}</span>`).join('')}</div>
+    </div>
+    <div class="stream-stamps">${stamps}</div>
+  </div>${vizNote(d.note)}`;
+}
+function vCompare(d){
+  const side=(x,cls)=>`<div class="cmp-side ${cls} reveal" style="--i:1"><div class="cmp-tag">${esc(x.tag)}</div><h3>${esc(x.title)}</h3><ul>${x.lines.map(l=>`<li>${esc(l)}</li>`).join('')}</ul><div class="cmp-stat"><b>${esc(x.value)}</b><span>${esc(x.metric)}</span></div></div>`;
+  return `${vizHead('TWO OBJECTIVES',rightLabel('SAME WEIGHTS'))}
+  <div class="viz-body"><div class="cmp-grid">${side(d.left,'train')}<div class="cmp-vs">VS</div>${side(d.right,'infer')}</div></div>${vizNote(d.note)}`;
+}
+function vFlow(d){
+  const nodes=d.nodes.map((n,i)=>{
+    const hot=n.hot?' hot':'';
+    const link=i<d.nodes.length-1?`<div class="flow-link"><i style="--d:${(i*.42).toFixed(2)}s"></i></div>`:'';
+    return `<div class="flow-node${hot} reveal" style="--i:${i+1}"><span class="fn-k">${esc(n.k)}</span><b>${esc(n.t)}</b><em>${esc(n.s)}</em></div>${link}`;
+  }).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="flow-row">${nodes}</div><div class="flow-loop"><span>${esc(d.loopLeft)}</span><div class="line"></div><span>${esc(d.loopRight)}</span></div></div>${vizNote(d.note)}`;
+}
+function vPhases(d){
+  const card=(x,cls)=>{
+    const blocks=Array.from({length:x.n},(_,i)=>`<i class="${x.name==='DECODE'&&i===x.n-1?'on':''}"></i>`).join('');
+    return `<div class="phase-card ${cls} reveal" style="--i:1"><div class="phase-top"><b>${esc(x.name)}</b><span>${esc(x.sub)}</span><em>${esc(x.metric)}</em></div><div class="phase-blocks">${blocks}</div><div class="phase-tags">${x.tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div></div>`;
+  };
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="phase-stack">${card(d.prefill,'prefill')}${card(d.decode,'decode')}</div>
+  <div class="phase-meters">${d.meters.map(m=>`<div class="phase-meter"><b>${esc(m.label)}</b><div class="meter"><i style="width:${m.pct}%"></i></div></div>`).join('')}</div></div>${vizNote(d.note)}`;
+}
+function vLayers(d){
+  const rows=d.layers.map((l,i)=>`<div class="layer-row ${l.cls} reveal" style="--i:${i+1}"><span class="lr-k">${esc(l.k)}</span><b>${esc(l.name)}</b><em>${esc(l.note)}</em></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="layer-wrap"><div class="layer-stack">${rows}</div><div class="layer-side"><span>${esc(d.bracketTop)}</span><div class="bracket"></div><b>${esc(d.bracket)}</b><span>${esc(d.bracketBottom)}</span></div></div></div>${vizNote(d.note)}`;
+}
+function vTokens(d){
+  const chips=d.tokens.map((t,i)=>`<div class="token-chip" style="--i:${i}"><b>${esc(t.t)}</b><span>${t.id}</span></div>`).join('');
+  const facts=d.facts.map((f,i)=>`<div class="token-fact reveal" style="--i:${i+3}"><b>${esc(f.b)}</b><span>${esc(f.s)}</span></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="token-strip">${chips}</div>
+  <div class="ctx-card"><div class="ctx-head"><span>CONTEXT WINDOW</span><span><b>${d.context.used}</b> / ${d.context.total} TOKENS</span></div><div class="ctx-bar"><i class="used" style="width:${d.context.usedPct}%"></i><i class="out" style="width:${d.context.outPct}%"></i><i class="free"></i></div><div class="ctx-legend"><span><i class="a"></i>prompt</span><span><i class="b"></i>reserved output</span><span><i class="c"></i>free</span></div></div>
+  <div class="token-facts">${facts}</div></div>${vizNote(d.note)}`;
+}
+function vKv(d){
+  let cells='';
+  for(let r=0;r<d.rows;r++){
+    for(let c=0;c<d.cols;c++){
+      let cls='kv';
+      if(r<d.promptRows){ if(c===d.recentCol) cls+=' recent'; }
+      else if(r===d.newRow) cls='new';
+      else cls='free';
+      cells+=`<i class="kv-cell ${cls}" style="${cls==='new'?`--d:${(c*.075).toFixed(2)}s`:''}"></i>`;
+    }
+  }
+  const stats=d.side.map(x=>`<div class="kv-stat"><b>${esc(x.b)}</b><span>${esc(x.s)}</span></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="kv-layout"><div class="kv-matrix-wrap"><div class="kv-axis"><span>PAST TOKENS</span><span>NEW TOKEN →</span></div><div class="kv-matrix">${cells}</div></div><div class="kv-side">${stats}<div class="kv-formula">${esc(d.formula)}</div></div></div></div>${vizNote(d.note)}`;
+}
+function vDist(d){
+  const rows=d.candidates.map((c,i)=>`<div class="dist-row ${c.pick?'pick':''} ${c.blocked?'blocked':''}"><span class="dr-label">${esc(c.t)}</span><div class="dr-track"><i style="--i:${i};width:${Math.round(c.p*100)}%"></i></div><b>${Math.round(c.p*100)}%</b></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="dist-rows">${rows}</div><div class="dist-foot">${d.controls.map(c=>`<span>${esc(c)}</span>`).join('')}<span style="color:var(--green);border-color:rgba(46,122,76,.2);background:rgba(234,245,239,.45)">SELECTED: ${esc(d.candidates.find(c=>c.pick).t)}</span></div></div>${vizNote(d.note)}`;
+}
+function vMetrics(d){
+  const cards=d.cards.map(c=>`<div class="metric-card ${c.good?'good':''} reveal" style="--i:${d.cards.indexOf(c)+2}"><b>${esc(c.v)}<em>${esc(c.u)}</em></b><span>${esc(c.l)}</span></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="lat-card reveal" style="--i:1"><div class="lat-scale">${d.scale.map(s=>`<span>${esc(s)}</span>`).join('')}</div><div class="lat-line"><span class="lat-ttft" style="flex-basis:${d.ttftPct}%">TTFT</span><span class="lat-gen"></span></div><div class="lat-e2e"><span>STREAM</span><div class="bracket"></div><span>E2E 4.22s</span></div></div><div class="metric-grid">${cards}</div><div class="slo-row"><span>${esc(d.slo)}</span><b>41 REQUESTS MEET THE TARGET</b></div></div>${vizNote(d.note)}`;
+}
+function vParams(d){
+  const rows=d.rows.map(r=>`<div class="param-row"><span class="pr-label">${esc(r.label)}</span><div class="pr-track"><i style="--w:${r.w}%"></i><em style="--w:${r.w}%"></em></div><b>${esc(r.value)}</b></div>`).join('');
+  const effects=d.effects.map(e=>`<span><b>${esc(e.b)}</b>${esc(e.s)}</span>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="param-panel reveal" style="--i:1">${rows}</div><div class="param-effects reveal" style="--i:2">${effects}</div></div>${vizNote(d.note)}`;
+}
+function vChat(d){
+  const msgs=d.messages.map((m,i)=>`<div class="chat-msg ${m.role.toLowerCase()} reveal" style="--i:${i+1}"><div class="cm-head"><b>${esc(m.role)}</b><span>${esc(m.tokens)}</span></div><p>${m.text}</p></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="chat-panel">${msgs}</div><div class="ctx-budget"><div class="ctx-head"><span>${esc(d.budgetLabel)}</span><span><b>${esc(d.budget)}</b></span></div><div class="ctx-bar"><i class="used" style="width:${d.usedPct}%"></i><i class="out" style="width:${d.outPct}%"></i><i class="free"></i></div><div class="ctx-legend"><span><i class="a"></i>prompt</span><span><i class="b"></i>reserved</span><span><i class="c"></i>free</span></div></div></div>${vizNote(d.note)}`;
+}
+function vSchema(d){
+  const code=`{\n  <span class="jk">"sentiment"</span>: <span class="js">"positive"</span>,\n  <span class="jk">"confidence"</span>: <span class="jn">0.92</span>,\n  <span class="jk">"topics"</span>: [<span class="js">"pricing"</span>, <span class="js">"latency"</span>]\n}`;
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="schema-grid"><div class="schema-code reveal" style="--i:1"><div class="sc-head"><span>REQUESTED SCHEMA</span><span>VALID</span></div><pre>${code}</pre></div><div class="schema-side"><div class="mask-card ok reveal" style="--i:2"><span>ALLOWED TOKENS</span><b>{ } [ ] ":"</b></div><div class="mask-card no reveal" style="--i:3"><span>MASKED TOKENS</span><b>free-form prose</b></div><div class="mode-list reveal" style="--i:4">${d.modes.map(m=>`<span>${esc(m)}</span>`).join('')}</div><div class="mask-card reveal" style="--i:5"><span>GUARANTEE</span><b style="color:var(--green)">SHAPE, NOT TRUTH</b></div></div></div></div>${vizNote(d.note)}`;
+}
+function vHub(d){
+  const servers=d.servers.map((s,i)=>`<div class="hub-server reveal" style="--i:${i+2}"><b>${esc(s.b)}</b><span>${esc(s.s)}</span></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="hub-layout"><div class="hub-host reveal" style="--i:1"><span>HOST</span><b>AI ASSISTANT</b><em>chat · IDE · app</em><div class="hub-client">MCP CLIENT</div></div><div class="hub-protocol"><i></i><span>MCP</span><i></i></div><div><div class="hub-servers">${servers}</div><div class="hub-backends">${d.backends.map(b=>`<span>${esc(b)}</span>`).join('')}</div></div></div></div>${vizNote(d.note)}`;
+}
+function vHardware(d){
+  const cards=d.cards.map((c,i)=>{
+    const meters=c.m.map(m=>`<div class="phase-meter"><b>${esc(m[0])}</b><div class="meter"><i style="width:${m[1]}%;background:var(--accent)"></i></div></div>`).join('');
+    return `<div class="stamp reveal" style="--i:${i+1};padding:12px 13px"><b style="font-size:9px">${esc(c.b)}</b><span style="font-size:8.5px;min-height:43px;display:block">${esc(c.s)}</span><div class="phase-tags" style="margin-top:8px">${c.tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div><div class="phase-meters" style="grid-template-columns:1fr;gap:5px;margin-top:9px">${meters}</div></div>`;
+  }).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}<div class="viz-body"><div class="stream-stamps" style="margin-top:0;gap:10px">${cards}</div></div>${vizNote(d.note)}`;
+}
+function vBatch(d){
+  const modes=d.modes.map((m,mi)=>{
+    const lanes=m.lanes.map((lane,li)=>`<div class="bm-lane">${lane.map((x,xi)=>`<i class="bm-req" style="left:${x.s}%;width:${x.w}%;--c:${TONES[x.t]};--i:${li*2+xi}"></i>`).join('')}</div>`).join('');
+    return `<div class="batch-mode ${m.cls} reveal" style="--i:${mi+1}"><div class="bm-head"><span>${esc(m.name)}</span><b>${esc(m.util)}</b></div><div class="bm-lanes">${lanes}</div><div class="bm-foot">${esc(m.foot)}<br><b>GPU UTIL ${esc(m.util)}</b></div></div>`;
+  }).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}<div class="viz-body"><div class="batch-grid">${modes}</div></div>${vizNote(d.note)}`;
+}
+function vChunked(d){
+  const lane=arr=>arr.map(x=>`<div class="chunk-block ${x.c}" style="flex:${x.f}">${esc(x.t)}</div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="chunk-grid"><div class="chunk-row"><span class="cr-label">NAIVE</span><div class="chunk-lane">${lane(d.before)}</div></div><div class="chunk-row good"><span class="cr-label">CHUNKED</span><div class="chunk-lane">${lane(d.after)}</div></div></div><div class="chunk-note"><div class="bad"><b>NAIVE</b>A long prefill creates a visible inter-token stall.</div><div class="ok"><b>CHUNKED</b>Prefill chunks interleave with decode steps.</div></div></div>${vizNote(d.note)}`;
+}
+function vMemory(d){
+  const segs=d.segments.map(s=>`<i class="${s.cls}" style="width:${s.pct}%"></i>`).join('');
+  const legend=d.segments.map(s=>`<div class="ml-item"><i class="${s.cls==='weights'?'w':s.cls==='kv'?'k':s.cls==='act'?'a':'o'}"></i>${esc(s.label)}<b>${esc(s.value)}</b></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="mem-card"><div class="mem-head"><span>H100 · 80 GB</span><span><b>${esc(d.used)}</b> · ${esc(d.free)}</span></div><div class="mem-bar"><i class="free"></i>${segs}</div><div class="mem-scale">${d.scale.map(s=>`<span>${esc(s)}</span>`).join('')}</div></div><div class="mem-legend">${legend}</div><div class="formula-strip"><b>KV</b> = ${d.formula}</div></div>${vizNote(d.note)}`;
+}
+function vGpu(d){
+  const rows=d.rows.map((r,i)=>`<div class="gpu-row reveal" style="--i:${i+1}"><div class="gr-name"><b>${esc(r.name)}</b><span>${esc(r.spec)}</span></div><div class="gr-meter"><i style="width:${r.pct}%;--i:${i}"></i></div><div class="gr-val"><b>${esc(r.tps)}</b><span>tok/s</span></div></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}<div class="viz-body"><div class="gpu-rows">${rows}</div><div class="gpu-foot"><span>${esc(d.footLeft)}</span><span>${esc(d.footRight)}</span></div></div>${vizNote(d.note)}`;
+}
+function vQuant(d){
+  const cards=d.cards.map((c,i)=>{
+    const bits=Array.from({length:c.bits},()=>'<i class="on"></i>').join('');
+    return `<div class="q-card ${c.hot?'hot':''} reveal" style="--i:${i+1}"><div class="q-top"><b>${esc(c.name)}</b><span>${esc(c.tag)}</span></div><div class="q-bits">${bits}</div><div class="q-size">${esc(c.size)}<em>${esc(c.unit)}</em></div><div class="q-q">QUALITY</div><div class="q-meter"><i style="width:${c.quality}%;--i:${i}"></i></div><p>${esc(c.note)}</p></div>`;
+  }).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}<div class="viz-body"><div class="quant-grid">${cards}</div></div>${vizNote(d.note)}`;
+}
+function vKvmath(d){
+  const rows=d.rows.map((r,i)=>`<div class="kvm-row"><span>${esc(r.s)}</span><div class="track"><i style="width:${r.pct}%;--i:${i}"></i></div><b>${esc(r.v)}</b></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="kvm-formula"><span>KV / TOKEN</span><b>2 × L × H<sub>kv</sub> × d<sub>head</sub> × bytes</b></div><div class="kvm-plug">2 × 32 × 8 × 128 × 2 B = ${d.plug}</div><div class="kvm-scale">${rows}</div><div class="kvm-note">${d.note}</div></div>`;
+}
+function vPaging(d){
+  const reqs=[['REQ A · 512 / 8K','32%'],['REQ B · 2K / 8K','58%'],['REQ C · 8K / 8K','100%']].map((r,i)=>`<div class="pg-req"><span>${r[0]}</span><div class="pg-block"><i class="u" style="--w:${r[1]}"></i><i class="w"></i></div></div>`).join('');
+  let blocks='';
+  for(let i=0;i<24;i++){blocks+=`<i class="${i<10?'on':i<14?'share':''}"></i>`;}
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="page-compare"><div class="pg-panel"><div class="pg-head"><span>CONTIGUOUS</span><span>20–38% USEFUL</span></div>${reqs}<div class="pg-util"><span>RESERVED MAX LENGTH</span><span>WASTED</span></div></div><div class="pg-panel paged"><div class="pg-head"><span>PAGED</span><span>~100% USEFUL</span></div><div class="pg-blocks">${blocks}</div><div class="pg-table"><span>BLOCK TABLE</span><b>0 → 4 → 7 → 9 → …</b></div><div class="pg-util good"><span>ALLOCATE ON DEMAND</span><span>SHAREABLE</span></div></div></div></div>${vizNote(d.note)}`;
+}
+function vPrefix(d){
+  const cards=d.branches.map((b,i)=>`<div class="branch-card reveal" style="--i:${i+2}"><b>${esc(b.b)}</b><span>${esc(b.s)}</span><em>TTFT ${esc(b.ttft)}</em></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="prefix-wrap"><div class="prefix-shared reveal" style="--i:1"><span>SYSTEM PROMPT + DOCUMENT · 2,048 TOKENS</span><b>CACHED</b></div><div class="prefix-stem"></div><div class="prefix-branches">${cards}</div></div><div class="ttft-duo"><div class="ttft-card cold reveal" style="--i:5"><span>COLD TTFT</span><b>${esc(d.cold)}</b></div><div class="ttft-card warm reveal" style="--i:6"><span>WARM TTFT</span><b>${esc(d.warm)}</b></div></div></div>${vizNote(d.note)}`;
+}
+function vOffload(d){
+  const tiers=d.tiers.map((t,i)=>`<div class="tier ${t.cls} reveal" style="--i:${i+1}"><div class="tier-id">${esc(t.id)}<em>${esc(t.sub)}</em></div><div class="tier-blocks">${Array.from({length:t.blocks},()=>'<i></i>').join('')}</div><div class="tier-spec"><b>${esc(t.size)}</b><span>${esc(t.bw)}</span></div></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}<div class="viz-body"><div class="tiers">${tiers}</div><div class="offload-note"><span><b>HOT</b> stays on GPU</span><span><b>COLD</b> moves down the hierarchy</span><span><b>PROMOTE</b> on a cache hit</span></div></div>${vizNote(d.note)}`;
+}
+function vTool(d){
+  const nodes=d.nodes.map((n,i)=>`<div class="tool-node ${n.t==='MODEL'?'model':n.t==='TOOL'?'tool':''} reveal" style="--i:${i+1}"><span>${esc(n.k)}</span><b>${esc(n.t)}</b><em style="display:block;font-style:normal;font-size:6px;color:var(--mute);margin-top:3px">${esc(n.s)}</em></div>${i<d.nodes.length-1?`<div class="tool-link"><span>${esc(d.labels[i])}</span></div>`:''}`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}<div class="viz-body"><div class="tool-flow">${nodes}</div><div class="tool-return">TOOL RESULT → CONTEXT → MODEL CONTINUES → NEXT TURN</div><div class="tool-guards">${d.guards.map(g=>`<span>${esc(g)}</span>`).join('')}</div></div>${vizNote(d.note)}`;
+}
+function vApi(d){
+  const foot=d.foot.map(x=>`<span>${esc(x)}</span>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="api-wrap reveal" style="--i:1"><div class="api-route"><span class="method">${esc(d.method)}</span><b>${esc(d.route)}</b><span class="pill">${esc(d.pill)}</span></div><pre class="api-code">${d.code}</pre><div class="api-foot">${foot}</div></div></div>${vizNote(d.note)}`;
+}
+function vAgent(d){
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="agent-wrap"><div class="agent-wheel"><svg class="aw-ring" viewBox="0 0 320 300"><ellipse cx="160" cy="150" rx="144" ry="126" class="draw" pathLength="100"/></svg><div class="aw-center"><span>HARNESS</span><b>CONTROL LOOP</b><em>context · budget · policy</em></div><div class="aw-node n1">PLAN</div><div class="aw-node n2">ACT</div><div class="aw-node n3">OBSERVE</div><div class="aw-node n4">REMEMBER</div></div><div class="agent-chips">${d.chips.map(c=>`<span>${esc(c)}</span>`).join('')}</div></div></div>${vizNote(d.note)}`;
+}
+function vMatrix(d){
+  const bubbles=d.bubbles.map((b,i)=>`<div class="q-bubble ${b.cls}" style="left:${b.x}%;top:${b.y}%">${esc(b.l)}</div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="quadrant"><div class="q-y">QUALITY ↑</div><div class="q-plane"><div class="q-line v"></div><div class="q-line h"></div><div class="q-label tl">HIGH QUALITY<br>HIGH COST</div><div class="q-label tr">HIGH QUALITY<br>LOW COST</div><div class="q-label bl">LOW QUALITY<br>HIGH COST</div><div class="q-label br">LOW QUALITY<br>LOW COST</div>${bubbles}</div><div class="q-x">COST / LATENCY →</div></div><div class="matrix-chips">${d.chips.map(c=>`<span>${esc(c)}</span>`).join('')}</div></div>${vizNote(d.note)}`;
+}
+function vFrameworks(d){
+  const cards=d.cards.map((c,i)=>`<div class="fw-card reveal" style="--i:${i+1}"><b>${esc(c.b)}</b><span>${esc(c.s)}</span><em>${esc(c.tag)}</em></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}<div class="viz-body"><div class="fw-grid">${cards}</div></div>${vizNote(d.note)}`;
+}
+function vAdapters(d){
+  const cards=d.cards.map((c,i)=>`<div class="adapter-card reveal" style="--i:${i+2}"><b>${esc(c.b)}</b><span>${esc(c.tag)}</span><em>${esc(c.s)}</em></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="adapter-wrap"><div class="base-model reveal" style="--i:1"><span>FROZEN BASE</span><b>8B</b><div class="base-layers"><i></i><i></i><i></i><i></i><i></i></div></div><div class="adapter-side">${cards}</div></div><div class="adapter-formula">W′ = W + BA&nbsp;&nbsp;·&nbsp;&nbsp;r ≪ d&nbsp;&nbsp;·&nbsp;&nbsp;ONE BASE, MANY ADAPTERS</div></div>${vizNote(d.note)}`;
+}
+function vDistill(d){
+  const bars=arr=>arr.map((v,i)=>`<i style="height:${v}%;--i:${i}"></i>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="distill-wrap"><div class="model-card teacher reveal" style="--i:1"><span>${esc(d.teacher.name)}</span><b>${esc(d.teacher.size)}</b><div class="logits">${bars(d.teacher.bars)}</div><em>soft targets · full distribution</em></div><div class="distill-arrow reveal" style="--i:2"><b>KL</b><span>match</span><span class="a">→</span></div><div class="model-card student reveal" style="--i:3"><span>${esc(d.student.name)}</span><b>${esc(d.student.size)}</b><div class="logits">${bars(d.student.bars)}</div><em>served · smaller · faster</em></div></div><div class="distill-note"><span>SOFT TARGETS</span><span>BEHAVIOR TRANSFER</span><span>LOWER SERVING COST</span></div></div>${vizNote(d.note)}`;
+}
+function vBench(d){
+  const y=200,x0=65,x1=585;
+  const xs=[65,195,325,455,585];
+  const labels=['1','8','32','64','128'];
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="chart-card reveal" style="--i:1"><svg class="bench-svg" viewBox="0 0 620 236" role="img" aria-label="Load sweep chart"><defs><linearGradient id="benchArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E7A4C" stop-opacity=".18"/><stop offset="1" stop-color="#2E7A4C" stop-opacity="0"/></linearGradient></defs>${[80,120,160].map(v=>`<line class="grid" x1="${x0}" y1="${v}" x2="${x1}" y2="${v}"/>`).join('')}<line class="axis" x1="${x0}" y1="${y}" x2="${x1}" y2="${y}"/><line class="axis" x1="${x0}" y1="30" x2="${x0}" y2="${y}"/>${xs.map((x,i)=>`<text x="${x}" y="216" text-anchor="middle">${labels[i]}</text>`).join('')}<text x="12" y="118" transform="rotate(-90 12 118)" text-anchor="middle">GOODPUT / LATENCY</text><path class="area draw" pathLength="100" d="M65 200 L65 198 C120 190 150 168 195 150 S280 112 325 100 S410 78 455 70 S540 62 585 60 L585 200 Z"/><path class="tg draw" pathLength="100" d="M65 198 C120 190 150 168 195 150 S280 112 325 100 S410 78 455 70 S540 62 585 60"/><path class="lat draw" pathLength="100" d="M65 200 C130 198 160 194 195 188 S280 175 325 160 S410 130 455 105 S540 65 585 45"/>${xs.map((x,i)=>`<circle class="dot g" cx="${x}" cy="${[198,150,100,70,60][i]}" r="2.6"/>`).join('')}${xs.map((x,i)=>`<circle class="dot o" cx="${x}" cy="${[200,188,160,105,45][i]}" r="2.6"/>`).join('')}<circle cx="545" cy="55" r="3" fill="#2E7A4C"/><text x="500" y="46" fill="#2E7A4C">GOODPUT</text><circle cx="512" cy="104" r="3" fill="#C8552A"/><text x="470" y="118" fill="#C8552A">P99 LATENCY</text></svg><div class="bench-foot"><span>X / CONCURRENCY</span><span><b>TTFT P95 380ms</b> · TPOT P99 31ms</span><span>GOODPUT 41 rps</span></div></div></div>${vizNote(d.note)}`;
+}
+function vBatchjob(d){
+  const nodes=d.nodes.map((n,i)=>`<div class="job-node ${i===1?'engine':''} reveal" style="--i:${i+1}"><span>${esc(n.k)}</span><b>${esc(n.b)}</b><em>${esc(n.s)}</em></div>${i<d.nodes.length-1?'<div class="job-arrow"></div>':''}`).join('');
+  const cost=d.cost.map(c=>`<div class="${c.cls}"><span>${esc(c.l)} RELATIVE COST</span><b>${esc(c.v)}</b></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}<div class="viz-body"><div class="job-flow">${nodes}</div><div class="job-cost">${cost}</div></div>${vizNote(d.note)}`;
+}
+function vSpec(d){
+  const toks=d.tokens.map((t,i)=>`<div class="spec-tok ${t.ok?'':'reject'} reveal" style="--i:${i+1}"><b>${esc(t.t)}</b><span>${t.ok?'ACCEPT':'REJECT'}</span></div>`).join('');
+  const stats=d.stats.map(s=>`<div><span>${esc(s.l)}</span><b>${esc(s.v)}</b></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="spec-wrap"><div class="draft-line"><div class="spec-model">DRAFT<b>0.5B</b></div><div class="spec-tokens">${toks}</div></div><div class="spec-verify">DRAFT PROPOSES 4 · TARGET VERIFIES ALL IN ONE FORWARD PASS</div><div class="spec-target"><div class="spec-model">TARGET<b>8B</b></div><div class="spec-verifyline">ONE PASS · LONGEST ACCEPTED PREFIX</div></div><div class="spec-stats">${stats}</div></div></div>${vizNote(d.note)}`;
+}
+function vFlash(d){
+  let cells='';
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    const tile=Math.floor(r/2)===Math.floor(c/2)?'tile':'';
+    const hot=(r===3&&c===3)?'hot':'';
+    cells+=`<i class="flash-cell ${tile} ${hot}"></i>`;
+  }
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="flash-wrap"><div class="flash-matrix reveal" style="--i:1">${cells}</div><div class="flash-side"><div class="sram-card reveal" style="--i:2">SRAM TILE<b>Q · K · V blocks</b></div><div class="flash-arrow reveal" style="--i:3"><span>LOAD</span><div class="line"></div><span>ACCUMULATE</span></div><div class="fuse-chips reveal" style="--i:4"><span>RMSNORM</span><span>ROPE</span><span>SILU</span><span>RESIDUAL</span><span>CUDA GRAPH</span></div></div></div></div>${vizNote(d.note)}`;
+}
+function vGpuarch(d){
+  let sms='';
+  for(let i=0;i<12;i++)sms+=`<div class="sm-cell ${i===5?'hot':''}"></div>`;
+  const tiers=d.tiers.map((t,i)=>`<div class="mem-tier"><b>${esc(t[0])}</b><span>${esc(t[1])}</span></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="gpuarch"><div class="sm-wrap reveal" style="--i:1"><div class="sm-grid">${sms}</div><div class="sm-label"><span>GRID / BLOCKS</span><span>SM = STREAMING MULTIPROCESSOR</span></div></div><div class="gpu-side"><div class="warp-card reveal" style="--i:2"><span>WARP · 32 THREADS</span><div class="warp-lanes">${Array.from({length:32},()=>'<i></i>').join('')}</div></div>${tiers}</div></div></div>${vizNote(d.note)}`;
+}
+function vRoofline(d){
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="chart-card reveal" style="--i:1"><svg class="roof-svg" viewBox="0 0 620 282" role="img" aria-label="Roofline chart"><line class="grid" x1="75" y1="170" x2="585" y2="170"/><line class="grid" x1="75" y1="105" x2="585" y2="105"/><line class="axis" x1="75" y1="240" x2="585" y2="240"/><line class="axis" x1="75" y1="30" x2="75" y2="240"/><path class="roof draw" pathLength="100" d="M75 230 L335 55 L585 55"/><text x="315" y="258" text-anchor="middle">ARITHMETIC INTENSITY →</text><text x="18" y="140" transform="rotate(-90 18 140)" text-anchor="middle">PERFORMANCE →</text><text x="110" y="225">MEMORY-BOUND</text><text x="405" y="46">COMPUTE-BOUND</text><circle class="dot d" cx="185" cy="145" r="3.2"/><text x="195" y="143">DECODE</text><circle class="dot p" cx="450" cy="75" r="3.2"/><text x="460" y="73">PREFILL</text><line x1="335" y1="55" x2="335" y2="240" stroke="rgba(23,26,33,.12)" stroke-dasharray="3 4"/><text x="342" y="232">RIDGE</text></svg><div class="roof-tools">${d.tools.map(t=>`<span>${esc(t)}</span>`).join('')}</div></div></div>${vizNote(d.note)}`;
+}
+function vParallel(d){
+  const node=(label,tag)=>`<div class="topo-node reveal"><div class="tn-head"><span>${esc(label)}</span><span>8 × GPU</span></div><div class="gpu-grid">${Array.from({length:8},(_,i)=>`<i class="${i>3?'edge':''}"></i>`).join('')}</div><span class="tn-tag">${esc(tag)}</span></div>`;
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="topo">${node('NODE 0','TP=8 · NVLink')}<div class="topo-link"><div class="line"></div><span>PP</span></div>${node('NODE 1','TP=8 · NVLink')}</div><div class="topo-legend"><span><b>TP</b> split matrices</span><span><b>PP</b> split layers</span><span><b>DP</b> replicate</span><span><b>EP</b> shard experts</span></div></div>${vizNote(d.note)}`;
+}
+function vDisagg(d){
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="disagg"><div class="pool prefill reveal" style="--i:1"><span>PREFILL POOL</span><b>COMPUTE-HEAVY</b><div class="pool-gpus">${Array.from({length:4},()=>'<i></i>').join('')}</div></div><div class="kv-wire"><span>KV</span><div class="wire"><i></i><i></i><i></i></div><span>TRANSFER</span><span style="color:var(--orange)">NVLink / RDMA</span></div><div class="pool decode reveal" style="--i:2"><span>DECODE POOL</span><b>BANDWIDTH-HEAVY</b><div class="pool-gpus">${Array.from({length:4},()=>'<i></i>').join('')}</div></div></div><div class="gain-row"><span>TTFT ↓</span><span>TPOT ↓</span><span>INDEPENDENT SCALING</span></div></div>${vizNote(d.note)}`;
+}
+function vRouter(d){
+  const targets=d.targets.map((t,i)=>`<div class="route-card reveal" style="--i:${i+2}"><b>${esc(t.b)}</b><span>${esc(t.s)}</span></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="router-layout"><div class="router-core reveal" style="--i:1"><span>ROUTER</span><b>POLICY</b><em>load · SLO · cache locality</em></div><div class="router-arms"><i></i><i></i><i></i></div><div class="router-targets">${targets}</div></div><div class="router-signals">${d.signals.map(s=>`<span>${esc(s)}</span>`).join('')}</div></div>${vizNote(d.note)}`;
+}
+function vDash(d){
+  const cards=d.metrics.map((m,i)=>`<div class="dash-card ${m.cls} reveal" style="--i:${i+1}"><span>${esc(m.l)}</span><b>${esc(m.v)}<em>${esc(m.u)}</em></b></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="dash-grid">${cards}<div class="dash-chart reveal" style="--i:5"><div class="dc-head"><span>QUEUE DEPTH · 15 MIN</span><span>p95</span></div><svg class="dash-spark" viewBox="0 0 620 44" preserveAspectRatio="none"><polygon class="area" points="0,44 0,34 40,31 80,36 120,25 160,28 200,20 240,24 280,16 320,20 360,12 400,17 440,9 480,14 520,7 560,11 600,5 620,7 620,44"/><polyline points="0,34 40,31 80,36 120,25 160,28 200,20 240,24 280,16 320,20 360,12 400,17 440,9 480,14 520,7 560,11 600,5 620,7"/></svg></div><div class="dash-alert"><i></i>${esc(d.alert)}</div></div><div class="ops-loop"><span>OBSERVE</span><span>DECIDE</span><span>SCALE</span><span>ROLLBACK</span></div></div>${vizNote(d.note)}`;
+}
+function vWorld(d){
+  const regions=d.regions.map((r,i)=>`<div class="region r${i+1} reveal" style="--i:${i+2}"><b>${esc(r.b)}</b><span>${esc(r.s)}</span></div>`).join('');
+  const cards=d.cards.map(c=>`<div class="ws-card"><span>${esc(c.l)}</span><b>${esc(c.v)}</b></div>`).join('');
+  return `${vizHead(d.label,rightLabel(d.right))}
+  <div class="viz-body"><div class="world-wrap"><div class="world-map"><svg class="world-lines" viewBox="0 0 420 300" preserveAspectRatio="none"><path d="M95 100 C170 60 260 150 330 90"/><path class="hot" d="M95 100 C150 170 250 190 215 195"/><path d="M215 195 C280 120 300 90 350 86"/></svg>${regions}</div><div class="world-side">${cards}<div class="unit-cost"><span>${esc(d.unit)}</span><b>COMPUTE + IDLE + EGRESS + OPS</b><em>${esc(d.unitNote)}</em></div></div></div></div>${vizNote(d.note)}`;
+}
+
+function renderViz(kind,d){
+  switch(kind){
+    case 'stream': return vStream(d);
+    case 'compare': return vCompare(d);
+    case 'flow': return vFlow(d);
+    case 'phases': return vPhases(d);
+    case 'layers': return vLayers(d);
+    case 'tokens': return vTokens(d);
+    case 'kv': return vKv(d);
+    case 'dist': return vDist(d);
+    case 'metrics': return vMetrics(d);
+    case 'params': return vParams(d);
+    case 'chat': return vChat(d);
+    case 'schema': return vSchema(d);
+    case 'hub': return vHub(d);
+    case 'hardware': return vHardware(d);
+    case 'batch': return vBatch(d);
+    case 'chunked': return vChunked(d);
+    case 'memory': return vMemory(d);
+    case 'gpu': return vGpu(d);
+    case 'quant': return vQuant(d);
+    case 'kvmath': return vKvmath(d);
+    case 'paging': return vPaging(d);
+    case 'prefix': return vPrefix(d);
+    case 'offload': return vOffload(d);
+    case 'tool': return vTool(d);
+    case 'api': return vApi(d);
+    case 'agent': return vAgent(d);
+    case 'matrix': return vMatrix(d);
+    case 'frameworks': return vFrameworks(d);
+    case 'adapters': return vAdapters(d);
+    case 'distill': return vDistill(d);
+    case 'bench': return vBench(d);
+    case 'batchjob': return vBatchjob(d);
+    case 'spec': return vSpec(d);
+    case 'flash': return vFlash(d);
+    case 'gpuarch': return vGpuarch(d);
+    case 'roofline': return vRoofline(d);
+    case 'parallel': return vParallel(d);
+    case 'disagg': return vDisagg(d);
+    case 'router': return vRouter(d);
+    case 'dash': return vDash(d);
+    case 'world': return vWorld(d);
+    default: return '';
+  }
+}
+function chromeHTML(s,i){
+  const t=s.track?TRACKS[s.track]:null;
+  const meta=t
+    ? `<span class="live-dot"></span><span>${esc(t.label.toUpperCase())}</span><span class="sep">·</span><span>${esc(s.num||'')} / ${t.count}</span><span class="chrome-chip">${pad(i+1)}</span>`
+    : `<span class="live-dot"></span><span>FIELD GUIDE</span><span class="sep">·</span><span>${CONCEPTS.length} CONCEPTS</span><span class="chrome-chip">${pad(i+1)}</span>`;
+  return `<header class="chrome reveal" style="--i:0">
+    <div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="brand-txt">LLM INFERENCE&nbsp;&nbsp;<em>/&nbsp;&nbsp;2026</em></span></div>
+    <div class="chrome-meta">${meta}</div>
+  </header>`;
+}
+function footHTML(i){
+  return `<footer class="foot reveal" style="--i:6"><span><b>SOURCE</b> / MODULAR LLM INFERENCE HANDBOOK</span><span class="foot-right"><kbd>←</kbd><kbd>→</kbd> NAVIGATE <b>·</b> <kbd>O</kbd> MAP</span></footer><div class="progress"><i style="width:${((i+1)/SLIDES.length*100).toFixed(2)}%"></i></div>`;
+}
+function renderCover(s,i){
+  const cards=Object.values(TRACKS).map((t,j)=>`<button class="track-card tc-${t.key} reveal" style="--i:${j+5}" data-goto-track="${t.key}"><span class="tc-num">${t.num}</span><span class="tc-body"><h3>${esc(t.label)}</h3><p>${esc(t.topics)}</p></span><span class="tc-count"><b>${t.count}</b>concepts</span></button>`).join('');
+  let grid='';
+  for(let r=0;r<7;r++)for(let c=0;c<12;c++){
+    let cls='kv';
+    if(r===5)cls='new';
+    else if(r===6)cls='free';
+    else if(c===11)cls+=' recent';
+    grid+=`<i class="${cls}"${cls==='new'?` style="--d:${(c*.075).toFixed(2)}s"`:''}></i>`;
+  }
+  return `<section class="slide cover is-first" data-track="basics" id="s-cover">
+  <div class="grain"></div>${chromeHTML(s,i)}
+  <div class="page">
+    <div class="cover-main">
+      <div class="cover-copy">
+        <div class="eyebrow reveal" style="--i:1"><span class="pulse"></span>A FIELD GUIDE TO THE SERVING STACK</div>
+        <h1 class="reveal" style="--i:2">LLM <span class="it">Inference</span><br>Engineering</h1>
+        <div class="thin-rule reveal" style="--i:3"><i class="b"></i><i class="o"></i><i class="g"></i></div>
+        <p class="lead reveal" style="--i:3">What happens after <code>model.generate()</code> — how a model answers, what limits it, and the toolkit that makes serving fast, cheap, and production-ready.</p>
+        <div class="stats reveal" style="--i:4"><div class="stat"><b>${CONCEPTS.length}</b><span>concepts</span></div><div class="stat"><b>3</b><span>tracks</span></div><div class="stat"><b>1</b><span>handbook</span></div></div>
+      </div>
+      <div class="cover-panel reveal" style="--i:4">
+        <div class="cp-head"><span>SERVING LOOP</span><span class="live"><i></i>LIVE KV CACHE</span></div>
+        <div class="cp-flow"><div class="cp-node"><span class="k">STEP 01</span><b>PREFILL</b><em>read the prompt</em></div><div class="cp-link"><i></i><i></i></div><div class="cp-node" style="text-align:right"><span class="k">STEP 02</span><b>DECODE</b><em>one token / step</em></div></div>
+        <div class="cp-cache"><div class="cp-cache-head"><span>KV CACHE · <b>REQUEST 04</b></span><span>seq 1,024 · 8 heads</span></div><div class="cp-grid">${grid}</div><div class="cp-stats"><div><b>280</b><span>TTFT ms</span></div><div><b>22</b><span>TPOT ms</span></div><div><b>41</b><span>GOODPUT</span></div></div></div>
+      </div>
+    </div>
+    <div class="track-rail">${cards}</div>
+  </div>${footHTML(i)}</section>`;
+}
+function renderSection(s,i){
+  const t=TRACKS[s.track];
+  const ti=Object.keys(TRACKS).indexOf(s.track)+1;
+  const items=t.sectionItems.map((it,j)=>`<button class="sec-item reveal" style="--i:${j+2}" data-goto-id="${it.id}"><b>${pad(CONCEPTS.findIndex(c=>c.id===it.id)+1)}</b><span>${esc(it.label)}</span><em>→</em></button>`).join('');
+  return `<section class="slide section-slide" data-track="${s.track}" id="s-${s.track}">
+  <div class="grain"></div>${chromeHTML({...s,track:s.track,num:t.num},i)}
+  <div class="page"><div class="section-copy"><div class="section-num reveal" style="--i:1">${t.num}</div><div class="kicker reveal" style="--i:1"><span class="knum">${t.num}</span>TRACK ${pad(ti)} / 03 · ${esc(s.subtitle).toUpperCase()}</div><h2 class="reveal" style="--i:2">${esc(s.title)}</h2><p class="section-dek reveal" style="--i:3">${esc(t.blurb)}</p><div class="section-meta reveal" style="--i:4"><span>${t.count} CONCEPTS</span><span>${t.range}</span><span>${esc(t.label).toUpperCase()}</span></div></div><div class="section-list"><div class="section-list-head">IN THIS TRACK</div>${items}<div class="section-list-head" style="margin-top:8px;color:var(--accent)">FEATURED JUMPS →</div></div></div>
+  ${footHTML(i)}</section>`;
+}
+function renderConcept(s,i){
+  return `<section class="slide concept" data-track="${s.track}" id="s-${s.id}">
+  <div class="grain"></div>${chromeHTML(s,i)}
+  <div class="page split"><div class="copy"><div class="kicker reveal" style="--i:0"><span class="knum">${esc(s.num)}</span>${esc(s.kicker)}</div><h2 class="reveal" style="--i:1">${esc(s.title)}</h2><p class="dek reveal" style="--i:2">${esc(s.dek)}</p>${pointsHTML(s.points)}</div><div class="canvas reveal" style="--i:2">${renderViz(s.viz,s.data)}</div></div>
+  ${footHTML(i)}</section>`;
+}
+function renderIndex(s,i){
+  const cols=Object.values(TRACKS).map(t=>{
+    const items=CONCEPTS.filter(c=>c.track===t.key).map(c=>`<button class="index-chip" data-goto-id="${c.id}"><b>${esc(c.num)}</b><span>${esc(c.title)}</span></button>`).join('');
+    return `<div class="index-col" data-track="${t.key}" style="--accent:${t.key==='basics'?'var(--blue)':t.key==='intermediate'?'var(--orange)':'var(--green)'}"><div class="index-col-head"><b>${esc(t.label).toUpperCase()}</b><span>${t.count} CONCEPTS</span></div><div class="index-chips">${items}</div></div>`;
+  }).join('');
+  return `<section class="slide index-slide" id="s-index"><div class="grain"></div>${chromeHTML(s,i)}<div class="page"><div class="index-head"><div><div class="kicker reveal" style="--i:1"><span class="knum">42</span>THE WHOLE MAP</div><h2 class="reveal" style="--i:2">The whole map</h2></div><p class="reveal" style="--i:3">Three tracks, ${CONCEPTS.length} concepts. Click any line to jump straight into the deck.</p></div><div class="index-cols reveal" style="--i:4">${cols}</div></div>${footHTML(i)}</section>`;
+}
+function renderClosing(s,i){
+  return `<section class="slide closing-slide" id="s-closing"><div class="grain"></div>${chromeHTML(s,i)}<div class="page"><div class="close-copy"><div class="kicker reveal" style="--i:1"><span class="knum">42</span>THE OPERATING LOOP</div><h2 class="reveal" style="--i:2">Measure.<br><em>Optimize.</em><br>Operate.</h2><p class="dek reveal" style="--i:3">Serving is a loop, not a launch. Start with a number, change one thing, measure again — and keep the whole path observable.</p></div><div class="close-cards"><div class="close-card reveal" style="--i:2"><b>01</b><div><h3>Measure the user path</h3><p>TTFT, TPOT, tail latency, goodput. If it is not measured end to end, it is not an SLO.</p></div></div><div class="close-card reveal" style="--i:3"><b>02</b><div><h3>Optimize the bottleneck</h3><p>Compute, bandwidth, or overhead. Move the constraint that actually limits the workload.</p></div></div><div class="close-card reveal" style="--i:4"><b>03</b><div><h3>Operate the system</h3><p>Capacity, routing, rollouts, runbooks. The model is only one component of the service.</p></div></div></div><div class="close-source"><span>DISTILLED FROM THE MODULAR LLM INFERENCE HANDBOOK · 2026</span><span>${CONCEPTS.length} CONCEPTS · 3 TRACKS</span></div></div>${footHTML(i)}</section>`;
+}
+function renderSlide(s,i){
+  if(s.type==='cover')return renderCover(s,i);
+  if(s.type==='section')return renderSection(s,i);
+  if(s.type==='concept')return renderConcept(s,i);
+  if(s.type==='index')return renderIndex(s,i);
+  if(s.type==='closing')return renderClosing(s,i);
+  return '';
+}
+
+const deck=document.getElementById('deck');
+deck.innerHTML=SLIDES.map(renderSlide).join('');
+const slideEls=[...deck.querySelectorAll('.slide')];
+const ovGrid=document.getElementById('ovGrid');
+const overview=document.getElementById('overview');
+const counter=document.getElementById('counter');
+const ovBtn=document.getElementById('ovBtn');
+const ovClose=document.getElementById('ovClose');
+let current=0;
+let ovOpen=false;
+const trackStart={};
+SLIDES.forEach((s,i)=>{if(s.type==='section'&&trackStart[s.track]===undefined)trackStart[s.track]=i;});
+
+function ovTitle(s){
+  if(s.type==='cover')return 'Three tracks · cover';
+  if(s.type==='section')return `${TRACKS[s.track].num} · ${s.title}`;
+  if(s.type==='index')return 'The whole map';
+  if(s.type==='closing')return 'Measure. Optimize. Operate.';
+  return s.title;
+}
+function ovLabel(s){
+  if(s.type==='section')return 'SECTION';
+  if(s.type==='cover')return 'OPENING';
+  if(s.type==='index')return 'INDEX';
+  if(s.type==='closing')return 'CLOSING';
+  return TRACKS[s.track].label;
+}
+ovGrid.innerHTML=SLIDES.map((s,i)=>`<button class="ov-item ${s.type==='concept'?'':'plain'}" data-ov-index="${i}" ${s.track?`data-track="${s.track}"`:''}><b>${pad(i+1)}</b><span>${esc(ovTitle(s))}</span><em>${esc(ovLabel(s))}</em></button>`).join('');
+const ovItems=[...ovGrid.querySelectorAll('.ov-item')];
+
+function fit(){
+  const k=STATIC?Math.min(window.innerWidth/1280,window.innerHeight/720):Math.min((window.innerWidth-44)/1280,(window.innerHeight-44)/720);
+  deck.style.transform=`scale(${Math.max(.28,k)})`;
+}
+function markOverview(){
+  ovItems.forEach((el,i)=>el.classList.toggle('is-current',i===current));
+}
+function go(n,opts={}){
+  const url=opts.url!==false;
+  n=Math.max(0,Math.min(SLIDES.length-1,n));
+  if(slideEls[current])slideEls[current].classList.remove('is-active');
+  current=n;
+  slideEls[current].classList.add('is-active');
+  counter.textContent=`${pad(current+1)} / ${pad(SLIDES.length)}`;
+  markOverview();
+  if(url&&!STATIC){
+    try{history.replaceState(null,'',`${location.pathname}?slide=${current+1}`);}catch(e){}
+  }
+}
+function openOverview(){
+  ovOpen=true;
+  overview.classList.add('open');
+  overview.setAttribute('aria-hidden','false');
+  markOverview();
+  ovClose.focus({preventScroll:true});
+}
+function closeOverview(){
+  ovOpen=false;
+  overview.classList.remove('open');
+  overview.setAttribute('aria-hidden','true');
+  ovBtn.focus({preventScroll:true});
+}
+function next(){go(current+1);}
+function prev(){go(current-1);}
+function firstTrack(key){
+  return trackStart[key]??0;
+}
+document.addEventListener('click',e=>{
+  const ov=e.target.closest('[data-ov-index]');
+  if(ov){go(Number(ov.dataset.ovIndex));closeOverview();return;}
+  const tr=e.target.closest('[data-goto-track]');
+  if(tr){go(firstTrack(tr.dataset.gotoTrack));return;}
+  const id=e.target.closest('[data-goto-id]');
+  if(id){
+    const idx=SLIDES.findIndex(s=>s.id===id.dataset.gotoId);
+    if(idx>=0)go(idx);
+    return;
+  }
+});
+ovBtn.addEventListener('click',openOverview);
+ovClose.addEventListener('click',closeOverview);
+overview.addEventListener('click',e=>{if(e.target===overview)closeOverview();});
+document.addEventListener('keydown',e=>{
+  const k=e.key;
+  if(ovOpen){
+    if(k==='Escape'||k.toLowerCase()==='o'){e.preventDefault();closeOverview();}
+    return;
+  }
+  if(e.target.tagName==='BUTTON'&&(k===' '||k==='Enter'))return;
+  if(k==='ArrowRight'||k==='ArrowDown'||k===' '||k==='PageDown'){e.preventDefault();next();}
+  else if(k==='ArrowLeft'||k==='ArrowUp'||k==='PageUp'){e.preventDefault();prev();}
+  else if(k==='Home'){e.preventDefault();go(0);}
+  else if(k==='End'){e.preventDefault();go(SLIDES.length-1);}
+  else if(k.toLowerCase()==='o'){e.preventDefault();openOverview();}
+  else if(k.toLowerCase()==='f'){
+    e.preventDefault();
+    if(!document.fullscreenElement){document.documentElement.requestFullscreen?.();}
+    else{document.exitFullscreen?.();}
+  }
+});
+let tx=null;
+window.addEventListener('touchstart',e=>{tx=e.touches[0]?.clientX??null;},{passive:true});
+window.addEventListener('touchend',e=>{
+  if(tx===null)return;
+  const dx=(e.changedTouches[0]?.clientX??tx)-tx;
+  if(Math.abs(dx)>50){dx<0?next():prev();}
+  tx=null;
+},{passive:true});
+window.addEventListener('resize',fit,{passive:true});
+function startIndex(){
+  const p=qs.get('slide');
+  if(!p)return 0;
+  const n=Number(p);
+  if(Number.isFinite(n)&&n>0)return Math.min(SLIDES.length-1,Math.floor(n)-1);
+  const idx=SLIDES.findIndex(s=>s.id===p);
+  return idx>=0?idx:0;
+}
+fit();
+window.addEventListener('load',fit);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
+requestAnimationFrame(()=>go(startIndex(),{url:false}));
+})();
+</script>
+</body>
+</html>
