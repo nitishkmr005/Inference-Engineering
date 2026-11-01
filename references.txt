@@ -1,0 +1,11 @@
+1) Avi Chawla -> Daily Dose of Data Science 
+2) Dr. Ashish Bamania
+3) Sebastian for LLM architecture
+    - KV Cache in LLM -> https://magazine.sebastianraschka.com/p/coding-the-kv-cache-in-llms
+4) https://handbook.modular.com/
+5) Inference Engineering Book by PHILIP KIELY
+6) Efficient LLM Inference by Lamhot Siagian
+7) VLLM/SGLANG/TensorRT-LLM
+8) Miguel Otero Pedrido articles 
+    - https://substack.com/home/post/p-210443287 
+9) 

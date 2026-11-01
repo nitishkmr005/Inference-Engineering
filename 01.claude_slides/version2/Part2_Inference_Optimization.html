@@ -352,6 +352,31 @@ table.fm tr.hl td:first-child{background:var(--violet-soft)}
 .p2plan.p1plan{padding-left:0;list-style:none}.p1plan li{display:flex;align-items:baseline;gap:8px}.p1plan li em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--accent);min-width:18px}
 .p1plan.two{display:grid;grid-template-columns:1fr 1fr;column-gap:28px;max-width:760px}
 .p1go{all:unset;cursor:pointer;color:var(--ink2);border-bottom:1px dotted transparent}.p1go:hover,.p1go:focus-visible{color:var(--ink);border-bottom-color:var(--accent)}
+/* part1 v3 */
+.infp{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:auto}.infp div{font-size:12.5px;line-height:1.45;color:var(--ink2);border-top:2px solid var(--rule2);padding-top:8px}.infp b{color:var(--ink);display:block}
+.fwg{border-left:3px solid var(--c);background:var(--panel);border-radius:0 10px 10px 0;padding:7px 12px;display:flex;flex-direction:column;gap:3px;border:1px solid var(--rule);border-left:3px solid var(--c)}
+.fwh{font-family:var(--mono);font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--c)}
+.fw{display:grid;grid-template-columns:132px 1fr;gap:10px;font-size:12px;line-height:1.35;color:var(--ink2)}.fw b{font-family:var(--serif);font-size:14px;color:var(--ink)}
+.lnh{font-family:var(--serif);font-size:21px}
+.lst{display:grid;grid-template-columns:repeat(4,1fr);gap:4px 8px;align-items:stretch}.lst>div{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:7px 10px;display:flex;flex-direction:column;gap:3px;font-size:11.5px;line-height:1.35;color:var(--ink2);transition:border-color .3s,background .3s}
+.lst>div b{font-size:12.5px;color:var(--violet)}.lst code{font-family:var(--mono);font-size:12px;color:var(--ink)}.lst>div.on{border-color:var(--violet);background:var(--violet-soft)}
+.lst>.lsh{grid-column:1/-1;background:none;border:none;padding:0;font-family:var(--mono);font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--mute)}
+.itlv{margin-top:auto;display:flex;gap:16px;font-family:var(--mono);font-size:13px;color:var(--ink2)}.itlv b{font-size:18px;color:var(--ink)}
+.thv{border-left:4px solid var(--c);padding:10px 14px}.thv .big{font-size:30px;color:var(--c);margin:2px 0 4px}.thv .lbl{margin-bottom:2px}
+.cst{display:flex;flex-direction:column;gap:5px;background:var(--code-bg);border:1px solid var(--rule);border-radius:8px;padding:8px 12px}.cst div{display:grid;grid-template-columns:110px 1fr;gap:2px 10px;align-items:baseline}
+.cst span{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mute)}.cst code{font-family:var(--mono);font-size:13px;color:var(--ink)}.cst em{grid-column:2;font-style:normal;font-size:11px;color:var(--mute)}
+.cder{padding:10px 12px;display:flex;flex-direction:column;gap:4px}.cder div:not(.lbl){display:flex;flex-direction:column}.cder span{font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--mute)}.cder code{font-family:var(--mono);font-size:11.5px;color:var(--ink)}
+/* part1 v4 */
+.pz{all:unset;cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:.6px;padding:3px 10px;border-radius:999px;border:1px solid var(--rule2);color:var(--ink2);background:var(--panel);margin-left:auto;margin-right:8px}.pz:hover,.pz:focus-visible{border-color:var(--accent);color:var(--ink)}.pz[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+body.paused .slide.active *{animation-play-state:paused!important}
+.cdt{font-size:12px;font-weight:600;color:var(--ink);padding:4px 0 2px}
+.cder span{text-transform:none!important;letter-spacing:0!important;font-size:11px!important;font-family:var(--sans)!important;color:var(--ink2)!important}
+.c4g{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.c4{background:var(--panel);border:1px solid var(--rule);border-top:4px solid var(--c);border-radius:10px;padding:10px 14px;position:relative}.c4 h3{font-family:var(--serif);font-size:19px;color:var(--c);margin-bottom:6px}
+.c4n{position:absolute;right:12px;top:6px;font-family:var(--serif);font-size:30px;font-weight:700;color:var(--c);opacity:.25}
+.c4 dl{display:grid;grid-template-columns:76px 1fr;gap:3px 8px;font-size:12px;line-height:1.35}.c4 dt{font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--mute);padding-top:2px}.c4 dd{margin:0;color:var(--ink2)}
+.c4tips{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.c4tips div{font-size:12px;line-height:1.4;color:var(--ink2);border-top:2px solid var(--green);padding-top:6px}.c4tips b{display:block;color:var(--ink)}
+.p2g9{grid-template-columns:repeat(3,1fr)!important;grid-template-rows:repeat(3,1fr)!important;gap:9px!important}.p2g9 .p2c{padding:8px 12px;gap:3px}.p2g9 .p2c .cn{font-size:22px}.p2g9 .p2c b{font-size:15px}.p2g9 .p2c>span:not(.p2t){display:none}
 /* series: contents cards + title rail */
 .p2grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;gap:12px}
 .p2c{padding:12px 14px;gap:6px}.p2c .cn{font-size:32px}.p2c b{font-size:16.5px;line-height:1.2}.p2c>span{font-size:12px}
@@ -371,6 +396,26 @@ table.fm tr.hl td:first-child{background:var(--violet-soft)}
 .sr.on{cursor:default;border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c);background:color-mix(in srgb,var(--c) 7%,var(--panel))}
 .sr.on::after{content:"you are here";position:absolute;top:9px;right:12px;font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--c)}
 .sr:not(.on):hover,.sr:not(.on):focus-visible{border-color:var(--c);transform:translateY(-2px)}
+
+/* part1 v5 · hardware tour */
+.hwk{transition:opacity .35s}
+svg.dim .hwk:not(.hot){opacity:.42}
+.hwk.hot{filter:drop-shadow(0 0 4px color-mix(in srgb,var(--blue) 40%,transparent))}
+.kvpulse{animation:kvp 1s ease-in-out infinite}@keyframes kvp{50%{opacity:.25}}
+.hwseg button{font-size:11.5px;padding:4px 9px}
+.hwant{animation:hwant 1s linear infinite}@keyframes hwant{to{stroke-dashoffset:-30}}
+#hw-d.dim .hwk:not(.hot){opacity:.35}
+/* throughput comparison table */
+.ttb{width:100%;border-collapse:collapse;font-size:12px}
+.ttb th{font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--mute);text-align:left;font-weight:500;padding:6px 8px;border-bottom:1.5px solid var(--ink3)}
+.ttb td{padding:6px 8px;border-bottom:1px solid var(--rule);vertical-align:top;line-height:1.38;color:var(--ink2)}
+.ttb tbody tr:last-child td{border-bottom:none}
+.ttb td:first-child{border-left:3px solid var(--c);font-weight:600;color:var(--ink);font-size:12.5px}
+.ttb td b{color:var(--ink)}
+.ttb .num{font-family:var(--mono);color:var(--c);font-weight:600;font-size:12px}
+.ttm td{font-family:var(--mono);font-size:12px;padding:5px 8px}.ttm td:first-child{border-left:none}
+.ttm tr.on td{background:color-mix(in srgb,var(--green) 9%,transparent);color:var(--ink);font-weight:600}
+.ttm .bad{color:var(--orange);font-weight:600}
 </style>
 
 </head>
@@ -394,134 +439,148 @@ table.fm tr.hl td:first-child{background:var(--violet-soft)}
     </div>
     <figure class="panel rise p2stack" style="--dl:.2s;flex:.9" aria-label="What each chapter covers">
       <div class="lbl">what each chapter covers</div>
-      <div class="p2l" style="--c:var(--violet)"><b>the model</b><span>quantization · GQA · draft models</span><em>2 · 3 · 6</em></div><div class="p2l" style="--c:var(--blue)"><b>the engine</b><span>paged KV · prefix cache · continuous batching</span><em>3 · 4 · 5</em></div><div class="p2l" style="--c:var(--green)"><b>the framework</b><span>vLLM · SGLang · TensorRT-LLM · llama.cpp</span><em>5</em></div><div class="p2l" style="--c:var(--orange)"><b>one machine</b><span>tensor parallel · shard vs replicate</span><em>7</em></div><div class="p2l" style="--c:var(--ink2)"><b>the deployment</b><span>benchmarks · monitoring · autoscaling</span><em>8</em></div>
+      <div class="p2l" style="--c:var(--violet)"><b>the model</b><span>quantization · GQA · draft models</span><em>2 · 3 · 6</em></div><div class="p2l" style="--c:var(--blue)"><b>the engine</b><span>paged KV · prefix cache · continuous batching</span><em>3 · 4 · 5</em></div><div class="p2l" style="--c:var(--green)"><b>the framework</b><span>vLLM · SGLang · TensorRT-LLM · llama.cpp</span><em>5</em></div><div class="p2l" style="--c:var(--orange)"><b>one machine</b><span>tensor parallel · shard vs replicate</span><em>7</em></div><div class="p2l" style="--c:var(--ink2)"><b>the deployment</b><span>benchmarks · autoscaling · caching · routing</span><em>8 · 9</em></div>
     </figure>
   </div>
-  <nav class="srail rise" style="--dl:.34s" aria-label="The three parts of the series"><a class="sr" href="Part1_Inference_Foundations.html" style="--c:var(--blue)"><span class="srn">1</span><b>Foundations</b><span>How inference works, what it needs, what it costs</span><em>basics · 6 chapters</em></a><a class="sr on" aria-current="page" style="--c:var(--green)"><span class="srn">2</span><b>Optimization</b><span>The techniques and frameworks every team uses</span><em>intermediate · 8 chapters</em></a><a class="sr" href="Part3_Advanced_Inference.html" style="--c:var(--violet)"><span class="srn">3</span><b>Advanced</b><span>Kernels, scale, new workloads, new hardware</span><em>deep dive · 8 chapters</em></a></nav>
+  <nav class="srail rise" style="--dl:.34s" aria-label="The three parts of the series"><a class="sr" href="Part1_Inference_Foundations.html" style="--c:var(--blue)"><span class="srn">1</span><b>Foundations</b><span>How inference works, what it needs, what it costs</span><em>basics · 6 chapters</em></a><a class="sr on" aria-current="page" style="--c:var(--green)"><span class="srn">2</span><b>Optimization</b><span>The techniques and frameworks every team uses</span><em>intermediate · 9 chapters</em></a><a class="sr" href="Part3_Advanced_Inference.html" style="--c:var(--violet)"><span class="srn">3</span><b>Advanced</b><span>Kernels, scale, new workloads, new hardware</span><em>deep dive · 8 chapters</em></a></nav>
   <div class="ft"><span>Continues Part One · advanced topics in Part Three · running example throughout: Qwen3.8-27B · press O for the overview</span><span class="pg">01</span></div>
 </section>
 <section class="slide" data-page="2" data-title="Contents" style="--accent:var(--green)">
   <div class="hd"><span class="k">Contents</span><span class="nb">click a chapter to jump</span></div>
-  <h2 class="ttl">Eight chapters of everyday optimization</h2>
+  <h2 class="ttl">Nine chapters of everyday optimization</h2>
   <p class="sub">The techniques most teams use, each measured on Qwen3.8-27B. Deeper material is in Part Three.</p>
-  <div class="body p2grid"><button class="chap rise p2c" data-go="3" style="--c:var(--blue);--dl:0.02s"><span class="cn">1</span><b>Where the time goes</b><span>The baseline to beat, and which bottleneck each technique attacks</span><span class="p2t"><i>baseline profile</i><i>memory- vs compute-bound</i><i>optimization map</i></span><em>moves: all</em></button><button class="chap rise p2c" data-go="4" style="--c:var(--violet);--dl:0.06s"><span class="cn">2</span><b>Quantization in practice</b><span>Fewer bytes per weight and per KV entry, and how to check what quality you lose</span><span class="p2t"><i>FP8</i><i>INT8</i><i>INT4 AWQ / GPTQ</i><i>GGUF</i><i>KV-cache FP8</i></span><em>moves: memory · ITL · cost</em></button><button class="chap rise p2c" data-go="5" style="--c:var(--orange);--dl:0.10s"><span class="cn">3</span><b>KV cache management</b><span>Store the KV cache without waste, and reuse it across requests</span><span class="p2t"><i>PagedAttention</i><i>prefix caching</i><i>GQA / MQA</i><i>eviction</i></span><em>moves: memory · TTFT · throughput</em></button><button class="chap rise p2c" data-go="6" style="--c:var(--green);--dl:0.14s"><span class="cn">4</span><b>Batching and scheduling</b><span>Keep the GPU full without letting any one request wait too long</span><span class="p2t"><i>continuous batching</i><i>chunked prefill</i><i>batch-size knobs</i></span><em>moves: throughput · TTFT · ITL</em></button><button class="chap rise p2c" data-go="7" style="--c:var(--blue);--dl:0.18s"><span class="cn">5</span><b>Inference frameworks compared</b><span>The popular engines side by side, and the settings that matter most</span><span class="p2t"><i>vLLM</i><i>SGLang</i><i>TensorRT-LLM</i><i>llama.cpp / Ollama</i><i>TGI · LMDeploy · MLX</i></span><em>moves: all</em></button><button class="chap rise p2c" data-go="8" style="--c:var(--violet);--dl:0.22s"><span class="cn">6</span><b>Speculative decoding basics</b><span>Guess several tokens cheaply, then verify them in one pass of the big model</span><span class="p2t"><i>draft model</i><i>n-gram lookup</i><i>acceptance rate</i></span><em>moves: ITL</em></button><button class="chap rise p2c" data-go="9" style="--c:var(--orange);--dl:0.26s"><span class="cn">7</span><b>Multi-GPU on one machine</b><span>Split a model across GPUs, or run copies, when one GPU is not enough</span><span class="p2t"><i>tensor parallel</i><i>replicas</i><i>NVLink vs PCIe</i></span><em>moves: memory · ITL · throughput</em></button><button class="chap rise p2c" data-go="10" style="--c:var(--green);--dl:0.30s"><span class="cn">8</span><b>Benchmarking and running it</b><span>Measure honestly, then deploy, scale and watch it</span><span class="p2t"><i>load testing</i><i>percentiles</i><i>autoscaling</i><i>monitoring</i></span><em>moves: cost · TTFT · uptime</em></button></div>
+  <div class="body p2grid p2g9"><button class="chap rise p2c" data-go="3" style="--c:var(--blue);--dl:0.02s"><span class="cn">1</span><b>Where the time goes</b><span>The baseline to beat, and which bottleneck each technique attacks</span><span class="p2t"><i>baseline profile</i><i>memory- vs compute-bound</i><i>optimization map</i></span><em>moves: all</em></button><button class="chap rise p2c" data-go="4" style="--c:var(--violet);--dl:0.06s"><span class="cn">2</span><b>Quantization in practice</b><span>Fewer bytes per weight and per KV entry, and how to check what quality you lose</span><span class="p2t"><i>FP8</i><i>INT8</i><i>INT4 AWQ / GPTQ</i><i>GGUF</i><i>KV-cache FP8</i></span><em>moves: memory · ITL · cost</em></button><button class="chap rise p2c" data-go="5" style="--c:var(--orange);--dl:0.10s"><span class="cn">3</span><b>KV cache management</b><span>Store the KV cache without waste, and reuse it across requests</span><span class="p2t"><i>PagedAttention</i><i>prefix caching</i><i>GQA / MQA</i><i>eviction</i></span><em>moves: memory · TTFT · throughput</em></button><button class="chap rise p2c" data-go="6" style="--c:var(--green);--dl:0.14s"><span class="cn">4</span><b>Batching and scheduling</b><span>Keep the GPU full without letting any one request wait too long</span><span class="p2t"><i>dynamic batching</i><i>continuous batching</i><i>chunked prefill</i><i>SLO-aware scheduling</i></span><em>moves: throughput · TTFT · ITL</em></button><button class="chap rise p2c" data-go="7" style="--c:var(--blue);--dl:0.18s"><span class="cn">5</span><b>Inference frameworks compared</b><span>The popular engines side by side, and the settings that matter most</span><span class="p2t"><i>vLLM</i><i>SGLang</i><i>TensorRT-LLM</i><i>llama.cpp / Ollama</i><i>TGI · LMDeploy · MLX</i></span><em>moves: all</em></button><button class="chap rise p2c" data-go="8" style="--c:var(--violet);--dl:0.22s"><span class="cn">6</span><b>Speculative decoding basics</b><span>Guess several tokens cheaply, then verify them in one pass of the big model</span><span class="p2t"><i>draft model</i><i>n-gram lookup</i><i>acceptance rate</i></span><em>moves: ITL</em></button><button class="chap rise p2c" data-go="9" style="--c:var(--orange);--dl:0.26s"><span class="cn">7</span><b>Multi-GPU on one machine</b><span>Split a model across GPUs, or run copies, when one GPU is not enough</span><span class="p2t"><i>tensor parallel</i><i>replicas</i><i>NVLink vs PCIe</i></span><em>moves: memory · ITL · throughput</em></button><button class="chap rise p2c" data-go="10" style="--c:var(--green);--dl:0.30s"><span class="cn">8</span><b>Benchmarking and running it</b><span>Measure honestly, then deploy, scale and watch it</span><span class="p2t"><i>load testing</i><i>percentiles</i><i>autoscaling</i><i>spot GPUs</i><i>monitoring</i></span><em>moves: cost · TTFT · uptime</em></button><button class="chap rise p2c" data-go="11" style="--c:var(--violet);--dl:0.34s"><span class="cn">9</span><b>Savings around the model: caching, prompts and routing</b><span>Spend fewer tokens, or skip the model entirely, before touching the GPU</span><span class="p2t"><i>exact-match / semantic cache</i><i>prompt compression</i><i>output caps</i><i>batch API</i><i>model routing</i></span><em>moves: cost · TTFT</em></button></div>
   <div class="ft"><span>"moves" = the metric the technique mainly improves: TTFT (time to first token), ITL (time between tokens), throughput, memory, cost.</span><span class="pg">02</span></div>
 </section>
 <section class="slide dv" data-page="c1" data-title="Chapter 1 · Where the time goes" style="--accent:var(--blue)">
   <div class="dv-wrap">
     <div class="dv-num">01</div>
     <div class="dv-txt">
-      <div class="dv-eye">Chapter 1 of 8</div>
+      <div class="dv-eye">Chapter 1 of 9</div>
       <h2 class="dv-t">Where the time goes</h2>
       <div class="dv-line"></div>
       <p class="p2s">The baseline to beat, and which bottleneck each technique attacks</p>
       <ol class="p2plan"><li>Qwen3.8-27B on one H100, unoptimized: TTFT, ITL, throughput, $ per 1M tokens</li><li>Recap from Part One: decode is memory-bound, prefill is compute-bound</li><li>The optimization map: each technique, the bottleneck it removes, the metric it moves</li><li>Latency vs throughput: the trade-off every knob sits on</li></ol>
     </div>
   </div>
-  <ol class="dv-steps p2steps"><li class="on"><span>01</span>Where the time goes</li><li class=""><span>02</span>Quantization in practice</li><li class=""><span>03</span>KV cache management</li><li class=""><span>04</span>Batching and scheduling</li><li class=""><span>05</span>Inference frameworks compared</li><li class=""><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li></ol>
+  <ol class="dv-steps p2steps" style="grid-template-columns:repeat(9,1fr)!important"><li class="on"><span>01</span>Where the time goes</li><li class=""><span>02</span>Quantization in practice</li><li class=""><span>03</span>KV cache management</li><li class=""><span>04</span>Batching and scheduling</li><li class=""><span>05</span>Inference frameworks compared</li><li class=""><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li><li class=""><span>09</span>Savings around the model: caching, prompts and routing</li></ol>
   <div class="ft"><span>Running example throughout: Qwen3.8-27B · planned slides, content to follow</span><span class="pg">03</span></div>
 </section>
 <section class="slide dv" data-page="c2" data-title="Chapter 2 · Quantization in practice" style="--accent:var(--violet)">
   <div class="dv-wrap">
     <div class="dv-num">02</div>
     <div class="dv-txt">
-      <div class="dv-eye">Chapter 2 of 8</div>
+      <div class="dv-eye">Chapter 2 of 9</div>
       <h2 class="dv-t">Quantization in practice</h2>
       <div class="dv-line"></div>
       <p class="p2s">Fewer bytes per weight and per KV entry, and how to check what quality you lose</p>
       <ol class="p2plan"><li>Number formats: BF16, FP8, INT8, INT4: bits, range, which GPUs run them natively</li><li>Weight-only (AWQ, GPTQ, GGUF) vs weights + activations (FP8 W8A8)</li><li>FP8 KV cache: more users per GPU</li><li>Checking quality: perplexity, task evals, side-by-side samples</li><li>Qwen3.8-27B at each precision: memory, users that fit, tokens/s</li></ol>
     </div>
   </div>
-  <ol class="dv-steps p2steps"><li class="done"><span>01</span>Where the time goes</li><li class="on"><span>02</span>Quantization in practice</li><li class=""><span>03</span>KV cache management</li><li class=""><span>04</span>Batching and scheduling</li><li class=""><span>05</span>Inference frameworks compared</li><li class=""><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li></ol>
+  <ol class="dv-steps p2steps" style="grid-template-columns:repeat(9,1fr)!important"><li class="done"><span>01</span>Where the time goes</li><li class="on"><span>02</span>Quantization in practice</li><li class=""><span>03</span>KV cache management</li><li class=""><span>04</span>Batching and scheduling</li><li class=""><span>05</span>Inference frameworks compared</li><li class=""><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li><li class=""><span>09</span>Savings around the model: caching, prompts and routing</li></ol>
   <div class="ft"><span>Running example throughout: Qwen3.8-27B · planned slides, content to follow</span><span class="pg">04</span></div>
 </section>
 <section class="slide dv" data-page="c3" data-title="Chapter 3 · KV cache management" style="--accent:var(--orange)">
   <div class="dv-wrap">
     <div class="dv-num">03</div>
     <div class="dv-txt">
-      <div class="dv-eye">Chapter 3 of 8</div>
+      <div class="dv-eye">Chapter 3 of 9</div>
       <h2 class="dv-t">KV cache management</h2>
       <div class="dv-line"></div>
       <p class="p2s">Store the KV cache without waste, and reuse it across requests</p>
-      <ol class="p2plan"><li>PagedAttention: KV cache in fixed-size blocks, no fragmentation</li><li>Prefix caching: skip prefill for a shared system prompt or chat history</li><li>Provider-side prompt caching (API pricing) vs self-hosted prefix caching</li><li>Smaller KV by design: MHA → GQA → MQA</li><li>What happens when the cache is full: preemption, recompute, swap</li></ol>
+      <ol class="p2plan"><li>PagedAttention: KV cache in fixed-size blocks, no fragmentation</li><li>Prefix caching (vLLM) and RadixAttention (SGLang): skip prefill for a shared prefix</li><li>Provider-side prompt caching (API pricing) vs self-hosted prefix caching</li><li>Smaller KV by design: MHA → GQA → MQA</li><li>What happens when the cache is full: preemption, recompute, swap</li></ol>
     </div>
   </div>
-  <ol class="dv-steps p2steps"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="on"><span>03</span>KV cache management</li><li class=""><span>04</span>Batching and scheduling</li><li class=""><span>05</span>Inference frameworks compared</li><li class=""><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li></ol>
+  <ol class="dv-steps p2steps" style="grid-template-columns:repeat(9,1fr)!important"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="on"><span>03</span>KV cache management</li><li class=""><span>04</span>Batching and scheduling</li><li class=""><span>05</span>Inference frameworks compared</li><li class=""><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li><li class=""><span>09</span>Savings around the model: caching, prompts and routing</li></ol>
   <div class="ft"><span>Running example throughout: Qwen3.8-27B · planned slides, content to follow</span><span class="pg">05</span></div>
 </section>
 <section class="slide dv" data-page="c4" data-title="Chapter 4 · Batching and scheduling" style="--accent:var(--green)">
   <div class="dv-wrap">
     <div class="dv-num">04</div>
     <div class="dv-txt">
-      <div class="dv-eye">Chapter 4 of 8</div>
+      <div class="dv-eye">Chapter 4 of 9</div>
       <h2 class="dv-t">Batching and scheduling</h2>
       <div class="dv-line"></div>
       <p class="p2s">Keep the GPU full without letting any one request wait too long</p>
-      <ol class="p2plan"><li>Static, dynamic and continuous batching</li><li>Chunked prefill: long prompts stop stalling decodes</li><li>The knobs: max sequences, max batched tokens, max model length</li><li>Goodput: throughput that still meets the latency target</li></ol>
+      <ol class="p2plan"><li>Static, dynamic and continuous batching</li><li>Chunked prefill: long prompts stop stalling decodes</li><li>The knobs: max sequences, max batched tokens, max model length</li><li>SLO-aware scheduling and goodput: throughput that still meets the latency target</li></ol>
     </div>
   </div>
-  <ol class="dv-steps p2steps"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="done"><span>03</span>KV cache management</li><li class="on"><span>04</span>Batching and scheduling</li><li class=""><span>05</span>Inference frameworks compared</li><li class=""><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li></ol>
+  <ol class="dv-steps p2steps" style="grid-template-columns:repeat(9,1fr)!important"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="done"><span>03</span>KV cache management</li><li class="on"><span>04</span>Batching and scheduling</li><li class=""><span>05</span>Inference frameworks compared</li><li class=""><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li><li class=""><span>09</span>Savings around the model: caching, prompts and routing</li></ol>
   <div class="ft"><span>Running example throughout: Qwen3.8-27B · planned slides, content to follow</span><span class="pg">06</span></div>
 </section>
 <section class="slide dv" data-page="c5" data-title="Chapter 5 · Inference frameworks compared" style="--accent:var(--blue)">
   <div class="dv-wrap">
     <div class="dv-num">05</div>
     <div class="dv-txt">
-      <div class="dv-eye">Chapter 5 of 8</div>
+      <div class="dv-eye">Chapter 5 of 9</div>
       <h2 class="dv-t">Inference frameworks compared</h2>
       <div class="dv-line"></div>
       <p class="p2s">The popular engines side by side, and the settings that matter most</p>
       <ol class="p2plan"><li>The landscape: vLLM, SGLang, TensorRT-LLM, TGI, LMDeploy, llama.cpp, Ollama, MLX</li><li>Brief comparison: hardware, model coverage, quantization, speed, ease of use, best fit</li><li>Serving Qwen3.8-27B with vLLM: the OpenAI-compatible server and its key flags</li><li>Streaming, sampling parameters and structured (JSON) output</li><li>Managed options: Bedrock, SageMaker, NIM, hosted APIs</li></ol>
     </div>
   </div>
-  <ol class="dv-steps p2steps"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="done"><span>03</span>KV cache management</li><li class="done"><span>04</span>Batching and scheduling</li><li class="on"><span>05</span>Inference frameworks compared</li><li class=""><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li></ol>
+  <ol class="dv-steps p2steps" style="grid-template-columns:repeat(9,1fr)!important"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="done"><span>03</span>KV cache management</li><li class="done"><span>04</span>Batching and scheduling</li><li class="on"><span>05</span>Inference frameworks compared</li><li class=""><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li><li class=""><span>09</span>Savings around the model: caching, prompts and routing</li></ol>
   <div class="ft"><span>Running example throughout: Qwen3.8-27B · planned slides, content to follow</span><span class="pg">07</span></div>
 </section>
 <section class="slide dv" data-page="c6" data-title="Chapter 6 · Speculative decoding basics" style="--accent:var(--violet)">
   <div class="dv-wrap">
     <div class="dv-num">06</div>
     <div class="dv-txt">
-      <div class="dv-eye">Chapter 6 of 8</div>
+      <div class="dv-eye">Chapter 6 of 9</div>
       <h2 class="dv-t">Speculative decoding basics</h2>
       <div class="dv-line"></div>
       <p class="p2s">Guess several tokens cheaply, then verify them in one pass of the big model</p>
       <ol class="p2plan"><li>Draft and verify: why one forward pass can check k tokens</li><li>Acceptance rate: the arithmetic of the speed-up</li><li>Draft models and n-gram / prompt lookup, switched on in vLLM</li><li>When it helps (low batch, predictable text) and when it does not</li></ol>
     </div>
   </div>
-  <ol class="dv-steps p2steps"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="done"><span>03</span>KV cache management</li><li class="done"><span>04</span>Batching and scheduling</li><li class="done"><span>05</span>Inference frameworks compared</li><li class="on"><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li></ol>
+  <ol class="dv-steps p2steps" style="grid-template-columns:repeat(9,1fr)!important"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="done"><span>03</span>KV cache management</li><li class="done"><span>04</span>Batching and scheduling</li><li class="done"><span>05</span>Inference frameworks compared</li><li class="on"><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li><li class=""><span>09</span>Savings around the model: caching, prompts and routing</li></ol>
   <div class="ft"><span>Running example throughout: Qwen3.8-27B · planned slides, content to follow</span><span class="pg">08</span></div>
 </section>
 <section class="slide dv" data-page="c7" data-title="Chapter 7 · Multi-GPU on one machine" style="--accent:var(--orange)">
   <div class="dv-wrap">
     <div class="dv-num">07</div>
     <div class="dv-txt">
-      <div class="dv-eye">Chapter 7 of 8</div>
+      <div class="dv-eye">Chapter 7 of 9</div>
       <h2 class="dv-t">Multi-GPU on one machine</h2>
       <div class="dv-line"></div>
       <p class="p2s">Split a model across GPUs, or run copies, when one GPU is not enough</p>
       <ol class="p2plan"><li>Tensor parallelism: split every layer, sync every layer</li><li>Shard vs replicate: which gives more throughput for Qwen3.8-27B</li><li>NVLink vs PCIe: why g6e and p5 instances behave differently</li><li>Choosing TP size on an 8-GPU AWS instance</li></ol>
     </div>
   </div>
-  <ol class="dv-steps p2steps"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="done"><span>03</span>KV cache management</li><li class="done"><span>04</span>Batching and scheduling</li><li class="done"><span>05</span>Inference frameworks compared</li><li class="done"><span>06</span>Speculative decoding basics</li><li class="on"><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li></ol>
+  <ol class="dv-steps p2steps" style="grid-template-columns:repeat(9,1fr)!important"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="done"><span>03</span>KV cache management</li><li class="done"><span>04</span>Batching and scheduling</li><li class="done"><span>05</span>Inference frameworks compared</li><li class="done"><span>06</span>Speculative decoding basics</li><li class="on"><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li><li class=""><span>09</span>Savings around the model: caching, prompts and routing</li></ol>
   <div class="ft"><span>Running example throughout: Qwen3.8-27B · planned slides, content to follow</span><span class="pg">09</span></div>
 </section>
 <section class="slide dv" data-page="c8" data-title="Chapter 8 · Benchmarking and running it" style="--accent:var(--green)">
   <div class="dv-wrap">
     <div class="dv-num">08</div>
     <div class="dv-txt">
-      <div class="dv-eye">Chapter 8 of 8</div>
+      <div class="dv-eye">Chapter 8 of 9</div>
       <h2 class="dv-t">Benchmarking and running it</h2>
       <div class="dv-line"></div>
       <p class="p2s">Measure honestly, then deploy, scale and watch it</p>
-      <ol class="p2plan"><li>Benchmarking: load generators, request mixes, P50 / P99, goodput</li><li>Monitoring: the engine metrics to watch (queue, KV usage, TTFT, ITL)</li><li>Autoscaling basics and cold starts on AWS</li><li>Self-host vs API: break-even on cost per 1M tokens</li><li>Putting it together: Qwen3.8-27B before and after Part Two</li></ol>
+      <ol class="p2plan"><li>Benchmarking: load generators, request mixes, P50 / P99, goodput</li><li>Monitoring: the engine metrics to watch (queue, KV usage, TTFT, ITL)</li><li>Autoscaling, spot instances and cold starts on AWS</li><li>Self-host vs API: break-even on cost per 1M tokens</li><li>Putting it together: Qwen3.8-27B before and after Part Two</li></ol>
     </div>
   </div>
-  <ol class="dv-steps p2steps"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="done"><span>03</span>KV cache management</li><li class="done"><span>04</span>Batching and scheduling</li><li class="done"><span>05</span>Inference frameworks compared</li><li class="done"><span>06</span>Speculative decoding basics</li><li class="done"><span>07</span>Multi-GPU on one machine</li><li class="on"><span>08</span>Benchmarking and running it</li></ol>
+  <ol class="dv-steps p2steps" style="grid-template-columns:repeat(9,1fr)!important"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="done"><span>03</span>KV cache management</li><li class="done"><span>04</span>Batching and scheduling</li><li class="done"><span>05</span>Inference frameworks compared</li><li class="done"><span>06</span>Speculative decoding basics</li><li class="done"><span>07</span>Multi-GPU on one machine</li><li class="on"><span>08</span>Benchmarking and running it</li><li class=""><span>09</span>Savings around the model: caching, prompts and routing</li></ol>
   <div class="ft"><span>Running example throughout: Qwen3.8-27B · planned slides, content to follow</span><span class="pg">10</span></div>
+</section>
+<section class="slide dv" data-page="c9" data-title="Chapter 9 · Savings around the model: caching, prompts and routing" style="--accent:var(--violet)">
+  <div class="dv-wrap">
+    <div class="dv-num">09</div>
+    <div class="dv-txt">
+      <div class="dv-eye">Chapter 9 of 9</div>
+      <h2 class="dv-t">Savings around the model: caching, prompts and routing</h2>
+      <div class="dv-line"></div>
+      <p class="p2s">Spend fewer tokens, or skip the model entirely, before touching the GPU</p>
+      <ol class="p2plan"><li>Caching answers: exact-match, response and semantic caches, and when they go wrong</li><li>Shaping the input: trimming system prompts, few-shot examples and history; prompt compression; RAG instead of stuffing long context</li><li>Shaping the output: length caps, stop sequences, structured output</li><li>Batch APIs and offline jobs: the same model at a lower price</li><li>Routing and cascading: a small or fine-tuned model for easy requests, quality tiers, failover across providers</li></ol>
+    </div>
+  </div>
+  <ol class="dv-steps p2steps" style="grid-template-columns:repeat(9,1fr)!important"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="done"><span>03</span>KV cache management</li><li class="done"><span>04</span>Batching and scheduling</li><li class="done"><span>05</span>Inference frameworks compared</li><li class="done"><span>06</span>Speculative decoding basics</li><li class="done"><span>07</span>Multi-GPU on one machine</li><li class="done"><span>08</span>Benchmarking and running it</li><li class="on"><span>09</span>Savings around the model: caching, prompts and routing</li></ol>
+  <div class="ft"><span>Running example throughout: Qwen3.8-27B · planned slides, content to follow</span><span class="pg">11</span></div>
 </section>
 </div></div>
 <div id="help">← → navigate · N notes · O overview · R replay</div>
-<nav id="nav" aria-label="Slide navigation"><button id="ov-b" title="Overview (O)">▦</button><button id="notes-b" title="Speaker notes (N)">notes</button><button id="prev" aria-label="Previous slide">←</button><span id="count">01 / 10</span><button id="next" aria-label="Next slide">→</button></nav>
+<nav id="nav" aria-label="Slide navigation"><button id="ov-b" title="Overview (O)">▦</button><button id="notes-b" title="Speaker notes (N)">notes</button><button id="prev" aria-label="Previous slide">←</button><span id="count">01 / 11</span><button id="next" aria-label="Next slide">→</button></nav>
 <aside id="notes" hidden><span class="lbl">Speaker notes</span><p id="notes-t"></p></aside>
 <div id="overview" hidden><div class="grid" id="ov-grid"></div></div>
 <script>
@@ -529,11 +588,22 @@ table.fm tr.hl td:first-child{background:var(--violet-soft)}
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const INIT={};
-const NOTES={"1": "Part Two: the everyday optimizations. Every technique answers a limit from Part One. Keep asking: which bottleneck does this remove, and which metric moves?", "2": "Contents. Intermediate level: what you can switch on in a framework today. Kernels, FP4, disaggregation and MoE at scale wait for Part Three.", "c1": "Chapter 1: Where the time goes. The baseline to beat, and which bottleneck each technique attacks.", "c2": "Chapter 2: Quantization in practice. Fewer bytes per weight and per KV entry, and how to check what quality you lose.", "c3": "Chapter 3: KV cache management. Store the KV cache without waste, and reuse it across requests.", "c4": "Chapter 4: Batching and scheduling. Keep the GPU full without letting any one request wait too long.", "c5": "Chapter 5: Inference frameworks compared. The popular engines side by side, and the settings that matter most.", "c6": "Chapter 6: Speculative decoding basics. Guess several tokens cheaply, then verify them in one pass of the big model.", "c7": "Chapter 7: Multi-GPU on one machine. Split a model across GPUs, or run copies, when one GPU is not enough.", "c8": "Chapter 8: Benchmarking and running it. Measure honestly, then deploy, scale and watch it."};
+const NOTES={"1": "Part Two: the everyday optimizations. Every technique answers a limit from Part One. Keep asking: which bottleneck does this remove, and which metric moves?", "2": "Contents. Intermediate level: what you can switch on in a framework today. Kernels, FP4, disaggregation and MoE at scale wait for Part Three.", "c1": "Chapter 1: Where the time goes. The baseline to beat, and which bottleneck each technique attacks.", "c2": "Chapter 2: Quantization in practice. Fewer bytes per weight and per KV entry, and how to check what quality you lose.", "c3": "Chapter 3: KV cache management. Store the KV cache without waste, and reuse it across requests.", "c4": "Chapter 4: Batching and scheduling. Keep the GPU full without letting any one request wait too long.", "c5": "Chapter 5: Inference frameworks compared. The popular engines side by side, and the settings that matter most.", "c6": "Chapter 6: Speculative decoding basics. Guess several tokens cheaply, then verify them in one pass of the big model.", "c7": "Chapter 7: Multi-GPU on one machine. Split a model across GPUs, or run copies, when one GPU is not enough.", "c8": "Chapter 8: Benchmarking and running it. Measure honestly, then deploy, scale and watch it.", "c9": "Chapter 9: Savings around the model: caching, prompts and routing. Spend fewer tokens, or skip the model entirely, before touching the GPU."};
+/* ---------------- pause ---------------- */
+let PAUSED=false,pT0=0,pAcc=0,rid=0;const RM=new Map(),TM=new Map();
+const _si=window.setInterval.bind(window),_st=window.setTimeout.bind(window),_ct=window.clearTimeout.bind(window),_raf=window.requestAnimationFrame.bind(window),_caf=window.cancelAnimationFrame.bind(window),_now=performance.now.bind(performance);
+window.setInterval=(f,ms,...a)=>_si(()=>{if(!PAUSED)f(...a)},ms);
+window.setTimeout=(f,ms,...a)=>{const id=++rid;const w=()=>{if(PAUSED)TM.set(id,_st(w,120));else{TM.delete(id);f(...a)}};TM.set(id,_st(w,ms));return id};
+window.clearTimeout=id=>{const r=TM.get(id);if(r!=null){_ct(r);TM.delete(id)}else _ct(id)};
+try{performance.now=()=>_now()-pAcc-(PAUSED?_now()-pT0:0)}catch(e){}
+window.requestAnimationFrame=f=>{const id=++rid;const w=t=>{if(PAUSED){RM.set(id,_raf(w));return}RM.delete(id);f(t-pAcc)};RM.set(id,_raf(w));return id};
+window.cancelAnimationFrame=id=>{const r=RM.get(id);if(r!=null){_caf(r);RM.delete(id)}};
+function setPaused(v){if(v===PAUSED)return;if(v){pT0=_now()}else{pAcc+=_now()-pT0}PAUSED=v;document.body.classList.toggle('paused',v);$$('.pz').forEach(b=>{b.textContent=v?'▶ play':'❚❚ pause';b.setAttribute('aria-pressed',String(v))})}
+$$('.slide').forEach(sl=>{const pg=sl.dataset.page,hd=sl.querySelector('.hd');if(!INIT[pg]||!hd)return;const b=document.createElement('button');b.className='pz';b.type='button';b.textContent='❚❚ pause';b.title='Pause or play the animation (P)';b.setAttribute('aria-pressed','false');b.onclick=e=>{e.stopPropagation();setPaused(!PAUSED)};const nb=hd.querySelector('.nb');hd.insertBefore(b,nb)});
 /* ---------------- navigation ---------------- */
 const deck=$('#deck'),slides=$$('.slide'),N=slides.length;let cur=0,cleanup=null;
 const notesBox=$('#notes'),notesTxt=$('#notes-t'),count=$('#count'),prog=$('#progress');
-function go(i,fromHash){i=Math.max(0,Math.min(N-1,i));if(cleanup){try{cleanup()}catch(e){}cleanup=null}
+function go(i,fromHash){i=Math.max(0,Math.min(N-1,i));setPaused(false);if(cleanup){try{cleanup()}catch(e){}cleanup=null}
  slides[cur].classList.remove('active');cur=i;const s=slides[cur];void s.offsetWidth;s.classList.add('active');
  const pg=s.dataset.page;if(INIT[pg]&&!reduce)cleanup=INIT[pg](s)||null;
  count.textContent=String(cur+1).padStart(2,'0')+' / '+N;prog.style.width=((cur+1)/N*100)+'%';notesTxt.textContent=NOTES[pg]||'';
@@ -545,7 +615,7 @@ const ov=$('#overview'),ovg=$('#ov-grid');slides.forEach((s,i)=>{const b=documen
 $('#ov-b').onclick=()=>{ov.hidden=!ov.hidden};
 document.addEventListener('keydown',e=>{if(e.target.matches('input,textarea,select'))return;const k=e.key;
  if(['ArrowRight','PageDown',' '].includes(k)){e.preventDefault();go(cur+1)}else if(['ArrowLeft','PageUp'].includes(k)){e.preventDefault();go(cur-1)}
- else if(k==='Home')go(0);else if(k==='End')go(N-1);else if(k==='n'||k==='N')notesBox.hidden=!notesBox.hidden;else if(k==='o'||k==='O')ov.hidden=!ov.hidden;else if(k==='Escape')ov.hidden=true;else if(k==='r'||k==='R')go(cur,true)});
+ else if(k==='Home')go(0);else if(k==='End')go(N-1);else if(k==='n'||k==='N')notesBox.hidden=!notesBox.hidden;else if(k==='o'||k==='O')ov.hidden=!ov.hidden;else if(k==='Escape')ov.hidden=true;else if(k==='r'||k==='R')go(cur,true);else if(k==='p'||k==='P')setPaused(!PAUSED)});
 let tx=null;deck.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});deck.addEventListener('touchend',e=>{if(tx==null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>60&&!e.target.closest('input,button,select'))go(cur+(dx<0?1:-1));tx=null},{passive:true});
 function fit(){const w=window.innerWidth-32,h=window.innerHeight-70;deck.style.transform='scale('+Math.max(.2,Math.min(w/1280,h/720))+')'}
 addEventListener('resize',fit,{passive:true});fit();
