@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Inference Optimization</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&display=swap" rel="stylesheet">
+<style>
+/* Layout: a 1280×720 lab-notebook canvas, scaled to the window. Left = the claim, right = the mechanism drawn.
+   Colour code used on every slide: blue = compute / prefill / KV cache, orange = memory traffic / decode / the new token,
+   green = good outcome / headroom met, ink = weights. */
+:root{
+  --stage:#E6E7EA;
+  --bg:#FBFAF6; --bg2:#F3F2EC; --panel:#FFFFFF; --panel2:#F6F7F9;
+  --ink:#171A21; --ink2:#414855; --mute:#666E7D; --faint:#9AA1AD;
+  --rule:rgba(23,26,33,.12); --rule2:rgba(23,26,33,.22);
+  --blue:#2C66BF; --blue-deep:#17457F; --blue-soft:rgba(44,102,191,.12);
+  --orange:#C8552A; --orange-soft:rgba(200,85,42,.12);
+  --green:#2E7A4C; --green-soft:rgba(46,122,76,.12);
+  --violet:#6B4FA8; --violet-soft:rgba(107,79,168,.12);
+  --weights:#2A2F3A; --idle:#E7E4DC;
+  --code-bg:#F4F3EE;
+  --shadow:0 18px 45px rgba(20,30,60,.10);
+  --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:light;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--stage);color:var(--ink);font-family:var(--sans);overflow:hidden;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3,h4,p,ul,ol,figure{margin:0;padding:0}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#deck{width:1280px;height:720px;flex:none;position:relative;transform-origin:center center;
+  background:var(--bg);box-shadow:0 24px 70px rgba(20,30,60,.18);overflow:hidden;border-radius:4px}
+#deck::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(900px 520px at 4% -14%,var(--blue-soft),transparent 62%),
+             radial-gradient(760px 520px at 104% 112%,var(--orange-soft),transparent 62%)}
+#progress{position:absolute;left:0;top:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--orange));z-index:20;transition:width .4s ease}
+
+.slide{position:absolute;inset:0;z-index:1;padding:40px 60px 30px;display:flex;flex-direction:column;
+  opacity:0;visibility:hidden;transition:opacity .45s ease,visibility 0s linear .45s}
+.slide.active{opacity:1;visibility:visible;transition:opacity .45s ease}
+
+/* header */
+.hd{display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:10.5px;letter-spacing:2px;color:var(--mute);text-transform:uppercase}
+.hd .k{display:flex;align-items:center;gap:9px}
+.hd .k::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent,var(--blue))}
+.hd .nb{border:1px solid var(--rule);border-radius:999px;padding:3px 10px;color:var(--ink2);letter-spacing:1.2px;text-transform:none}
+.ttl{font-family:var(--serif);font-weight:600;font-size:36px;line-height:1.08;letter-spacing:-.8px;margin:14px 0 6px;text-wrap:balance;max-width:1080px}
+.sub{font-size:15.5px;line-height:1.5;color:var(--ink2);max-width:860px}
+.body{flex:1;min-height:0;display:flex;gap:28px;margin-top:20px}
+.ft{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;font-family:var(--mono);font-size:9.5px;letter-spacing:.6px;color:var(--faint);border-top:1px solid var(--rule);padding-top:9px;margin-top:14px}
+.ft .pg{font-size:11px;color:var(--mute);letter-spacing:1px;white-space:nowrap}
+
+/* text helpers */
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.lede{font-size:16px;line-height:1.55;color:var(--ink2)}
+.lede b,.note b{color:var(--ink);font-weight:600}
+.note{font-size:13px;line-height:1.5;color:var(--mute)}
+.lbl{font-family:var(--mono);font-size:10px;letter-spacing:1.8px;color:var(--mute);text-transform:uppercase}
+.mono{font-family:var(--mono)}
+.tb{color:var(--blue)} .to{color:var(--orange)} .tg{color:var(--green)} .tv{color:var(--violet)}
+code,.c{font-family:var(--mono);font-size:.88em;background:var(--code-bg);border:1px solid var(--rule);border-radius:4px;padding:1px 5px}
+.big{font-family:var(--serif);font-weight:600;letter-spacing:-1px;line-height:1}
+.callout{border-left:3px solid var(--accent,var(--blue));background:var(--panel);padding:12px 16px;border-radius:0 8px 8px 0;font-size:14px;line-height:1.5;color:var(--ink2)}
+.callout b{color:var(--ink)}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow);position:relative;min-width:0}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;min-width:0}
+.card h3{font-size:15px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.card p{font-size:13px;line-height:1.5;color:var(--ink2)}
+.dot{width:9px;height:9px;border-radius:2px;display:inline-block;flex:none}
+.pill{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.8px;padding:2px 8px;border-radius:999px;border:1px solid var(--rule2);color:var(--ink2);white-space:nowrap}
+pre.code{font-family:var(--mono);font-size:12.5px;line-height:1.62;background:var(--code-bg);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;color:var(--ink);overflow:auto;margin:0;white-space:pre}
+pre.code .cm{color:var(--faint)} pre.code .kw{color:var(--violet)} pre.code .fn{color:var(--blue)} pre.code .hl-p{background:var(--blue-soft);color:var(--blue-deep);border-radius:3px} pre.code .hl-d{background:var(--orange-soft);border-radius:3px}
+table.t{border-collapse:collapse;width:100%;font-size:13px}
+table.t th{font-family:var(--mono);font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mute);font-weight:500;text-align:left;padding:7px 10px;border-bottom:1px solid var(--rule2)}
+table.t td{padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top;line-height:1.42;color:var(--ink2)}
+table.t td:first-child{color:var(--ink);font-weight:500}
+table.t .num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+svg{display:block;overflow:visible}
+svg text{font-family:var(--mono);fill:var(--ink2)}
+svg .lab{font-size:11px;fill:var(--mute);letter-spacing:.6px}
+svg .labk{font-size:10px;fill:var(--mute);letter-spacing:1.6px;text-transform:uppercase}
+svg .strong{fill:var(--ink);font-weight:600}
+svg .rule{stroke:var(--rule2);fill:none}
+
+/* controls inside slides */
+.ctl{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px 12px;font-size:12.5px;color:var(--ink2)}
+.ctl label{font-family:var(--mono);font-size:10.5px;letter-spacing:1px;color:var(--mute);text-transform:uppercase;white-space:nowrap}
+.ctl output{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;min-width:70px;text-align:right}
+input[type=range]{width:100%;accent-color:var(--blue)}
+.seg{display:inline-flex;border:1px solid var(--rule2);border-radius:8px;overflow:hidden}
+.seg button{font:500 11.5px var(--mono);background:transparent;color:var(--ink2);border:0;padding:6px 11px;cursor:pointer;border-right:1px solid var(--rule)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.replay{position:absolute;right:12px;top:12px;font:500 10px var(--mono);letter-spacing:1px;color:var(--mute);background:var(--panel2);border:1px solid var(--rule);border-radius:999px;padding:3px 10px;cursor:pointer;z-index:3}
+.replay:hover{color:var(--ink)}
+
+/* section dividers */
+.divider{justify-content:center;padding:60px 80px}
+.divider .pn{font-family:var(--serif);font-weight:700;font-size:200px;line-height:.8;letter-spacing:-8px;color:var(--accent);opacity:.16;position:absolute;right:70px;top:70px}
+.divider .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:14px}
+.divider h2{font-family:var(--serif);font-weight:600;font-size:64px;line-height:1;letter-spacing:-2px;max-width:820px;text-wrap:balance}
+.divider .dsub{font-size:19px;line-height:1.5;color:var(--ink2);max-width:700px;margin-top:20px}
+.divider ol{list-style:none;display:flex;gap:12px;margin-top:40px;flex-wrap:wrap;counter-reset:d}
+.divider li{counter-increment:d;font-size:14px;color:var(--ink2);border:1px solid var(--rule);background:var(--panel);border-radius:999px;padding:7px 14px 7px 10px;display:flex;gap:8px;align-items:center}
+.divider li::before{content:counter(d);font-family:var(--mono);font-size:11px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--bg);display:grid;place-items:center}
+
+/* animation helpers: only run on the active slide */
+.rise{opacity:1}
+.slide.active .rise{animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--dl,0s)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes flow{to{stroke-dashoffset:-24}}
+.flowline{stroke-dasharray:6 6}
+.slide.active .flowline{animation:flow 1s linear infinite}
+
+/* chrome */
+#nav{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:6px;z-index:40;font-family:var(--mono);font-size:11px;color:var(--mute)}
+#nav button{font:500 12px var(--mono);background:var(--panel);color:var(--ink2);border:1px solid var(--rule2);border-radius:8px;height:30px;min-width:30px;padding:0 9px;cursor:pointer}
+#nav button:hover{color:var(--ink)}
+#count{padding:0 6px;font-variant-numeric:tabular-nums}
+#notes{position:fixed;left:max(14px,env(safe-area-inset-left,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));width:min(520px,calc(100vw - 32px));max-height:40vh;overflow:auto;z-index:40;
+  background:var(--panel);border:1px solid var(--rule2);border-radius:12px;padding:14px 16px;font-size:14px;line-height:1.55;color:var(--ink2);box-shadow:var(--shadow)}
+#notes .lbl{display:block;margin-bottom:6px}
+#help{position:fixed;left:max(14px,env(safe-area-inset-left,0px));top:calc(12px + env(safe-area-inset-top,0px));font-family:var(--mono);font-size:10.5px;color:var(--faint);z-index:40;letter-spacing:.5px}
+#overview{position:fixed;inset:0;z-index:60;background:var(--stage);overflow:auto;padding:24px max(16px,env(safe-area-inset-left,0px));}
+#overview .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;max-width:1300px;margin:0 auto}
+#overview button{all:unset;cursor:pointer;background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+#overview button:hover,#overview button:focus-visible{border-color:var(--orange)}
+#overview .n{font-family:var(--mono);font-size:10px;color:var(--mute);letter-spacing:1px}
+#overview .t{font-size:13.5px;line-height:1.35;color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
+</style>
+<style>
+.bar{transform-box:fill-box;transform-origin:left center}
+.slide.active .bar{animation:barin .9s cubic-bezier(.2,.7,.2,1) both}
+.barv{transform-box:fill-box;transform-origin:center bottom}
+.slide.active .barv{animation:barup .9s cubic-bezier(.2,.7,.2,1) both}
+@keyframes barin{from{transform:scaleX(0)}}
+@keyframes barup{from{transform:scaleY(0)}}
+.slide.active .meter{animation:barin 1s cubic-bezier(.2,.7,.2,1) both;transform-origin:left center}
+</style>
+<style>
+/* component styles used by individual slides */
+.tier{width:var(--w);border:1px solid var(--c);background:color-mix(in srgb,var(--c) 14%,var(--panel));border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.tier b{font-size:15px;color:var(--ink)} .tier span{font-size:12px;color:var(--mute);text-align:right}
+.slide.active .tier{animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+.slide.active .tier:nth-child(2){animation-delay:.08s}.slide.active .tier:nth-child(3){animation-delay:.16s}.slide.active .tier:nth-child(4){animation-delay:.24s}.slide.active .tier:nth-child(5){animation-delay:.32s}
+.strip{display:grid;grid-template-columns:repeat(23,1fr);gap:3px;height:170px;margin:6px 0}
+.strip i{border-radius:2px;background:var(--idle)}
+.strip i.c{background:var(--blue)} .strip i.m{background:var(--orange)}
+.slide.active .strip i{animation:rise .3s both;animation-delay:calc(var(--k)*25ms)}
+.memb,.ceilb{display:inline-block;height:8px;border-radius:2px;vertical-align:middle;margin-right:8px}
+.memb{width:calc(var(--m)/512*60px);min-width:3px;background:var(--weights);opacity:.7}
+.ceilb{width:calc(var(--c)/1000*130px);min-width:3px;background:var(--orange)}
+.slide.active .ceilb,.slide.active .memb{animation:barin .9s cubic-bezier(.2,.7,.2,1) both;transform-origin:left center}
+.spec{background:var(--ink);color:var(--bg);border-radius:10px;padding:12px 16px;display:flex;flex-direction:column;gap:2px}
+.spec b{font-family:var(--serif);font-size:26px;letter-spacing:-.5px} .spec span{font-family:var(--mono);font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;opacity:.75}
+.q,.w{display:flex;align-items:center;border-radius:10px;padding:12px 16px;font-size:15px;line-height:1.4}
+.q{background:var(--panel);border:1px solid var(--rule);color:var(--ink)}
+.w{background:var(--orange-soft);border:1px solid var(--orange);color:var(--ink2)}
+.pair{display:grid;grid-template-columns:170px 1fr;grid-template-rows:auto auto;gap:4px 14px;padding:10px 0;border-bottom:1px solid var(--rule)}
+.pair .pn{grid-row:span 2;font-size:13.5px;color:var(--ink);font-weight:500;align-self:center}
+.pair div{display:flex;align-items:center;gap:10px}
+.pair i{display:block;height:14px;border-radius:3px}
+.pair i.a{width:calc(var(--a)/var(--max)*72%);background:var(--blue)} .pair i.b{width:calc(var(--b)/var(--max)*72%);background:var(--orange)}
+.pair em{font-style:normal;font-family:var(--mono);font-size:11.5px;color:var(--ink2);white-space:nowrap}
+.slide.active .pair i{animation:barin .9s cubic-bezier(.2,.7,.2,1) both;transform-origin:left center}
+#hw td{padding:13px 10px}
+.ctl .seg{justify-self:start}
+.cy-n circle{transition:transform .3s,stroke-width .3s;transform-box:fill-box;transform-origin:center}
+.cy-n.on circle{stroke-width:4;transform:scale(1.08)}
+</style>
+<style>
+.chap,.qa{all:unset;box-sizing:border-box;cursor:pointer;background:var(--panel);border:1px solid var(--rule);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;position:relative;transition:transform .2s,border-color .2s,box-shadow .2s}
+.chap:hover,.qa:hover,.chap:focus-visible,.qa:focus-visible{transform:translateY(-3px);border-color:var(--c,var(--violet));box-shadow:var(--shadow)}
+.chap .cn{font-family:var(--serif);font-weight:700;font-size:44px;line-height:1;color:var(--c)}
+.chap b{font-size:19px;font-family:var(--serif)} .chap span{font-size:13.5px;color:var(--ink2);line-height:1.45} .chap em,.qa em{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--mute);margin-top:auto}
+.chap::after{content:"";position:absolute;left:0;right:0;top:0;height:4px;border-radius:12px 12px 0 0;background:var(--c)}
+.qa .qq{font-family:var(--serif);font-size:19px;font-weight:600;line-height:1.2;color:var(--ink)}
+.qa .qf{font-family:var(--mono);font-size:12px;line-height:1.5;color:var(--violet);background:var(--violet-soft);border-radius:6px;padding:6px 8px}
+.mcard{display:flex;flex-direction:column;gap:8px;border-top:4px solid var(--c)}
+.mcard h3{font-family:var(--serif);font-size:28px;color:var(--c)}
+.vs{display:grid;grid-template-columns:170px 1fr 1fr;border:1px solid var(--rule);border-radius:12px;overflow:hidden;background:var(--panel)}
+.vs>div{padding:10px 14px;border-bottom:1px solid var(--rule);font-size:14px;color:var(--ink2);line-height:1.4}
+.vs .vh{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--c);background:color-mix(in srgb,var(--c) 10%,var(--panel))}
+.vs .vl{font-family:var(--mono);font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--mute);display:flex;align-items:center}
+.vs>div:nth-last-child(-n+3){border-bottom:0}
+.lev td{vertical-align:middle} .lev td:not(:first-child){text-align:center}
+.lev i,.key{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:middle}
+.s3{background:var(--orange)} .s2{background:color-mix(in srgb,var(--orange) 50%,var(--panel))} .s1{background:transparent;border:2px solid color-mix(in srgb,var(--orange) 50%,var(--panel))} .s0{background:var(--idle)}
+.lev i{transform:scale(1)} .slide.active .lev i{animation:pop .4s both} @keyframes pop{from{transform:scale(0)}}
+.btn{font:500 12px var(--mono);background:var(--ink);color:var(--bg);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+.sel{font:500 12.5px var(--mono);background:var(--panel);color:var(--ink);border:1px solid var(--rule2);border-radius:8px;padding:6px 8px;max-width:100%}
+.layer{border:1px solid var(--c);background:color-mix(in srgb,var(--c) 10%,var(--panel));border-radius:8px;padding:9px 14px;display:flex;gap:14px;align-items:baseline}
+.layer b{font-size:14px;min-width:200px} .layer span{font-size:12.5px;color:var(--ink2);font-family:var(--mono)}
+.slide.active .layer{animation:rise .5s both} .slide.active .layer:nth-child(7){animation-delay:0s}.slide.active .layer:nth-child(6){animation-delay:.08s}.slide.active .layer:nth-child(5){animation-delay:.16s}.slide.active .layer:nth-child(4){animation-delay:.24s}.slide.active .layer:nth-child(3){animation-delay:.32s}.slide.active .layer:nth-child(2){animation-delay:.4s}.slide.active .layer:nth-child(1){animation-delay:.48s}
+.pl{display:flex;flex-direction:column;gap:8px;border-top:4px solid var(--c)} .pl h3{font-size:15px;line-height:1.3}
+.fx{background:var(--panel);border:1px solid var(--rule);border-left:4px solid var(--c);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:4px}
+.fx span{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--c)} .fx code{background:none;border:0;padding:0;font-size:14.5px;color:var(--ink)} .fx em{font-style:normal;font-size:12px;color:var(--mute)}
+table.fm{border-collapse:separate;border-spacing:3px;font-size:11px;width:100%}
+table.fm th{font-family:var(--mono);font-weight:500;font-size:9.5px;color:var(--mute);text-align:center;padding:2px;line-height:1.25}
+table.fm th:first-child{text-align:left}
+table.fm td{height:22px;border-radius:4px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--ink);transition:background .3s}
+table.fm td:first-child{text-align:left;font-family:var(--sans);font-size:12px;white-space:nowrap;padding-right:6px}
+table.fm td.ok{background:var(--green);color:#fff} table.fm td.kv{background:#E9B949} table.fm td.no{background:var(--idle);color:var(--faint)}
+#aws-t td,#aws-t th,#cat td,#cat th{padding:5px 8px}
+.awsbar{display:inline-block;height:7px;border-radius:2px;vertical-align:middle;margin-right:6px}
+</style>
+<style>
+/* chapter dividers */
+.dv{justify-content:center}
+.dv-wrap{flex:1;display:flex;align-items:center;gap:56px;padding:0 30px}
+.dv-num{font-family:var(--serif);font-weight:700;font-size:260px;line-height:.8;letter-spacing:-12px;color:var(--accent)}
+.dv-eye{font-family:var(--mono);font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:18px}
+.dv-t{font-family:var(--serif);font-weight:600;font-size:72px;line-height:1.02;letter-spacing:-2.4px;max-width:760px;text-wrap:balance}
+.dv-line{height:4px;width:220px;background:var(--accent);border-radius:2px;margin-top:28px;transform-origin:left center}
+.slide.active .dv-num{animation:dvnum .9s cubic-bezier(.2,.7,.2,1) both}
+.slide.active .dv-eye{animation:rise .6s .15s both}
+.slide.active .dv-t{animation:rise .8s .25s cubic-bezier(.2,.7,.2,1) both}
+.slide.active .dv-line{animation:barin 1s .45s cubic-bezier(.2,.7,.2,1) both}
+@keyframes dvnum{from{opacity:0;transform:translateY(40px) scale(.92)}to{opacity:1;transform:none}}
+@keyframes barin{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.dv-steps{list-style:none;display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:0 30px 6px}
+.dv-steps li{border-top:3px solid var(--rule);padding-top:10px;font-size:12.5px;line-height:1.35;color:var(--faint);display:flex;flex-direction:column;gap:4px}
+.dv-steps li span{font-family:var(--mono);font-size:10.5px;letter-spacing:1.5px}
+.dv-steps li.done{color:var(--mute);border-top-color:var(--rule2)}
+.dv-steps li.on{color:var(--ink);border-top-color:var(--accent);font-weight:600}
+.slide.active .dv-steps li.on{animation:rise .6s .55s both}
+/* misc for new slides */
+.exbadge{display:flex;flex-direction:column;gap:3px;border-left:3px solid var(--orange);padding:6px 12px;background:var(--panel);border-radius:0 8px 8px 0;max-width:520px}
+.exbadge b{font-family:var(--serif);font-size:22px;letter-spacing:-.4px}
+table.t tr.hl td{background:var(--violet-soft)}
+table.fm tr.hl td:first-child{background:var(--violet-soft)}
+.cfg{font-family:var(--mono);font-size:13.5px;line-height:1.85;background:var(--code-bg);border:1px solid var(--rule);border-radius:10px;padding:10px 14px;margin:0;white-space:pre;color:var(--ink2)}
+.cfg .ln{display:block;border-radius:4px;padding:0 6px;margin:0 -6px;transition:background .3s,color .3s}
+.cfg .ln.on{background:var(--blue-soft);color:var(--ink)}
+.cfg .k{color:var(--violet)} .cfg .v{color:var(--orange)}
+.anno{font-size:13.5px;line-height:1.5;color:var(--ink2);min-height:62px}
+.anno b{color:var(--ink)}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat b{font-family:var(--serif);font-size:30px;letter-spacing:-1px;line-height:1.05}
+.stat span{font-family:var(--mono);font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--mute)}
+.wk{display:grid;grid-template-columns:150px repeat(5,1fr);gap:0;font-size:13px}
+.wk>div{padding:8px 8px;border-bottom:1px solid var(--rule);display:flex;align-items:center}
+.wk .h{font-family:var(--mono);font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--mute);border-bottom:1px solid var(--rule2);justify-content:center}
+.wk .h:first-child{justify-content:flex-start}
+.wk .n{font-weight:600;color:var(--ink);flex-direction:column;align-items:flex-start;gap:1px}
+.wk .n small{font-weight:400;color:var(--mute);font-size:11px}
+.wk .cc{justify-content:center}
+.wk i{display:block;border-radius:50%}
+.wk i.s3{width:16px;height:16px;background:var(--c)} .wk i.s2{width:12px;height:12px;background:color-mix(in srgb,var(--c) 45%,var(--panel))} .wk i.s0{width:6px;height:6px;background:var(--idle)}
+.slide.active .wk i{animation:pop .45s cubic-bezier(.2,.7,.2,1.4) both;animation-delay:calc(var(--k)*28ms + .2s)}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.vs2{display:grid;grid-template-columns:130px 1fr 1fr;font-size:13px}
+.vs2>div{padding:7px 10px;border-bottom:1px solid var(--rule);color:var(--ink2);line-height:1.4}
+.vs2 .vh{font-family:var(--serif);font-size:18px;font-weight:600;color:var(--c);border-bottom:2px solid var(--c)}
+.vs2 .vl{font-family:var(--mono);font-size:9.5px;letter-spacing:1.3px;text-transform:uppercase;color:var(--mute);padding-top:9px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips span{font-size:12.5px;border:1px solid var(--rule2);border-radius:999px;padding:4px 11px;background:var(--panel);color:var(--ink2)}
+.chips span b{color:var(--ink)}
+#cat td,#cat th{padding:3px 9px}#cat .chip,#cat code{padding-top:0;padding-bottom:0}
+
+/* chapter 5 v2.2 */
+.gm{display:grid;grid-template-columns:112px repeat(8,1fr);font-size:11.5px;line-height:1.3;color:var(--ink)}
+.gm>div{padding:5px 6px;border-bottom:1px solid var(--rule);min-width:0}
+.gm .rl{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center}
+.gm .gc{cursor:pointer;transition:background .25s}
+.slide.active .gm .gc{animation:rise .5s both;animation-delay:var(--dl,0s)}
+.gm .gc.on{background:color-mix(in srgb,var(--orange) 10%,transparent)}
+.gm .gh b{font-family:var(--serif);font-size:15px;display:block;line-height:1.15}
+.gm .gh span{font-family:var(--mono);font-size:9.5px;color:var(--mute)}
+.gm .gc.on.gh b{color:var(--orange)}
+.gm .v{font-family:var(--mono);font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gm .bt{position:relative;height:8px;margin-top:4px;background:var(--panel2);border-radius:3px}
+.gm .bw{position:absolute;left:0;top:0;height:8px;border-radius:3px;display:block;max-width:100%}
+.gm .fm{display:flex;gap:2px;flex-wrap:wrap}
+.gm .fm i{font-style:normal;font-family:var(--mono);font-size:8.5px;padding:1px 3px;border-radius:3px;border:1px solid var(--rule);color:var(--faint)}
+.gm .fm i.y{background:var(--blue-soft);border-color:var(--blue);color:var(--blue)}
+.gm .fm i.n{background:var(--orange);border-color:var(--orange);color:#fff}
+.gm .vw{font-family:var(--mono);font-size:10.5px}
+.gm .qf{font-family:var(--mono);font-size:10.5px;font-weight:600}
+.gm .qf0{color:var(--mute)} .gm .qf1{color:var(--green)} .gm .qf2{color:var(--violet)}
+#gf .gfk{transition:opacity .35s}
+#gf.dim .gfk:not(.hot){opacity:.42}
+#gf .gfk.hot{filter:drop-shadow(0 0 4px color-mix(in srgb,var(--orange) 45%,transparent))}
+.gl{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:1px;padding:6px 10px;border-radius:8px;border:1px solid var(--rule);background:var(--panel);transition:border-color .25s,background .25s}
+.gl:focus-visible{outline:2px solid var(--blue)}
+.gl.on{border-color:var(--orange);background:color-mix(in srgb,var(--orange) 7%,var(--panel))}
+.gl .gn{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.gl .gn b{font-size:13px} .gl .gn em{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--orange);white-space:nowrap}
+.gl .gd{font-size:11.5px;color:var(--ink2);line-height:1.35}
+#gf-steps button{min-width:26px;padding:3px 7px}
+
+/* questions slide v2.3 */
+.qi{display:grid;grid-template-columns:200px 1fr auto;gap:22px;align-items:center;background:linear-gradient(90deg,var(--violet-soft),var(--panel));border:1px solid color-mix(in srgb,var(--violet) 35%,var(--rule));border-radius:12px;padding:12px 18px}
+.qi-t{display:flex;flex-direction:column;gap:2px}.qi-t b{font-family:var(--serif);font-size:24px;color:var(--violet);line-height:1.1}
+.qi p{font-size:13.5px;line-height:1.5;color:var(--ink2);margin:0}
+.qi-s{display:grid;grid-template-columns:repeat(4,auto);gap:16px}.qi-s span{display:flex;flex-direction:column;font-size:10.5px;color:var(--mute);font-family:var(--mono);line-height:1.3}.qi-s b{font-family:var(--serif);font-size:20px;color:var(--ink);font-weight:600}
+.qg{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:12px;flex:1;min-height:0}
+.qg .qa{padding:11px 16px;gap:4px}
+.qa .qn{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--violet)}
+.qg .qa .qq{font-size:18px}
+.qg .qa .qd{font-size:13px}
+.qa .qd{font-size:12.5px;line-height:1.45;color:var(--ink2)}
+
+/* why slide v2.4 */
+.ws{display:flex;flex-direction:column;gap:4px;flex:1;justify-content:space-around}
+.ws .wr{display:grid;grid-template-columns:26px 250px 1fr 120px;align-items:center;gap:12px;padding:5px 0;border-bottom:1px dashed var(--rule)}
+.slide.active .ws .wr{animation:rise .5s both;animation-delay:var(--dl)}
+.ws .wn{width:22px;height:22px;border-radius:50%;background:var(--orange-soft);color:var(--orange);font-family:var(--mono);font-size:11px;display:grid;place-items:center;font-weight:600}
+.ws .wt{display:flex;flex-direction:column}.ws .wt b{font-size:14px}.ws .wt em{font-style:normal;font-size:11.5px;color:var(--mute)}
+.ws .wb{height:14px;background:var(--panel2);border-radius:4px;overflow:hidden}.ws .wb i{display:block;height:100%;background:var(--orange);border-radius:4px}
+.ws .wc{font-family:var(--mono);font-size:12px;text-align:right;color:var(--ink)}
+.ws .tr .wn{background:var(--violet-soft);color:var(--violet)}.ws .tr .wb i{background:var(--violet)}.ws .tr b{color:var(--violet)}.ws .tr .wc{color:var(--violet);font-size:10.5px}
+.ws-tot{display:flex;align-items:baseline;gap:10px;font-family:var(--mono);font-size:11px;color:var(--mute);padding-top:4px}.ws-tot b{font-family:var(--serif);font-size:22px;color:var(--ink)}
+.ws-k{margin-left:auto;display:flex;gap:6px;align-items:center}.ws-k i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-left:8px}
+.vs3{font-size:14.5px}.vs3>div{padding:8px 12px}.vs3 .vh{font-size:22px}.vs3 .vl{font-size:10px}
+.vs3 .mm p{margin:2px 0 0;font-size:12.5px;line-height:1.4}
+.led{display:grid;grid-template-columns:auto 1fr auto auto;column-gap:10px;row-gap:1px;font-size:11.5px;line-height:1.35;align-items:baseline}
+.led .lh{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);border-bottom:1px solid var(--rule);padding-bottom:2px}
+.led b{font-weight:600;white-space:nowrap}.led .r{text-align:right;font-family:var(--mono);white-space:nowrap}.led .z{color:var(--faint);text-decoration:line-through}
+.led .lt{font-style:normal;border-top:1px solid var(--ink2);padding-top:2px;margin-top:2px}.led em.lt:first-of-type{grid-column:1/3}
+.lt-v b:not(.z){color:var(--violet)}.lt-b b:not(.z){color:var(--blue)}.led .lt b{color:var(--ink)}
+.vs3{font-size:14.5px}.vs3>div{padding:8px 12px}
+.trm-t td,.trm-t th{padding:6px 10px;font-size:13px}.trm-t .r{text-align:right;font-family:var(--mono)}
+.trm-t tr.hv td{background:color-mix(in srgb,var(--violet) 7%,transparent)}.trm-t tr.tot td{border-top:2px solid var(--ink);font-weight:700}
+.mex{display:grid;grid-template-columns:auto auto 1fr;gap:4px 10px;align-items:baseline;margin:8px 0;font-size:12.5px}
+.mex span{font-family:var(--mono);font-size:10px;color:var(--mute)}.mex code{font-family:var(--mono);font-size:12.5px;background:var(--violet-soft);padding:2px 6px;border-radius:4px}
+.mex em{font-style:normal;color:var(--ink2);font-size:12px}.mex.f{grid-template-columns:auto 1fr}
+.inm-t tr.sub td{font-size:12px;color:var(--ink2);padding-top:3px;padding-bottom:3px}.inm-t tr.sub td:first-child{padding-left:22px}
+.inm-t tr.hb td{background:color-mix(in srgb,var(--orange) 8%,transparent)}.inm-t tr.z td{color:var(--faint);text-decoration:line-through}
+.fxi{margin:4px 0 0;padding-left:16px;font-size:12.5px;line-height:1.45;color:var(--ink2);display:flex;flex-direction:column;gap:5px}
+.mf{background:var(--panel2);border:1px solid var(--rule);border-radius:8px;padding:8px 12px}
+.mf-r{display:grid;grid-template-columns:92px 14px 1fr;align-items:baseline;font-family:var(--mono);font-size:12.5px;line-height:1.7}
+.mf-l{color:var(--mute);font-size:11px}.mf i{font-style:normal;padding:1px 6px;border-radius:4px;white-space:nowrap}
+.mf i.mw{background:var(--blue-soft);color:var(--blue)}.mf i.mk{background:var(--orange-soft);color:var(--orange)}.mf i.mr{background:var(--panel);color:var(--ink2);border:1px solid var(--rule)}
+.mf p{margin:4px 0 0;font-size:11.5px;color:var(--mute)}
+.trm-t.inm-t td,.trm-t.inm-t th{padding-top:4px;padding-bottom:4px}
+.why16{margin-top:auto;display:flex;flex-direction:column;gap:6px}.why16 p{margin:0;font-size:12px;line-height:1.45;color:var(--ink2)}
+.ai1{padding:9px 14px}.ai1 h3{font-size:14.5px;display:flex;gap:8px;align-items:center;margin-bottom:3px}.ai1 h3 span{width:20px;height:20px;border-radius:50%;background:var(--violet-soft);color:var(--violet);font-family:var(--mono);font-size:11px;display:grid;place-items:center;flex:none}
+.ai1 p{font-size:12.5px;line-height:1.45}
+
+.p1c{gap:6px;padding:14px 18px}.p1c .cn{font-size:36px}
+.p2plan.p1plan{padding-left:0;list-style:none}.p1plan li{display:flex;align-items:baseline;gap:8px}.p1plan li em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--accent);min-width:18px}
+.p1plan.two{display:grid;grid-template-columns:1fr 1fr;column-gap:28px;max-width:760px}
+.p1go{all:unset;cursor:pointer;color:var(--ink2);border-bottom:1px dotted transparent}.p1go:hover,.p1go:focus-visible{color:var(--ink);border-bottom-color:var(--accent)}
+/* series: contents cards + title rail */
+.p2grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;gap:12px}
+.p2c{padding:12px 14px;gap:6px}.p2c .cn{font-size:32px}.p2c b{font-size:16.5px;line-height:1.2}.p2c>span{font-size:12px}
+.p2t{display:flex;flex-wrap:wrap;gap:4px}.p2t i{font-style:normal;font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:5px;background:color-mix(in srgb,var(--c) 12%,var(--panel));color:var(--ink)}
+.p2stack{display:flex;flex-direction:column;gap:8px;padding:16px}
+.p2l{display:grid;grid-template-columns:1fr auto;gap:2px 10px;border-left:4px solid var(--c);background:color-mix(in srgb,var(--c) 7%,var(--panel));border-radius:0 8px 8px 0;padding:9px 12px}
+.p2l b{font-family:var(--serif);font-size:17px}.p2l span{grid-column:1;font-size:12.5px;color:var(--ink2)}.p2l em{grid-row:1/3;grid-column:2;align-self:center;font-style:normal;font-family:var(--mono);font-size:11px;color:var(--mute)}
+.p2s{font-size:17px;color:var(--ink2);margin:14px 0 8px;max-width:640px}
+.p2plan{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--ink2);max-width:680px}
+.p2plan li::marker{font-family:var(--mono);font-size:11px;color:var(--accent)}
+.p2steps{grid-template-columns:repeat(8,1fr)!important;gap:8px}.p2steps li{font-size:11px}
+.srail{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:2px 0 12px}
+.sr{all:unset;box-sizing:border-box;display:grid;grid-template-columns:auto 1fr;column-gap:12px;row-gap:1px;padding:10px 14px;border:1px solid var(--rule);border-radius:10px;background:var(--panel);cursor:pointer;position:relative;transition:border-color .2s,transform .2s}
+.sr .srn{grid-row:1/4;font-family:var(--serif);font-size:34px;font-weight:700;color:var(--c);line-height:1;align-self:center}
+.sr b{font-family:var(--serif);font-size:16px}.sr span{font-size:12px;color:var(--ink2)}
+.sr em{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--mute);letter-spacing:.4px}
+.sr.on{cursor:default;border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c);background:color-mix(in srgb,var(--c) 7%,var(--panel))}
+.sr.on::after{content:"you are here";position:absolute;top:9px;right:12px;font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--c)}
+.sr:not(.on):hover,.sr:not(.on):focus-visible{border-color:var(--c);transform:translateY(-2px)}
+</style>
+
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--ink2)"/></marker>
+<marker id="ahs" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M10 0 L0 5 L10 10 z" fill="var(--ink2)"/></marker>
+<marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--blue)"/></marker>
+<marker id="ahbs" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M10 0 L0 5 L10 10 z" fill="var(--blue)"/></marker>
+<marker id="aho" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--orange)"/></marker>
+</defs></svg>
+<div id="stage"><div id="deck"><div id="progress"></div>
+<!-- 1 · Title -->
+<section class="slide" data-page="1" data-title="Making LLM inference fast and cheap" style="--accent:var(--green)">
+  <div class="hd"><span class="k">LLM Inference Engineering · Part Two of three</span><span class="nb">Optimization techniques · intermediate</span></div>
+  <div class="body" style="align-items:center;gap:44px;margin-top:0;min-height:0">
+    <div class="col" style="flex:1;gap:20px">
+      <div class="lbl rise" style="color:var(--green)">Part Two · Optimization</div>
+      <h1 class="rise" style="--dl:.08s;font-family:var(--serif);font-weight:600;font-size:58px;line-height:1;letter-spacing:-2px">Making inference<br><i style="color:var(--green)">faster</i> and <i style="color:var(--orange)">cheaper</i></h1>
+      <p class="lede rise" style="--dl:.16s;max-width:520px">Part One showed the limits: memory bandwidth, memory capacity, and compute. Part Two covers the techniques every team uses to push those limits back, the popular frameworks that implement them, and how to measure the gain.</p>
+    </div>
+    <figure class="panel rise p2stack" style="--dl:.2s;flex:.9" aria-label="What each chapter covers">
+      <div class="lbl">what each chapter covers</div>
+      <div class="p2l" style="--c:var(--violet)"><b>the model</b><span>quantization · GQA · draft models</span><em>2 · 3 · 6</em></div><div class="p2l" style="--c:var(--blue)"><b>the engine</b><span>paged KV · prefix cache · continuous batching</span><em>3 · 4 · 5</em></div><div class="p2l" style="--c:var(--green)"><b>the framework</b><span>vLLM · SGLang · TensorRT-LLM · llama.cpp</span><em>5</em></div><div class="p2l" style="--c:var(--orange)"><b>one machine</b><span>tensor parallel · shard vs replicate</span><em>7</em></div><div class="p2l" style="--c:var(--ink2)"><b>the deployment</b><span>benchmarks · monitoring · autoscaling</span><em>8</em></div>
+    </figure>
+  </div>
+  <nav class="srail rise" style="--dl:.34s" aria-label="The three parts of the series"><a class="sr" href="Part1_Inference_Foundations.html" style="--c:var(--blue)"><span class="srn">1</span><b>Foundations</b><span>How inference works, what it needs, what it costs</span><em>basics · 6 chapters</em></a><a class="sr on" aria-current="page" style="--c:var(--green)"><span class="srn">2</span><b>Optimization</b><span>The techniques and frameworks every team uses</span><em>intermediate · 8 chapters</em></a><a class="sr" href="Part3_Advanced_Inference.html" style="--c:var(--violet)"><span class="srn">3</span><b>Advanced</b><span>Kernels, scale, new workloads, new hardware</span><em>deep dive · 8 chapters</em></a></nav>
+  <div class="ft"><span>Continues Part One · advanced topics in Part Three · running example throughout: Qwen3.8-27B · press O for the overview</span><span class="pg">01</span></div>
+</section>
+<section class="slide" data-page="2" data-title="Contents" style="--accent:var(--green)">
+  <div class="hd"><span class="k">Contents</span><span class="nb">click a chapter to jump</span></div>
+  <h2 class="ttl">Eight chapters of everyday optimization</h2>
+  <p class="sub">The techniques most teams use, each measured on Qwen3.8-27B. Deeper material is in Part Three.</p>
+  <div class="body p2grid"><button class="chap rise p2c" data-go="3" style="--c:var(--blue);--dl:0.02s"><span class="cn">1</span><b>Where the time goes</b><span>The baseline to beat, and which bottleneck each technique attacks</span><span class="p2t"><i>baseline profile</i><i>memory- vs compute-bound</i><i>optimization map</i></span><em>moves: all</em></button><button class="chap rise p2c" data-go="4" style="--c:var(--violet);--dl:0.06s"><span class="cn">2</span><b>Quantization in practice</b><span>Fewer bytes per weight and per KV entry, and how to check what quality you lose</span><span class="p2t"><i>FP8</i><i>INT8</i><i>INT4 AWQ / GPTQ</i><i>GGUF</i><i>KV-cache FP8</i></span><em>moves: memory · ITL · cost</em></button><button class="chap rise p2c" data-go="5" style="--c:var(--orange);--dl:0.10s"><span class="cn">3</span><b>KV cache management</b><span>Store the KV cache without waste, and reuse it across requests</span><span class="p2t"><i>PagedAttention</i><i>prefix caching</i><i>GQA / MQA</i><i>eviction</i></span><em>moves: memory · TTFT · throughput</em></button><button class="chap rise p2c" data-go="6" style="--c:var(--green);--dl:0.14s"><span class="cn">4</span><b>Batching and scheduling</b><span>Keep the GPU full without letting any one request wait too long</span><span class="p2t"><i>continuous batching</i><i>chunked prefill</i><i>batch-size knobs</i></span><em>moves: throughput · TTFT · ITL</em></button><button class="chap rise p2c" data-go="7" style="--c:var(--blue);--dl:0.18s"><span class="cn">5</span><b>Inference frameworks compared</b><span>The popular engines side by side, and the settings that matter most</span><span class="p2t"><i>vLLM</i><i>SGLang</i><i>TensorRT-LLM</i><i>llama.cpp / Ollama</i><i>TGI · LMDeploy · MLX</i></span><em>moves: all</em></button><button class="chap rise p2c" data-go="8" style="--c:var(--violet);--dl:0.22s"><span class="cn">6</span><b>Speculative decoding basics</b><span>Guess several tokens cheaply, then verify them in one pass of the big model</span><span class="p2t"><i>draft model</i><i>n-gram lookup</i><i>acceptance rate</i></span><em>moves: ITL</em></button><button class="chap rise p2c" data-go="9" style="--c:var(--orange);--dl:0.26s"><span class="cn">7</span><b>Multi-GPU on one machine</b><span>Split a model across GPUs, or run copies, when one GPU is not enough</span><span class="p2t"><i>tensor parallel</i><i>replicas</i><i>NVLink vs PCIe</i></span><em>moves: memory · ITL · throughput</em></button><button class="chap rise p2c" data-go="10" style="--c:var(--green);--dl:0.30s"><span class="cn">8</span><b>Benchmarking and running it</b><span>Measure honestly, then deploy, scale and watch it</span><span class="p2t"><i>load testing</i><i>percentiles</i><i>autoscaling</i><i>monitoring</i></span><em>moves: cost · TTFT · uptime</em></button></div>
+  <div class="ft"><span>"moves" = the metric the technique mainly improves: TTFT (time to first token), ITL (time between tokens), throughput, memory, cost.</span><span class="pg">02</span></div>
+</section>
+<section class="slide dv" data-page="c1" data-title="Chapter 1 · Where the time goes" style="--accent:var(--blue)">
+  <div class="dv-wrap">
+    <div class="dv-num">01</div>
+    <div class="dv-txt">
+      <div class="dv-eye">Chapter 1 of 8</div>
+      <h2 class="dv-t">Where the time goes</h2>
+      <div class="dv-line"></div>
+      <p class="p2s">The baseline to beat, and which bottleneck each technique attacks</p>
+      <ol class="p2plan"><li>Qwen3.8-27B on one H100, unoptimized: TTFT, ITL, throughput, $ per 1M tokens</li><li>Recap from Part One: decode is memory-bound, prefill is compute-bound</li><li>The optimization map: each technique, the bottleneck it removes, the metric it moves</li><li>Latency vs throughput: the trade-off every knob sits on</li></ol>
+    </div>
+  </div>
+  <ol class="dv-steps p2steps"><li class="on"><span>01</span>Where the time goes</li><li class=""><span>02</span>Quantization in practice</li><li class=""><span>03</span>KV cache management</li><li class=""><span>04</span>Batching and scheduling</li><li class=""><span>05</span>Inference frameworks compared</li><li class=""><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li></ol>
+  <div class="ft"><span>Running example throughout: Qwen3.8-27B · planned slides, content to follow</span><span class="pg">03</span></div>
+</section>
+<section class="slide dv" data-page="c2" data-title="Chapter 2 · Quantization in practice" style="--accent:var(--violet)">
+  <div class="dv-wrap">
+    <div class="dv-num">02</div>
+    <div class="dv-txt">
+      <div class="dv-eye">Chapter 2 of 8</div>
+      <h2 class="dv-t">Quantization in practice</h2>
+      <div class="dv-line"></div>
+      <p class="p2s">Fewer bytes per weight and per KV entry, and how to check what quality you lose</p>
+      <ol class="p2plan"><li>Number formats: BF16, FP8, INT8, INT4: bits, range, which GPUs run them natively</li><li>Weight-only (AWQ, GPTQ, GGUF) vs weights + activations (FP8 W8A8)</li><li>FP8 KV cache: more users per GPU</li><li>Checking quality: perplexity, task evals, side-by-side samples</li><li>Qwen3.8-27B at each precision: memory, users that fit, tokens/s</li></ol>
+    </div>
+  </div>
+  <ol class="dv-steps p2steps"><li class="done"><span>01</span>Where the time goes</li><li class="on"><span>02</span>Quantization in practice</li><li class=""><span>03</span>KV cache management</li><li class=""><span>04</span>Batching and scheduling</li><li class=""><span>05</span>Inference frameworks compared</li><li class=""><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li></ol>
+  <div class="ft"><span>Running example throughout: Qwen3.8-27B · planned slides, content to follow</span><span class="pg">04</span></div>
+</section>
+<section class="slide dv" data-page="c3" data-title="Chapter 3 · KV cache management" style="--accent:var(--orange)">
+  <div class="dv-wrap">
+    <div class="dv-num">03</div>
+    <div class="dv-txt">
+      <div class="dv-eye">Chapter 3 of 8</div>
+      <h2 class="dv-t">KV cache management</h2>
+      <div class="dv-line"></div>
+      <p class="p2s">Store the KV cache without waste, and reuse it across requests</p>
+      <ol class="p2plan"><li>PagedAttention: KV cache in fixed-size blocks, no fragmentation</li><li>Prefix caching: skip prefill for a shared system prompt or chat history</li><li>Provider-side prompt caching (API pricing) vs self-hosted prefix caching</li><li>Smaller KV by design: MHA → GQA → MQA</li><li>What happens when the cache is full: preemption, recompute, swap</li></ol>
+    </div>
+  </div>
+  <ol class="dv-steps p2steps"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="on"><span>03</span>KV cache management</li><li class=""><span>04</span>Batching and scheduling</li><li class=""><span>05</span>Inference frameworks compared</li><li class=""><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li></ol>
+  <div class="ft"><span>Running example throughout: Qwen3.8-27B · planned slides, content to follow</span><span class="pg">05</span></div>
+</section>
+<section class="slide dv" data-page="c4" data-title="Chapter 4 · Batching and scheduling" style="--accent:var(--green)">
+  <div class="dv-wrap">
+    <div class="dv-num">04</div>
+    <div class="dv-txt">
+      <div class="dv-eye">Chapter 4 of 8</div>
+      <h2 class="dv-t">Batching and scheduling</h2>
+      <div class="dv-line"></div>
+      <p class="p2s">Keep the GPU full without letting any one request wait too long</p>
+      <ol class="p2plan"><li>Static, dynamic and continuous batching</li><li>Chunked prefill: long prompts stop stalling decodes</li><li>The knobs: max sequences, max batched tokens, max model length</li><li>Goodput: throughput that still meets the latency target</li></ol>
+    </div>
+  </div>
+  <ol class="dv-steps p2steps"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="done"><span>03</span>KV cache management</li><li class="on"><span>04</span>Batching and scheduling</li><li class=""><span>05</span>Inference frameworks compared</li><li class=""><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li></ol>
+  <div class="ft"><span>Running example throughout: Qwen3.8-27B · planned slides, content to follow</span><span class="pg">06</span></div>
+</section>
+<section class="slide dv" data-page="c5" data-title="Chapter 5 · Inference frameworks compared" style="--accent:var(--blue)">
+  <div class="dv-wrap">
+    <div class="dv-num">05</div>
+    <div class="dv-txt">
+      <div class="dv-eye">Chapter 5 of 8</div>
+      <h2 class="dv-t">Inference frameworks compared</h2>
+      <div class="dv-line"></div>
+      <p class="p2s">The popular engines side by side, and the settings that matter most</p>
+      <ol class="p2plan"><li>The landscape: vLLM, SGLang, TensorRT-LLM, TGI, LMDeploy, llama.cpp, Ollama, MLX</li><li>Brief comparison: hardware, model coverage, quantization, speed, ease of use, best fit</li><li>Serving Qwen3.8-27B with vLLM: the OpenAI-compatible server and its key flags</li><li>Streaming, sampling parameters and structured (JSON) output</li><li>Managed options: Bedrock, SageMaker, NIM, hosted APIs</li></ol>
+    </div>
+  </div>
+  <ol class="dv-steps p2steps"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="done"><span>03</span>KV cache management</li><li class="done"><span>04</span>Batching and scheduling</li><li class="on"><span>05</span>Inference frameworks compared</li><li class=""><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li></ol>
+  <div class="ft"><span>Running example throughout: Qwen3.8-27B · planned slides, content to follow</span><span class="pg">07</span></div>
+</section>
+<section class="slide dv" data-page="c6" data-title="Chapter 6 · Speculative decoding basics" style="--accent:var(--violet)">
+  <div class="dv-wrap">
+    <div class="dv-num">06</div>
+    <div class="dv-txt">
+      <div class="dv-eye">Chapter 6 of 8</div>
+      <h2 class="dv-t">Speculative decoding basics</h2>
+      <div class="dv-line"></div>
+      <p class="p2s">Guess several tokens cheaply, then verify them in one pass of the big model</p>
+      <ol class="p2plan"><li>Draft and verify: why one forward pass can check k tokens</li><li>Acceptance rate: the arithmetic of the speed-up</li><li>Draft models and n-gram / prompt lookup, switched on in vLLM</li><li>When it helps (low batch, predictable text) and when it does not</li></ol>
+    </div>
+  </div>
+  <ol class="dv-steps p2steps"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="done"><span>03</span>KV cache management</li><li class="done"><span>04</span>Batching and scheduling</li><li class="done"><span>05</span>Inference frameworks compared</li><li class="on"><span>06</span>Speculative decoding basics</li><li class=""><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li></ol>
+  <div class="ft"><span>Running example throughout: Qwen3.8-27B · planned slides, content to follow</span><span class="pg">08</span></div>
+</section>
+<section class="slide dv" data-page="c7" data-title="Chapter 7 · Multi-GPU on one machine" style="--accent:var(--orange)">
+  <div class="dv-wrap">
+    <div class="dv-num">07</div>
+    <div class="dv-txt">
+      <div class="dv-eye">Chapter 7 of 8</div>
+      <h2 class="dv-t">Multi-GPU on one machine</h2>
+      <div class="dv-line"></div>
+      <p class="p2s">Split a model across GPUs, or run copies, when one GPU is not enough</p>
+      <ol class="p2plan"><li>Tensor parallelism: split every layer, sync every layer</li><li>Shard vs replicate: which gives more throughput for Qwen3.8-27B</li><li>NVLink vs PCIe: why g6e and p5 instances behave differently</li><li>Choosing TP size on an 8-GPU AWS instance</li></ol>
+    </div>
+  </div>
+  <ol class="dv-steps p2steps"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="done"><span>03</span>KV cache management</li><li class="done"><span>04</span>Batching and scheduling</li><li class="done"><span>05</span>Inference frameworks compared</li><li class="done"><span>06</span>Speculative decoding basics</li><li class="on"><span>07</span>Multi-GPU on one machine</li><li class=""><span>08</span>Benchmarking and running it</li></ol>
+  <div class="ft"><span>Running example throughout: Qwen3.8-27B · planned slides, content to follow</span><span class="pg">09</span></div>
+</section>
+<section class="slide dv" data-page="c8" data-title="Chapter 8 · Benchmarking and running it" style="--accent:var(--green)">
+  <div class="dv-wrap">
+    <div class="dv-num">08</div>
+    <div class="dv-txt">
+      <div class="dv-eye">Chapter 8 of 8</div>
+      <h2 class="dv-t">Benchmarking and running it</h2>
+      <div class="dv-line"></div>
+      <p class="p2s">Measure honestly, then deploy, scale and watch it</p>
+      <ol class="p2plan"><li>Benchmarking: load generators, request mixes, P50 / P99, goodput</li><li>Monitoring: the engine metrics to watch (queue, KV usage, TTFT, ITL)</li><li>Autoscaling basics and cold starts on AWS</li><li>Self-host vs API: break-even on cost per 1M tokens</li><li>Putting it together: Qwen3.8-27B before and after Part Two</li></ol>
+    </div>
+  </div>
+  <ol class="dv-steps p2steps"><li class="done"><span>01</span>Where the time goes</li><li class="done"><span>02</span>Quantization in practice</li><li class="done"><span>03</span>KV cache management</li><li class="done"><span>04</span>Batching and scheduling</li><li class="done"><span>05</span>Inference frameworks compared</li><li class="done"><span>06</span>Speculative decoding basics</li><li class="done"><span>07</span>Multi-GPU on one machine</li><li class="on"><span>08</span>Benchmarking and running it</li></ol>
+  <div class="ft"><span>Running example throughout: Qwen3.8-27B · planned slides, content to follow</span><span class="pg">10</span></div>
+</section>
+</div></div>
+<div id="help">← → navigate · N notes · O overview · R replay</div>
+<nav id="nav" aria-label="Slide navigation"><button id="ov-b" title="Overview (O)">▦</button><button id="notes-b" title="Speaker notes (N)">notes</button><button id="prev" aria-label="Previous slide">←</button><span id="count">01 / 10</span><button id="next" aria-label="Next slide">→</button></nav>
+<aside id="notes" hidden><span class="lbl">Speaker notes</span><p id="notes-t"></p></aside>
+<div id="overview" hidden><div class="grid" id="ov-grid"></div></div>
+<script>
+(function(){
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const INIT={};
+const NOTES={"1": "Part Two: the everyday optimizations. Every technique answers a limit from Part One. Keep asking: which bottleneck does this remove, and which metric moves?", "2": "Contents. Intermediate level: what you can switch on in a framework today. Kernels, FP4, disaggregation and MoE at scale wait for Part Three.", "c1": "Chapter 1: Where the time goes. The baseline to beat, and which bottleneck each technique attacks.", "c2": "Chapter 2: Quantization in practice. Fewer bytes per weight and per KV entry, and how to check what quality you lose.", "c3": "Chapter 3: KV cache management. Store the KV cache without waste, and reuse it across requests.", "c4": "Chapter 4: Batching and scheduling. Keep the GPU full without letting any one request wait too long.", "c5": "Chapter 5: Inference frameworks compared. The popular engines side by side, and the settings that matter most.", "c6": "Chapter 6: Speculative decoding basics. Guess several tokens cheaply, then verify them in one pass of the big model.", "c7": "Chapter 7: Multi-GPU on one machine. Split a model across GPUs, or run copies, when one GPU is not enough.", "c8": "Chapter 8: Benchmarking and running it. Measure honestly, then deploy, scale and watch it."};
+/* ---------------- navigation ---------------- */
+const deck=$('#deck'),slides=$$('.slide'),N=slides.length;let cur=0,cleanup=null;
+const notesBox=$('#notes'),notesTxt=$('#notes-t'),count=$('#count'),prog=$('#progress');
+function go(i,fromHash){i=Math.max(0,Math.min(N-1,i));if(cleanup){try{cleanup()}catch(e){}cleanup=null}
+ slides[cur].classList.remove('active');cur=i;const s=slides[cur];void s.offsetWidth;s.classList.add('active');
+ const pg=s.dataset.page;if(INIT[pg]&&!reduce)cleanup=INIT[pg](s)||null;
+ count.textContent=String(cur+1).padStart(2,'0')+' / '+N;prog.style.width=((cur+1)/N*100)+'%';notesTxt.textContent=NOTES[pg]||'';
+ if(!fromHash){try{history.replaceState(null,'','#s'+(cur+1))}catch(e){}}}
+$$('[data-replay]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();go(cur,true)}));
+$$('[data-go]').forEach(b=>b.addEventListener('click',()=>go(+b.dataset.go-1)));
+$('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>go(cur+1);$('#notes-b').onclick=()=>{notesBox.hidden=!notesBox.hidden};
+const ov=$('#overview'),ovg=$('#ov-grid');slides.forEach((s,i)=>{const b=document.createElement('button');b.innerHTML=`<span class="n">${String(i+1).padStart(2,'0')} · ${s.querySelector('.hd .k')?s.querySelector('.hd .k').textContent:''}</span><span class="t"></span>`;b.querySelector('.t').textContent=s.dataset.title;b.onclick=()=>{ov.hidden=true;go(i)};ovg.appendChild(b)});
+$('#ov-b').onclick=()=>{ov.hidden=!ov.hidden};
+document.addEventListener('keydown',e=>{if(e.target.matches('input,textarea,select'))return;const k=e.key;
+ if(['ArrowRight','PageDown',' '].includes(k)){e.preventDefault();go(cur+1)}else if(['ArrowLeft','PageUp'].includes(k)){e.preventDefault();go(cur-1)}
+ else if(k==='Home')go(0);else if(k==='End')go(N-1);else if(k==='n'||k==='N')notesBox.hidden=!notesBox.hidden;else if(k==='o'||k==='O')ov.hidden=!ov.hidden;else if(k==='Escape')ov.hidden=true;else if(k==='r'||k==='R')go(cur,true)});
+let tx=null;deck.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});deck.addEventListener('touchend',e=>{if(tx==null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>60&&!e.target.closest('input,button,select'))go(cur+(dx<0?1:-1));tx=null},{passive:true});
+function fit(){const w=window.innerWidth-32,h=window.innerHeight-70;deck.style.transform='scale('+Math.max(.2,Math.min(w/1280,h/720))+')'}
+addEventListener('resize',fit,{passive:true});fit();
+const fromHash=()=>{const m=/^#s(\d+)$/.exec(location.hash);return m?+m[1]-1:0};addEventListener('hashchange',()=>go(fromHash(),true));
+slides[0].classList.add('active');go(fromHash(),true);
+})();
+</script>
+
+</body>
+</html>
