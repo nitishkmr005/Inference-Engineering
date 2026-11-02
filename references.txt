@@ -8,4 +8,3 @@
 7) VLLM/SGLANG/TensorRT-LLM
 8) Miguel Otero Pedrido articles 
     - https://substack.com/home/post/p-210443287 
-9) 
