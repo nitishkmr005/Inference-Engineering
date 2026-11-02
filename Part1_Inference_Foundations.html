@@ -416,6 +416,29 @@ svg.dim .hwk:not(.hot){opacity:.42}
 .ttm td{font-family:var(--mono);font-size:12px;padding:5px 8px}.ttm td:first-child{border-left:none}
 .ttm tr.on td{background:color-mix(in srgb,var(--green) 9%,transparent);color:var(--ink);font-weight:600}
 .ttm .bad{color:var(--orange);font-weight:600}
+.tlsweep{animation:tlsweep 3s linear infinite}@keyframes tlsweep{from{transform:translateX(0)}to{transform:translateX(300px)}}
+/* worked example */
+.wxin{display:flex;flex-direction:column;gap:8px;padding:12px 14px}
+.wxg{display:flex;flex-direction:column;gap:1px;font-size:12.5px;color:var(--ink2)}
+.wxg>span{font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--mute);margin-bottom:2px}
+.wxg b{color:var(--ink);font-family:var(--mono);font-size:12px}
+.wxa b{color:var(--orange)}
+.wxrule{margin-top:auto;border-top:1px solid var(--rule);padding-top:8px;font-family:var(--mono);font-size:11.5px;color:var(--ink);line-height:1.5}.wxrule span{color:var(--mute)}
+.wxs{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:10px;min-height:0}
+.wx{border-left:3px solid var(--c);padding:9px 12px;display:flex;flex-direction:column;gap:3px;min-height:0}
+.wx h3{font-size:14px;color:var(--c);display:flex;gap:7px;align-items:center;margin-bottom:2px}
+.wx h3 i{font-style:normal;width:18px;height:18px;border-radius:50%;background:var(--c);color:#fff;font-family:var(--mono);font-size:10.5px;display:grid;place-items:center}
+.wx code{font-family:var(--mono);font-size:10.8px;color:var(--ink2);line-height:1.4}
+.wx p{font-size:11.8px;color:var(--ink2);margin:2px 0 0;line-height:1.35}
+.wxr{margin-top:auto;padding-top:5px;border-top:1px dashed var(--rule);font-size:13px;color:var(--ink)}.wxr b{color:var(--c);font-size:15px}
+.wxo{font-size:11px;color:var(--mute);line-height:1.3;display:block;margin-top:1px}
+.wxs{display:flex!important;flex-direction:column}
+.wxrow{display:flex;gap:10px;min-height:0}.wxt{flex:1}.wxb{flex:1.35}
+.wxrow>.wx{flex:1;min-width:0}.wxb>.wx5{flex:1.9}
+.wxst{display:flex;gap:7px;font-size:11.8px;color:var(--ink2);line-height:1.35}
+.wxst em{font-style:normal;font-family:var(--mono);font-size:10px;color:#fff;background:var(--c);border-radius:3px;width:15px;height:15px;display:grid;place-items:center;flex:none;margin-top:1px}
+.wxst code{display:block;margin-top:2px}
+.wx code{font-size:10.3px}.wxb{flex:1.2}.wx{padding:8px 11px}
 </style>
 
 </head>
@@ -439,7 +462,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
     </div>
     <figure class="panel rise p2stack" style="--dl:.2s;flex:.9" aria-label="What each chapter covers">
       <div class="lbl">what each chapter covers</div>
-      <div class="p2l" style="--c:var(--violet)"><b>the model</b><span>architecture · linear attention · training and inference memory</span><em>2</em></div><div class="p2l" style="--c:var(--orange)"><b>the workload</b><span>prefill vs decode · KV cache · four caches</span><em>3</em></div><div class="p2l" style="--c:var(--green)"><b>the numbers</b><span>TTFT · ITL vs TPOT · throughput · hosting cost</span><em>4</em></div><div class="p2l" style="--c:var(--blue)"><b>the GPU</b><span>kernels, blocks and warps · HBM data flow</span><em>5</em></div><div class="p2l" style="--c:var(--ink2)"><b>the hardware you rent</b><span>NVIDIA generations · spec sheets · AWS instances</span><em>6</em></div>
+      <div class="p2l" style="--c:var(--violet)"><b>the model</b><span>architecture · linear attention · training and inference memory</span><em>2</em></div><div class="p2l" style="--c:var(--orange)"><b>the workload</b><span>prefill vs decode · KV cache · four caches</span><em>3</em></div><div class="p2l" style="--c:var(--green)"><b>the numbers</b><span>TTFT · ITL vs TPOT · throughput · hosting cost</span><em>4</em></div><div class="p2l" style="--c:var(--blue)"><b>the GPU</b><span>kernels, blocks and warps · prefill and decode on one L40S</span><em>5</em></div><div class="p2l" style="--c:var(--ink2)"><b>the hardware you rent</b><span>NVIDIA generations · spec sheets · AWS instances</span><em>6</em></div>
     </figure>
   </div>
   <nav class="srail rise" style="--dl:.34s" aria-label="The three parts of the series"><a class="sr on" aria-current="page" style="--c:var(--blue)"><span class="srn">1</span><b>Foundations</b><span>How inference works, what it needs, what it costs</span><em>basics · 6 chapters</em></a><a class="sr" href="Part2_Inference_Optimization.html" style="--c:var(--green)"><span class="srn">2</span><b>Optimization</b><span>The techniques and frameworks every team uses</span><em>intermediate · 9 chapters</em></a><a class="sr" href="Part3_Advanced_Inference.html" style="--c:var(--violet)"><span class="srn">3</span><b>Advanced</b><span>Kernels, scale, new workloads, new hardware</span><em>deep dive · 8 chapters</em></a></nav>
@@ -454,9 +477,9 @@ svg.dim .hwk:not(.hot){opacity:.42}
     <button class="chap rise p1c" data-go="3" style="--c:var(--blue);--dl:0.02s"><span class="cn">1</span><b>Inference at a glance</b><span>What you will take away, what inference is, and the software that runs it</span><span class="p2t"><i>takeaways</i><i>what inference is</i><i>inference frameworks</i></span><em>slides 3–5</em></button>
     <button class="chap rise p1c" data-go="6" style="--c:var(--violet);--dl:0.06s"><span class="cn">2</span><b>The model: architecture and memory</b><span>The architecture, how linear attention works, the config, and the memory to train and to serve</span><span class="p2t"><i>architecture</i><i>linear attention</i><i>config.json</i><i>parameters</i><i>training vs inference</i><i>training memory</i><i>inference memory</i><i>calculator</i></span><em>slides 6–14</em></button>
     <button class="chap rise p1c" data-go="15" style="--c:var(--orange);--dl:0.10s"><span class="cn">3</span><b>Prefill vs decode</b><span>The two phases of every request, how the KV cache grows, and four kinds of cache</span><span class="p2t"><i>prefill and decode</i><i>KV cache</i><i>matrix vs vector</i><i>four caches</i></span><em>slides 15–20</em></button>
-    <button class="chap rise p1c" data-go="21" style="--c:var(--green);--dl:0.14s"><span class="cn">4</span><b>Metrics and cost</b><span>The numbers that describe a server, and what hosting one costs</span><span class="p2t"><i>TTFT</i><i>ITL vs TPOT</i><i>throughput 3 ways</i><i>hosting cost</i></span><em>slides 21–25</em></button>
-    <button class="chap rise p1c" data-go="26" style="--c:var(--blue);--dl:0.18s"><span class="cn">5</span><b>How inference runs on a GPU</b><span>Meet one AWS g6e.xlarge (L40S), see how work is split across it, then watch prefill and decode run on it</span><span class="p2t"><i>GPU hardware terms</i><i>kernels, blocks, warps</i><i>prefill on the GPU</i><i>decode on the GPU</i><i>memory hierarchy</i></span><em>slides 26–31</em></button>
-    <button class="chap rise p1c" data-go="32" style="--c:var(--orange);--dl:0.22s"><span class="cn">6</span><b>GPUs: hardware, NVIDIA, AWS</b><span>Software stack, generations, spec sheets, AWS instances, which model fits which GPU</span><span class="p2t"><i>software stack</i><i>NVIDIA generations</i><i>spec sheets</i><i>AWS instances</i><i>model fit</i></span><em>slides 32–38</em></button>
+    <button class="chap rise p1c" data-go="21" style="--c:var(--green);--dl:0.14s"><span class="cn">4</span><b>Metrics and cost</b><span>The numbers that describe a server, and what hosting one costs</span><span class="p2t"><i>TTFT</i><i>ITL vs TPOT</i><i>throughput 3 ways</i><i>hosting cost</i><i>worked example</i></span><em>slides 21–26</em></button>
+    <button class="chap rise p1c" data-go="27" style="--c:var(--blue);--dl:0.18s"><span class="cn">5</span><b>How inference runs on a GPU</b><span>Meet one AWS g6e.xlarge (L40S), see how work is split across it, then watch prefill and decode run on it</span><span class="p2t"><i>GPU hardware terms</i><i>kernels, blocks, warps</i><i>prefill on the GPU</i><i>decode on the GPU</i><i>memory hierarchy</i></span><em>slides 27–32</em></button>
+    <button class="chap rise p1c" data-go="33" style="--c:var(--orange);--dl:0.22s"><span class="cn">6</span><b>GPUs: hardware, NVIDIA, AWS</b><span>Software stack, generations, spec sheets and AWS instances</span><span class="p2t"><i>software stack</i><i>NVIDIA generations</i><i>spec sheets</i><i>AWS instances</i><i>product lines</i></span><em>slides 33–39</em></button>
   </div>
   <div class="ft"><span>Colour code throughout: blue = compute / prefill, orange = memory traffic / decode, green = good outcome, violet = capacity</span><span class="pg">02</span></div>
 </section>
@@ -489,10 +512,10 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <button class="qa rise" data-go="18" style="--dl:0.18s"><span class="qn">06 · speed</span><span class="qq">How fast does the answer stream?</span><span class="qd">Decode reads every weight for every token: <b>≈ 24 ms</b> per token, about 42 tokens/s.</span><em>→ slide 18</em></button>
       <button class="qa rise" data-go="24" style="--dl:0.21s"><span class="qn">07 · throughput</span><span class="qq">How much traffic can one GPU take?</span><span class="qd">Batching shares each weight read: <b>~1,900 tokens/s</b> and ~230 chat users on one H100 in FP8.</span><em>→ slide 24</em></button>
       <button class="qa rise" data-go="25" style="--dl:0.24s"><span class="qn">08 · cost</span><span class="qq">What does hosting it cost?</span><span class="qd"><b>≈ $5,000 a month</b> for an always-on H100; how busy you keep it sets the price per token.</span><em>→ slide 25</em></button>
-      <button class="qa rise" data-go="38" style="--dl:0.27s"><span class="qn">09 · hardware</span><span class="qq">Which GPU and AWS instance should I pick?</span><span class="qd">Memory first, then bandwidth: <b>g6e.xlarge</b> (L40S) works in FP8, <b>p5.4xlarge</b> (H100) in BF16.</span><em>→ slide 38</em></button>
+      <button class="qa rise" data-go="39" style="--dl:0.27s"><span class="qn">09 · hardware</span><span class="qq">Which GPU and AWS instance should I pick?</span><span class="qd">Memory first, then bandwidth: <b>g6e.xlarge</b> (L40S) works in FP8, <b>p5.4xlarge</b> (H100) in BF16.</span><em>→ slide 39</em></button>
       </div>
   </div>
-  <div class="ft"><span>Every answer is worked out for one model, Qwen3.8-27B (open weights, Apache 2.0: 27.8B parameters, 64 layers, 262K context), and uses the same arithmetic for any other open-weight model.</span><span class="pg">04</span></div>
+  <div class="ft"><span>Each answer is worked out on the slide its card links to. Qwen3.8-27B (Apache 2.0): 27.8B parameters, 64 layers, 262,144-token context, from config.json. Card 09: FP8 weights (27.8 GB) fit the L40S's 48 GB; BF16 weights (55.6 GB) need the H100's 80 GB.</span><span class="pg">04</span></div>
 </section>
 <!-- inf · what inference is + frameworks -->
 <section class="slide" data-page="inf" data-title="What inference is, and the software that runs it" style="--accent:var(--blue)">
@@ -556,7 +579,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <div class="callout rise" style="--dl:.22s;--accent:var(--violet);padding:9px 14px;font-size:13px">The small extras (sigmoid / SiLU output gates, QK-Norm, partial RoPE) mainly keep training stable. They don't change the memory math on the next slides.</div>
     </div>
   </div>
-  <div class="ft"><span>Figure: Sebastian Raschka (Qwen3.8 27B; vision encoder and MTP head omitted), used with attribution. Intuition after Raschka's LLM architecture gallery (hybrid attention) and LLMs-from-Scratch bonus chapters on DeltaNet and gated attention.</span><span class="pg">07</span></div>
+  <div class="ft"><span>Figure: Sebastian Raschka (vision encoder and MTP head omitted), used with attribution. From config.json: hidden_size 5,120; 64 layers; vocab 248,320; full_attention_interval 4, so 64 ÷ 4 = 16 layers keep a KV cache and it is 64 ÷ 16 = 4× smaller than with all-full attention.</span><span class="pg">07</span></div>
 </section>
 <!-- lin · how linear attention works -->
 <section class="slide" data-page="lin" data-title="How linear attention works" style="--accent:var(--violet)">
@@ -584,7 +607,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
     </div>
     <div class="callout rise" style="--dl:.14s;--accent:var(--violet);padding:7px 14px;font-size:13px">The trade-off: the whiteboard is <b>cheap but blurry</b>, the list is <b>exact but grows</b>. Qwen3.8 keeps 1 full-attention layer in every 4 so it can still look up exact details.</div>
   </div>
-  <div class="ft"><span>Gated DeltaNet: Yang, Kautz and Hatamizadeh, ICLR 2025. Sizes for Qwen3.8-27B. Intuition after Sebastian Raschka's LLMs-from-Scratch chapter on DeltaNet.</span><span class="pg">08</span></div>
+  <div class="ft"><span>Full attention, per layer: 2 (K and V) × 4 KV heads × 256 × 2 B = 4 KiB per token; × 200,000 tokens ≈ 0.8 GB. Linear attention, per layer: 48 heads × 128 × 128 × 4 B + a 3 × 10,240 × 2 B conv buffer ≈ 3.06 MiB (config.json linear_* values). Gated DeltaNet: Yang, Kautz and Hatamizadeh, ICLR 2025.</span><span class="pg">08</span></div>
 </section>
 <!-- ex · Meet the model -->
 <section class="slide" data-page="ex" data-title="Reading the config.json" style="--accent:var(--blue)">
@@ -600,7 +623,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <svg viewBox="0 0 580 470" width="100%" height="100%" id="ex-map" aria-label="Diagram of the model with each config value attached to the part it sizes: embedding table, hidden vector, 64-layer stack with every 4th full attention, attention heads, MLP width, LM head, context window, data type and MTP head"></svg>
     </div>
   </div>
-  <div class="ft"><span>Hugging Face Qwen/Qwen3.8-27B (Apache 2.0, Aug 2026): config.json and model.safetensors.index.json (total_size 55.56 GB). Diagram not to scale.</span><span class="pg">09</span></div>
+  <div class="ft"><span>Hugging Face Qwen/Qwen3.8-27B (Apache 2.0, Aug 2026): config.json and model.safetensors.index.json (total_size 55.56 GB = 27.8B parameters × 2 bytes in BF16). 24 query heads ÷ 4 KV heads = 6 queries share each KV head. Diagram not to scale.</span><span class="pg">09</span></div>
 </section>
 <!-- blk · Inside one layer -->
 <section class="slide" data-page="blk" data-title="Where the 27.8B parameters live" style="--accent:var(--blue)">
@@ -619,7 +642,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <div class="callout rise" style="--dl:.12s;--accent:var(--orange)">The <b>MLPs hold ~62%</b> of the weights, attention is second, norms are a rounding error. So a decode step's time is mostly <b>reading MLP matrices</b>.</div>
     </div>
   </div>
-  <div class="ft"><span>MLP: 3 × 5,120 × 17,408 × 64. Full attention: q (+ output gate), k, v, o × 16. Linear attention: in/out projections × 48. Text layers 26.9B; vision encoder + MTP ≈ 0.9B; total 27.8B matches the 55.56 GB checkpoint.</span><span class="pg">10</span></div>
+  <div class="ft"><span>From config shapes. MLP: 3 × 5,120 × 17,408 = 267M per layer (0.53 GB at 2 B), × 64 = 17.1B. Full attention: 5,120 × 12,288 (q + gate) + 2 × 5,120 × 1,024 (k, v) + 6,144 × 5,120 (o) = 105M, × 16 = 1.68B. Linear attention: 5,120 × 16,480 in + 6,144 × 5,120 out ≈ 116M, × 48 = 5.56B. Embedding and LM head: 248,320 × 5,120 = 1.27B each. Vision + MTP = 27.8B minus the rest. % = part ÷ 27.8B.</span><span class="pg">10</span></div>
 </section>
 <!-- tvi · Training vs inference, API vs dedicated -->
 <section class="slide" data-page="tvi" data-title="Training vs inference" style="--accent:var(--violet)">
@@ -655,7 +678,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
       </div>
     </div>
   </div>
-  <div class="ft"><span>Efficient LLM Inference §1.1 (training vs inference goals). Memory for each is calculated line by line on the next two slides.</span><span class="pg">11</span></div>
+  <div class="ft"><span>Efficient LLM Inference §1.1 (training vs inference goals). The 1,000 × 4K batch is an example. Memory for each is calculated line by line on the next two slides.</span><span class="pg">11</span></div>
 </section>
 <!-- trm · training memory explained -->
 <section class="slide" data-page="trm" data-title="Training memory: 16 bytes per parameter" style="--accent:var(--violet)">
@@ -757,7 +780,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
       </svg></div>
     </div>
   </div>
-  <div class="ft"><span>Qwen3.8-27B config.json: 16 full-attention layers (full_attention_interval 4), 4 KV heads, head_dim 256; 48 Gated DeltaNet layers with a fixed state. Usable = 90% of 80 GB, vLLM's default gpu-memory-utilization.</span><span class="pg">13</span></div>
+  <div class="ft"><span>Qwen3.8-27B config.json: 16 full-attention layers (full_attention_interval 4), 4 KV heads, head_dim 256. Fixed state: 48 linear-attention layers × 3.06 MiB = 147 MiB per user (slide 8). Usable 72 GB = 90% of 80 GB, vLLM's default gpu-memory-utilization; 1.5 GB runtime is a rule of thumb.</span><span class="pg">13</span></div>
 </section>
 <!-- 32 · Calculator -->
 <section class="slide" data-page="32" data-title="Memory calculator" style="--accent:var(--violet)">
@@ -788,7 +811,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <div class="panel rise cder" id="calc-x" style="--dl:.12s"></div>
     </div>
   </div>
-  <div class="ft"><span>Same formulas as the training and inference memory slides (12–13). Usable = 0.9 × GPU memory − 1.5 GB per GPU. KV includes fixed linear-attention state for hybrid models.</span><span class="pg">14</span></div>
+  <div class="ft"><span>Same formulas as slides 12–13. Model shapes from each model's Hugging Face config.json; GPU memory from AWS instance pages. Usable = 90% of GPU memory − 1.5 GB runtime per GPU. Decode ceiling = memory bandwidth ÷ weight bytes, batch 1 (e.g. 3,350 GB/s ÷ 55.6 GB = 60 tokens/s), an upper bound.</span><span class="pg">14</span></div>
 </section>
 <!-- c3 · divider -->
 <section class="slide dv" data-page="c3" data-title="Chapter 3 · Prefill vs decode" style="--accent:var(--orange)">
@@ -827,7 +850,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <div class="card rise" style="--dl:.18s;border-left:3px solid var(--orange);padding:9px 14px"><h3 style="color:var(--orange)">The price is memory</h3><p>For 1,000 tokens, no cache means <b>500,500</b> key-value computations; a cache needs <b>1,000</b>, but keeps them all. Qwen3.8: <b>64 KiB per token</b>, 512 MiB per user at 8K.</p></div>
     </div>
   </div>
-  <div class="ft"><span>Intuition and “Time flies” example after Sebastian Raschka, “Understanding and Coding the KV Cache in LLMs from Scratch” (2025), who measured ≈5× faster generation with a cache on a 124M model. Qwen3.8 keeps KV only in its 16 full-attention layers.</span><span class="pg">16</span></div>
+  <div class="ft"><span>Intuition and “Time flies” example after Sebastian Raschka, “Understanding and Coding the KV Cache in LLMs from Scratch” (2025), who measured ≈5× faster generation with a cache on a 124M model. No cache: 1 + 2 + … + 1,000 = 1,000 × 1,001 ÷ 2 = 500,500. Qwen3.8: 64 KiB per token × 8,192 tokens = 512 MiB.</span><span class="pg">16</span></div>
 </section>
 <!-- pd · prefill and decode, what they are -->
 <section class="slide" data-page="pd" data-title="Prefill and decode: the two phases of every request" style="--accent:var(--orange)">
@@ -843,7 +866,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <div class="card rise" style="--dl:.12s;border-left:3px solid var(--violet);padding:10px 14px"><h3 style="color:var(--violet)">Why it matters</h3><p>Qwen3.8 on one H100: a 2,000-token prompt prefills in <b>≈ 0.23 s</b>; a 500-token answer then takes <b>≈ 12 s</b> of decode. The KV cache grows by one entry per token, per user.</p></div>
     </div>
   </div>
-  <div class="ft"><span>Layout after a widely shared “Prefill &amp; Decode” explainer. In Qwen3.8 only the 16 full-attention layers keep KV entries (64 KiB per token in total). Timings: first-order estimates, BF16, batch 1.</span><span class="pg">17</span></div>
+  <div class="ft"><span>Layout after a widely shared “Prefill &amp; Decode” explainer. KV per token = 2 × 16 layers × 4 KV heads × 256 × 2 B = 64 KiB. Prefill ≈ 2 × 27.8B params × 2,000 tokens ÷ (50% × 989 BF16 TFLOPS) ≈ 0.23 s. Decode ≈ 55.6 GB ÷ (70% × 3.35 TB/s) ≈ 24 ms per token, × 500 ≈ 12 s. Batch 1; 50% and 70% are assumed efficiencies.</span><span class="pg">17</span></div>
 </section>
 <!-- 8 · GEMM vs GEMV -->
 <section class="slide" data-page="8" data-title="Why prefill and decode behave differently" style="--accent:var(--orange)">
@@ -883,7 +906,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
     </div>
     <div class="callout rise" style="--dl:.1s;--accent:var(--violet);margin-top:auto">A RAG request to Qwen3.8 with a 6,000-token context and a 150-token answer is <b>mostly prefill</b>. A chat reply of 800 tokens after a short question is <b>mostly decode</b>. Know which one your workload is.</div>
   </div>
-  <div class="ft"><span>Kiely §2.4 (prefill compute-bound, decode memory-bound); Efficient LLM Inference §1.2, §3.3; Databricks (2023). Qwen3.8 row: first-order model (MFU 50%, MBU 70%, batch 1).</span><span class="pg">19</span></div>
+  <div class="ft"><span>Kiely §2.4 (prefill compute-bound, decode memory-bound); Efficient LLM Inference §1.2, §3.3; Databricks (2023). Qwen3.8 row as on slide 17: 2 × 27.8B × 2,000 ÷ (50% × 989 TFLOPS) ≈ 230 ms; 55.6 GB ÷ (70% × 3.35 TB/s) ≈ 24 ms, batch 1. RAG and chat sizes are examples.</span><span class="pg">19</span></div>
 </section>
 <!-- cch · four caches -->
 <section class="slide" data-page="cch" data-title="Four caches in an LLM serving stack" style="--accent:var(--violet)">
@@ -905,7 +928,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <div class="callout rise" style="--dl:.2s;--accent:var(--violet);display:flex;flex-direction:column;gap:6px;justify-content:center"><b style="color:var(--ink)">The semantic cache can be confidently wrong.</b><span>It matches by meaning, and embeddings put a sentence close to its own negation: “is the API rate limited?” and “is the API <i>not</i> rate limited?” look almost the same. A wrong hit returns a normal-looking answer, with nothing in the logs. Caches 1–3 are exact, so they never change the answer.</span></div>
     </div>
   </div>
-  <div class="ft"><span>Prefix caching: vLLM automatic prefix caching, SGLang RadixAttention. Prompt-cache discounts and lifetimes vary by provider; check your provider's pricing. Part Two covers caching in depth.</span><span class="pg">20</span></div>
+  <div class="ft"><span>Prefix caching: vLLM automatic prefix caching, SGLang RadixAttention. “~10%”: e.g. Anthropic bills prompt-cache reads at 0.1× the base input price (prompt-caching docs); other providers' discounts and lifetimes differ. Part Two covers caching in depth.</span><span class="pg">20</span></div>
 </section>
 <!-- c4 · divider -->
 <section class="slide dv" data-page="c4" data-title="Chapter 4 · Metrics and cost" style="--accent:var(--green)">
@@ -916,7 +939,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <h2 class="dv-t">Metrics and cost</h2>
       <div class="dv-line"></div>
       <p class="p2s">TTFT, ITL vs TPOT, throughput as tokens, requests and users, and what hosting a model costs</p>
-      <ol class="p2plan p1plan"><li><em>22</em><button class="p1go" data-go="22">Four numbers that describe a server</button></li><li><em>23</em><button class="p1go" data-go="23">ITL vs TPOT</button></li><li><em>24</em><button class="p1go" data-go="24">Throughput: five ways to count it</button></li><li><em>25</em><button class="p1go" data-go="25">What it costs to host Qwen3.8-27B</button></li></ol>
+      <ol class="p2plan p1plan"><li><em>22</em><button class="p1go" data-go="22">Four numbers that describe a server</button></li><li><em>23</em><button class="p1go" data-go="23">ITL vs TPOT</button></li><li><em>24</em><button class="p1go" data-go="24">Throughput: five ways to count it</button></li><li><em>25</em><button class="p1go" data-go="25">What it costs to host Qwen3.8-27B</button></li><li><em>26</em><button class="p1go" data-go="26">Worked example: TTFT, ITL and throughput on one L40S</button></li></ol>
     </div>
   </div>
   <ol class="dv-steps"><li class="done"><span>01</span>Inference at a glance</li><li class="done"><span>02</span>The model: architecture and memory</li><li class="done"><span>03</span>Prefill vs decode</li><li class="on"><span>04</span>Metrics and cost</li><li class=""><span>05</span>How inference runs on a GPU</li><li class=""><span>06</span>GPUs: hardware, NVIDIA, AWS</li></ol>
@@ -948,12 +971,12 @@ svg.dim .hwk:not(.hot){opacity:.42}
     <article class="panel rise mcard" style="--c:var(--violet);--dl:.14s">
       <div class="lbl">money</div><h3>$ / 1M tokens</h3>
       <div class="mono" style="font-size:13px;line-height:1.6;padding:16px 0;color:var(--ink)">GPU $/hr<br>÷ (throughput × 3600)<br>× 1,000,000</div>
-      <p class="note">Set by <b>utilisation</b>, not by the sticker price. The same GPU can be 16× cheaper per token when well batched.</p>
+      <p class="note">Set by <b>utilisation</b>, not by the sticker price. The same GPU can be 29× cheaper per token when well batched.</p>
       <div class="mono note" style="margin-top:auto">input tokens are cheaper than output</div>
     </article>
   </div>
   <div class="panel rise" style="--dl:.18s;text-align:center;padding:12px;margin-top:14px"><span class="mono" style="font-size:16px"><span class="to">TPOT</span> = (end-to-end − <span class="tb">TTFT</span>) ÷ (output tokens − 1) &nbsp;·&nbsp; Qwen3.8, 500-token answer: (12,206 − 230) ms ÷ 499 = 24 ms</span></div>
-  <div class="ft"><span>Definitions and worked example: Modular LLM Inference Handbook, “Key metrics”; Kiely §1.4; goodput: DistServe, OSDI '24. Targets are rules of thumb.</span><span class="pg">22</span></div>
+  <div class="ft"><span>Definitions: Modular LLM Inference Handbook “Key metrics”; Kiely §1.4; goodput: DistServe, OSDI '24. 230 ms and 24 ms from slide 17; end-to-end 12,206 ms = 230 + 499 × 24. “29× cheaper”: slide 25, $57.89 vs $2.00 per 1M tokens at 1 vs 64 requests in flight. Targets and reading speed are rules of thumb.</span><span class="pg">22</span></div>
 </section>
 <!-- itl · ITL vs TPOT -->
 <section class="slide" data-page="itl" data-title="ITL vs TPOT" style="--accent:var(--green)">
@@ -970,7 +993,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <div class="panel rise mcard" style="--c:var(--green);--dl:.12s"><div class="lbl">which to watch</div><h3>Same data, different story</h3><p class="note" id="itl-c"></p></div>
     </div>
   </div>
-  <div class="ft"><span>Definitions as in vLLM's benchmark (TTFT, TPOT excluding the first token, ITL per gap) and the Modular LLM Inference Handbook “Key metrics”. 24 ms gap = Qwen3.8 BF16 on an H100 at batch 1; the stall is an illustrative 180 ms prefill of another request.</span><span class="pg">23</span></div>
+  <div class="ft"><span>Definitions as in vLLM's benchmark (TTFT, TPOT excluding the first token, ITL per gap) and the Modular LLM Inference Handbook “Key metrics”. Illustrative example: 24 ms gaps as for Qwen3.8 BF16 on an H100 at batch 1, plus one 180 ms stall; end-to-end 230 + 8 × 24 + 180 = 602 ms.</span><span class="pg">23</span></div>
 </section>
 <!-- thr · throughput three ways -->
 <section class="slide" data-page="thr" data-title="Throughput: five ways to count it" style="--accent:var(--green)">
@@ -1004,7 +1027,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <div class="callout rise" style="--dl:.1s;--accent:var(--green);font-size:13px;line-height:1.5;padding:10px 14px"><b>One server, one set of numbers.</b> 1,915 tokens/s ÷ 500 tokens per answer = <b>3.8 requests/s</b>; × 60 = <b>230 users</b> sending one request a minute; ÷ 64 in flight = <b>30 tokens/s each</b>. More requests in flight raise the totals and slow each user, so pick the per-user target first, then the batch size.</div>
     </div>
   </div>
-  <div class="ft"><span>First-order model, not a benchmark: decode step = max(weights + KV of all requests ÷ 70% of 3.35 TB/s, math ÷ 50% of 1,979 FP8 TFLOPS) + 3 ms; each prompt adds its prefill time. Goodput as defined in DistServe (Zhong et al., OSDI 2024). Little's law: in flight = arrival rate × time in system.</span><span class="pg">24</span></div>
+  <div class="ft"><span>First-order model, not a benchmark: decode step = max(weights + KV of all requests ÷ 70% of 3.35 TB/s, math ÷ 50% of 1,979 FP8 TFLOPS) + 3 ms; each prompt adds its prefill time. Per user = total ÷ requests in flight; requests/s = total ÷ 500; users = requests/s × 60. 20 and 25 tokens/s are example targets. Goodput: DistServe (OSDI 2024).</span><span class="pg">24</span></div>
 </section>
 <!-- cost · hosting cost -->
 <section class="slide" data-page="cost" data-title="What it costs to host Qwen3.8-27B" style="--accent:var(--green)">
@@ -1028,7 +1051,45 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <div class="panel rise thv" style="--dl:.12s;--c:var(--orange)"><div class="lbl">per 1,000 requests</div><div class="big" id="cost-r"></div><div class="note" id="cost-rn"></div></div>
     </div>
   </div>
-  <div class="ft"><span>On-demand us-east-1, Nov 2026: g6e.xlarge ≈ $1.86/hr, p5.4xlarge ≈ $6.88/hr (p5.48xlarge ≈ $55.04/hr = $6.88 per GPU). Prices change; check the AWS pricing page. Savings plans and spot cut them further. Throughput from the previous slide's model; requests = 1,500 prompt + 500 output tokens.</span><span class="pg">25</span></div>
+  <div class="ft"><span>On-demand us-east-1, Nov 2026: g6e.xlarge ≈ $1.86/hr, p5.4xlarge ≈ $6.88/hr (p5.48xlarge ≈ $55.04/hr ÷ 8 GPUs). Prices change; check the AWS pricing page. Monthly = $/hr × 730 h. Throughput from slide 24's model. Per 1,000 requests = $ per 1M output tokens × 0.5M (500 output tokens each).</span><span class="pg">25</span></div>
+</section>
+<!-- wex · worked example: all the numbers from the L40S spec sheet -->
+<section class="slide" data-page="wex" data-title="Worked example: TTFT, ITL and throughput on one L40S" style="--accent:var(--green)">
+  <div class="hd"><span class="k">4 · Metrics and cost</span><span class="nb">from the spec sheet · no benchmark needed</span></div>
+  <h2 class="ttl">Worked example: TTFT, ITL and throughput for Qwen3.8 on one L40S, from the spec sheet</h2>
+  <div class="body" style="gap:14px">
+    <div class="panel rise wxin" style="flex:.3">
+      <div class="lbl">inputs</div>
+      <div class="wxg"><span>NVIDIA L40S datasheet</span><div><b>48 GB</b> memory</div><div><b>864 GB/s</b> bandwidth</div><div><b>733 TFLOPS</b> FP8 compute</div></div>
+      <div class="wxg"><span>Qwen3.8-27B in FP8</span><div><b>27.8 GB</b> = 27.8B × 1 B</div><div><b>64 KiB</b> KV per token</div><div><b>147 MiB</b> fixed state per user</div></div>
+      <div class="wxg"><span>workload</span><div><b>2,000</b>-token prompt</div><div><b>500</b>-token answer</div></div>
+      <div class="wxg wxa"><span>assumptions</span><div>70% of bandwidth = <b>605 GB/s</b></div><div>50% of compute = <b>367 TFLOPS</b></div><div><b>3 ms</b> per step of non-math work:<br><span class="wxo">CPU schedules the batch, launches the GPU kernels, picks the next token</span></div><div>90% usable, <b>1.5 GB</b> runtime</div></div>
+      <div class="wxrule">time = max( bytes ÷ bandwidth, operations ÷ compute ) + 3 ms<br><span>operations = 2 × parameters × tokens</span></div>
+    </div>
+    <div class="wxs" style="flex:1">
+      <div class="wxrow wxt"><div class="card rise wx" style="--dl:.04s;--c:var(--blue)"><h3><i>1</i>TTFT · prefill</h3>
+        <code>math: 2 × 27.8B × 2,000 ÷ 367 TFLOPS = 0.30 s</code><code>read: 27.8 GB ÷ 605 GB/s = 0.05 s</code>
+        <p>Math is the bigger term: <b>compute-bound</b>.</p><div class="wxr">TTFT ≈ 0.30 s + 3 ms ≈ <b>0.31 s</b></div></div>
+      <div class="card rise wx" style="--dl:.06s;--c:var(--orange)"><h3><i>2</i>ITL · decode, 1 user</h3>
+        <code>KV: 2,500 × 64 KiB + 147 MiB = 0.32 GB</code><code>read: (27.8 + 0.32) GB ÷ 605 GB/s = 46.5 ms</code><code>math: 2 × 27.8B ÷ 367 TFLOPS = 0.15 ms</code>
+        <p>Reading is the bigger term: <b>memory-bound</b>.</p><div class="wxr">ITL ≈ 46.5 + 3 ≈ <b>49.5 ms</b> · 20 tokens/s</div></div>
+      <div class="card rise wx" style="--dl:.08s;--c:var(--violet)"><h3><i>3</i>End-to-end · 1 user</h3>
+        <code>TTFT + (500 − 1) × ITL</code><code>0.31 s + 499 × 49.5 ms</code>
+        <p>Decode is 99% of the wait for a 500-token answer.</p><div class="wxr">≈ <b>25 s</b></div></div>
+      </div><div class="wxrow wxb"><div class="card rise wx" style="--dl:.1s;--c:var(--violet)"><h3><i>4</i>Max users · memory</h3>
+        <code>free: 90% × 48 − 27.8 − 1.5 = 13.9 GB</code><code>13.9 GB ÷ 0.32 GB per user = 43</code>
+        <p>Each user's KV and state must stay in GPU memory.</p><div class="wxr"><b>43 users</b> at 2,500 tokens each</div></div>
+      <div class="card rise wx wx5" style="--dl:.12s;--c:var(--green)"><h3><i>5</i>Throughput · 43 users decoding together</h3>
+        <div class="wxst"><em>a</em><div>Weights are read <b>once</b> for all 43; each user adds its KV<code>(27.8 + 43 × 0.32) GB ÷ 605 GB/s + 3 ms = 72 ms</code></div></div>
+        <div class="wxst"><em>b</em><div>Each step gives every user one token<code>43 ÷ 0.072 s = 601 tokens/s (decode only)</code></div></div>
+        <div class="wxst"><em>c</em><div>But each request first needs a 0.30 s prefill, and decoding pauses meanwhile. For every 500 tokens:<code>decode 500 ÷ 601 = 0.83 s + prefill 0.30 s = 1.13 s</code></div></div>
+        <div class="wxr">500 ÷ 1.13 s ≈ <b>440 tokens/s</b> · 0.88 req/s</div></div>
+      <div class="card rise wx" style="--dl:.14s;--c:var(--green)"><h3><i>6</i>Cost · g6e.xlarge</h3>
+        <code>tokens/hour: 440 × 3,600 s = 1.58M</code><code>$1.861 per hour ÷ 1.58M tokens = $1.17 per 1M</code><code>1 user: 20 × 3,600 = 0.072M → $25.9 per 1M</code>
+        <p>Priced per million tokens, like API prices. Same GPU, 22× cheaper when full.</p><div class="wxr"><b>≈ $1.17</b> per 1M output tokens</div></div></div>
+    </div>
+  </div>
+  <div class="ft"><span>Same first-order model as slides 13, 17, 24 and 30–31 (where prefill and decode are animated on this GPU); 70%, 50%, 3 ms and 1.5 GB are assumptions, not measurements. The 3 ms is time each step spends outside the matrix math (engine scheduler, kernel launches, sampling); CUDA graphs shrink it, and at 1 user it is 3 ÷ 49.5 ≈ 6% of ITL. KV per token = 2 × 16 layers × 4 KV heads × 256 × 2 B. Prefills taking turns: each 500-token answer also costs one 0.30 s prefill. Price: AWS on-demand us-east-1, Nov 2026, full load. Excludes queueing and network time; check real numbers with vLLM's benchmark.</span><span class="pg">26</span></div>
 </section>
 <!-- c5 · divider -->
 <section class="slide dv" data-page="c5" data-title="Chapter 5 · How inference runs on a GPU" style="--accent:var(--blue)">
@@ -1039,15 +1100,15 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <h2 class="dv-t">How inference runs on a GPU</h2>
       <div class="dv-line"></div>
       <p class="p2s">Meet the hardware of one AWS g6e.xlarge (L40S, 48 GB), see how work is split across it, then watch prefill and decode run on it</p>
-      <ol class="p2plan p1plan"><li><em>27</em><button class="p1go" data-go="27">Meet the hardware: one g6e.xlarge with an L40S</button></li><li><em>28</em><button class="p1go" data-go="28">How work is organized inside a GPU</button></li><li><em>29</em><button class="p1go" data-go="29">Prefill on the L40S, step by step</button></li><li><em>30</em><button class="p1go" data-go="30">Decode on the L40S, step by step</button></li><li><em>31</em><button class="p1go" data-go="31">The GPU memory hierarchy</button></li></ol>
+      <ol class="p2plan p1plan"><li><em>28</em><button class="p1go" data-go="28">Meet the hardware: one g6e.xlarge with an L40S</button></li><li><em>29</em><button class="p1go" data-go="29">How work is organized inside a GPU</button></li><li><em>30</em><button class="p1go" data-go="30">Prefill on the L40S, step by step</button></li><li><em>31</em><button class="p1go" data-go="31">Decode on the L40S, step by step</button></li><li><em>32</em><button class="p1go" data-go="32">The GPU memory hierarchy</button></li></ol>
     </div>
   </div>
   <ol class="dv-steps"><li class="done"><span>01</span>Inference at a glance</li><li class="done"><span>02</span>The model: architecture and memory</li><li class="done"><span>03</span>Prefill vs decode</li><li class="done"><span>04</span>Metrics and cost</li><li class="on"><span>05</span>How inference runs on a GPU</li><li class=""><span>06</span>GPUs: hardware, NVIDIA, AWS</li></ol>
-  <div class="ft"><span>Running example throughout: Qwen3.8-27B</span><span class="pg">26</span></div>
+  <div class="ft"><span>Running example throughout: Qwen3.8-27B</span><span class="pg">27</span></div>
 </section>
 <!-- hw · meet the hardware: one g6e.xlarge -->
 <section class="slide" data-page="hw" data-title="Meet the hardware: one g6e.xlarge with an L40S" style="--accent:var(--blue)">
-  <div class="hd"><span class="k">5 · Running on a GPU</span><span class="nb">AWS g6e.xlarge · 1 × NVIDIA L40S · $1.86 / hour</span></div>
+  <div class="hd"><span class="k">5 · Metrics and cost</span><span class="nb">AWS g6e.xlarge · 1 × NVIDIA L40S · $1.86 / hour</span></div>
   <h2 class="ttl">Meet the hardware: one AWS g6e.xlarge, from the CPU down to the tensor cores</h2>
   <div class="body" style="flex-direction:column;gap:8px">
     <div class="panel rise" style="flex:1;min-height:0;display:flex;flex-direction:column;gap:6px;padding:10px 14px">
@@ -1056,7 +1117,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
     </div>
     <div class="callout rise" id="hw-cap" style="--accent:var(--orange);min-height:50px;padding:8px 14px;font-size:13.5px"></div>
   </div>
-  <div class="ft"><span>AWS g6e.xlarge: 1 × L40S 48 GB, 4 vCPU, 32 GiB RAM, 250 GB NVMe, on-demand us-east-1. NVIDIA L40S datasheet: 142 SMs, 18,176 CUDA cores, 568 tensor cores, 96 MB L2, 48 GB GDDR6 at 864 GB/s, 362 BF16 / 733 FP8 dense TFLOPS, PCIe Gen4 x16. Drawn schematically.</span><span class="pg">27</span></div>
+  <div class="ft"><span>AWS g6e.xlarge (on-demand us-east-1, Nov 2026): 1 × L40S, 4 vCPU, 32 GiB RAM, 250 GB NVMe. NVIDIA L40S datasheet: 142 SMs, 96 MB L2, 48 GB GDDR6 at 864 GB/s, 733 FP8 dense TFLOPS, PCIe Gen4 x16. Derived: 18,176 = 142 × 128; 568 = 142 × 4; weights over PCIe ≈ 27.8 GB ÷ 32 GB/s ≈ 1 s; free for KV ≈ 90% × 48 − 27.8 − 1.5 ≈ 14 GB; 27.8 GB ÷ 96 MB ≈ 290×; 64 KB = 256 KB ÷ 4 quarters.</span><span class="pg">28</span></div>
 </section>
 <!-- wrk · how work is organized inside a GPU -->
 <section class="slide" data-page="wrk" data-title="How work is organized inside a GPU" style="--accent:var(--blue)">
@@ -1073,11 +1134,11 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <div class="callout rise" id="wrk-v" style="--dl:.12s;--accent:var(--blue);font-size:12.5px;padding:9px 12px;line-height:1.45"></div>
     </div>
   </div>
-  <div class="ft"><span>NVIDIA CUDA programming guide (grid, block, warp of 32 threads). L40S: 142 SMs. MLP up-projection: 5,120 → 17,408 (89 M weights, 89 MB in FP8). 128 × 128 tiles are illustrative; real kernels pick their own tiles and split decode work across all SMs. Timings: 70% of 864 GB/s, 50% of 733 FP8 TFLOPS. Warp timeline schematic.</span><span class="pg">28</span></div>
+  <div class="ft"><span>CUDA programming guide (grid, block, warp of 32 threads). MLP up-projection 5,120 × 17,408 = 89M weights = 89 MB in FP8. 128 × 128 tiles are illustrative. Assumed real-world speed: 70% of 864 GB/s = 605 GB/s; 50% of 733 FP8 TFLOPS = 367 TFLOPS. Reading 89 MB ÷ 605 GB/s ≈ 0.15 ms. Math: 2 × 89M × 2,000 ÷ 367 TFLOPS ≈ 1 ms (prefill); 2 × 89M ÷ 367 TFLOPS ≈ 0.0005 ms (decode). Warp timeline schematic.</span><span class="pg">29</span></div>
 </section>
 <!-- rpf · prefill on the L40S -->
 <section class="slide" data-page="rpf" data-title="Prefill on the L40S, step by step" style="--accent:var(--blue)">
-  <div class="hd"><span class="k">5 · Running on a GPU</span><span class="nb">Qwen3.8 FP8 · 2,000-token prompt</span></div>
+  <div class="hd"><span class="k">5 · Metrics and cost</span><span class="nb">Qwen3.8 FP8 · 2,000-token prompt</span></div>
   <h2 class="ttl">Prefill on the L40S: read the weights once, keep the tensor cores busy</h2>
   <div class="body" style="gap:16px">
     <div class="panel rise" style="flex:1.45;display:flex;flex-direction:column;gap:6px;padding:10px 14px">
@@ -1087,11 +1148,11 @@ svg.dim .hwk:not(.hot){opacity:.42}
     </div>
     <div class="col rise" style="--dl:.06s;flex:.55;gap:10px" id="rpf-side"></div>
   </div>
-  <div class="ft"><span>First-order model used across this deck: 70% of the 864 GB/s memory bandwidth, 50% of the 733 FP8 TFLOPS, 3 ms overhead per step. Qwen3.8-27B in FP8 (27.8 GB); KV 64 KiB per token plus 147 MiB of linear-attention state. Drawn schematically: 16 of the 142 SMs shown.</span><span class="pg">29</span></div>
+  <div class="ft"><span>Deck model (assumed efficiencies): 70% of 864 GB/s = 605 GB/s, 50% of 733 FP8 TFLOPS = 367 TFLOPS, 3 ms per step. Reading 27.8 GB ÷ 605 GB/s ≈ 46 ms; math 2 × 27.8B × 2,000 ÷ 367 TFLOPS ≈ 303 ms; TTFT ≈ 303 + 3 ms. Token IDs 2,000 × 4 B ≈ 8 KB; KV 2,000 × 64 KiB ≈ 131 MB; this user ≈ 2,500 × 64 KiB + 147 MiB ≈ 0.3 GB; free ≈ 90% × 48 − 27.8 − 1.5 ≈ 14 GB.</span><span class="pg">30</span></div>
 </section>
 <!-- rdc · decode on the L40S -->
 <section class="slide" data-page="rdc" data-title="Decode on the L40S, step by step" style="--accent:var(--orange)">
-  <div class="hd"><span class="k">5 · Running on a GPU</span><span class="nb">Qwen3.8 FP8 · one new token per pass</span></div>
+  <div class="hd"><span class="k">5 · Metrics and cost</span><span class="nb">Qwen3.8 FP8 · one new token per pass</span></div>
   <h2 class="ttl">Decode on the L40S: read every weight again for one token, and the tensor cores wait</h2>
   <div class="body" style="gap:16px">
     <div class="panel rise" style="flex:1.45;display:flex;flex-direction:column;gap:6px;padding:10px 14px">
@@ -1101,7 +1162,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
     </div>
     <div class="col rise" style="--dl:.06s;flex:.55;gap:10px" id="rdc-side"></div>
   </div>
-  <div class="ft"><span>Same first-order model: 70% of 864 GB/s, 50% of 733 FP8 TFLOPS, 3 ms overhead per step. Per-user KV at 2,000 prompt + 500 output tokens ≈ 0.3 GB including linear-attention state. Drawn schematically: 16 of the 142 SMs shown.</span><span class="pg">30</span></div>
+  <div class="ft"><span>L40S datasheet: 864 GB/s, 733 FP8 TFLOPS. Assumed real-world speed: 70% of bandwidth = 605 GB/s, 50% of compute = 367 TFLOPS, plus 3 ms fixed cost per step. KV for this user: 2,500 tokens × 64 KiB + 147 MiB ≈ 0.3 GB. Step = (27.8 + 0.3) GB ÷ 605 GB/s + 3 ms ≈ 49 ms → 1 ÷ 0.049 ≈ 20 tokens/s. Math = 2 × 27.8B ÷ 367 TFLOPS ≈ 0.15 ms. Tensor cores need 733 TFLOPS ÷ 864 GB/s ≈ 848 operations per byte.</span><span class="pg">31</span></div>
 </section>
 <!-- mem · memory hierarchy -->
 <section class="slide" data-page="mem" data-title="The GPU memory hierarchy" style="--accent:var(--orange)">
@@ -1120,7 +1181,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <div class="callout rise" style="--dl:.12s;--accent:var(--orange)">The Handbook's kitchen: GPU memory (GDDR6 here) is the <b>fridge</b>, on-chip SRAM the <b>counter</b>. Fewer fridge trips = faster. <b>FlashAttention</b> does this for attention: tiles stay in SRAM, so the N × N score matrix never reaches GPU memory.</div>
     </div>
   </div>
-  <div class="ft"><span>L40S (Ada): registers 256 KB/SM; L1 + shared memory 128 KB/SM (up to 100 KB shared); L2 96 MB; 48 GB GDDR6 at 864 GB/s; PCIe Gen4 x16; no NVLink. g6e.xlarge: 32 GiB RAM, 250 GB NVMe, up to 20 Gbps network. Cycle counts approximate. Handbook “GPU memory”; Kiely §2.5 (FlashAttention).</span><span class="pg">31</span></div>
+  <div class="ft"><span>L40S (Ada): registers 256 KB/SM; L1 + shared 128 KB/SM; L2 96 MB; 48 GB GDDR6 at 864 GB/s; PCIe Gen4 x16; no NVLink. g6e.xlarge: 250 GB NVMe, up to 20 Gbps. 0.35% = 96 MB ÷ 27.8 GB; 32 ms = 27.8 GB ÷ 864 GB/s at full bandwidth (slide 31 uses 70%: ≈ 46 ms). Cycle counts approximate. Handbook “GPU memory”; Kiely §2.5.</span><span class="pg">32</span></div>
 </section>
 <!-- c6 · divider -->
 <section class="slide dv" data-page="c6" data-title="Chapter 6 · GPUs: hardware, NVIDIA, AWS" style="--accent:var(--orange)">
@@ -1131,11 +1192,11 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <h2 class="dv-t">GPUs: hardware, NVIDIA, AWS</h2>
       <div class="dv-line"></div>
       <p class="p2s">The software stack, NVIDIA generations, spec sheets and AWS instances</p>
-      <ol class="p2plan p1plan"><li><em>33</em><button class="p1go" data-go="33">The software stack between your prompt and the silicon</button></li><li><em>34</em><button class="p1go" data-go="34">NVIDIA generations side by side</button></li><li><em>35</em><button class="p1go" data-go="35">Read a GPU spec sheet as answers to four questions</button></li><li><em>36</em><button class="p1go" data-go="36">Which hardware specs improve TTFT and ITL</button></li><li><em>37</em><button class="p1go" data-go="37">Product lines and form factors</button></li><li><em>38</em><button class="p1go" data-go="38">AWS GPU instances for inference</button></li></ol>
+      <ol class="p2plan p1plan"><li><em>34</em><button class="p1go" data-go="34">The software stack between your prompt and the silicon</button></li><li><em>35</em><button class="p1go" data-go="35">NVIDIA generations side by side</button></li><li><em>36</em><button class="p1go" data-go="36">Read a GPU spec sheet as answers to four questions</button></li><li><em>37</em><button class="p1go" data-go="37">Which hardware specs improve TTFT and ITL</button></li><li><em>38</em><button class="p1go" data-go="38">Product lines and form factors</button></li><li><em>39</em><button class="p1go" data-go="39">AWS GPU instances for inference</button></li></ol>
     </div>
   </div>
   <ol class="dv-steps"><li class="done"><span>01</span>Inference at a glance</li><li class="done"><span>02</span>The model: architecture and memory</li><li class="done"><span>03</span>Prefill vs decode</li><li class="done"><span>04</span>Metrics and cost</li><li class="done"><span>05</span>How inference runs on a GPU</li><li class="on"><span>06</span>GPUs: hardware, NVIDIA, AWS</li></ol>
-  <div class="ft"><span>Running example throughout: Qwen3.8-27B</span><span class="pg">32</span></div>
+  <div class="ft"><span>Running example throughout: Qwen3.8-27B</span><span class="pg">33</span></div>
 </section>
 <!-- 22 · Software stack -->
 <section class="slide" data-page="22" data-title="The software stack between your prompt and the silicon" style="--accent:var(--orange)">
@@ -1157,7 +1218,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <div class="callout rise" style="--dl:.22s;--accent:var(--orange)">CUDA lock-in is real: the kernels behind fast inference (FlashAttention, FP8 GEMMs) land on NVIDIA first. AMD ROCm and AWS Neuron work, with fewer options.</div>
     </div>
   </div>
-  <div class="ft"><span>NVIDIA developer documentation; vLLM, SGLang and TensorRT-LLM project docs.</span><span class="pg">33</span></div>
+  <div class="ft"><span>NVIDIA developer documentation; vLLM, SGLang and TensorRT-LLM project docs.</span><span class="pg">34</span></div>
 </section>
 <!-- 20 · Generations matrix -->
 <section class="slide" data-page="20" data-title="NVIDIA generations side by side" style="--accent:var(--orange)">
@@ -1167,7 +1228,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
     <div class="panel rise" style="padding:8px 12px"><div class="gm" id="gm" role="table" aria-label="Eight NVIDIA data-center generations compared on memory, bandwidth, compute, number formats, GPU link, other new features, AWS instances and fit for Qwen3.8-27B"></div></div>
     <div class="callout rise" id="gm-c" style="--dl:.1s;--accent:var(--orange);min-height:58px"></div>
   </div>
-  <div class="ft"><span>Flagship data-center part per generation (SXM where it exists). Dense tensor TFLOPS, no sparsity; Volta and Turing have no BF16, FP16 shown. Hopper column: H100 → H200. Rubin as announced by NVIDIA, not final. Qwen3.8 ceiling = bandwidth ÷ weight bytes, batch 1.</span><span class="pg">34</span></div>
+  <div class="ft"><span>Flagship data-center part per generation; dense tensor TFLOPS, no sparsity; Volta and Turing show FP16. Rubin as announced, not final. Qwen3.8 ceiling = bandwidth ÷ weight bytes, batch 1 (e.g. 3.35 TB/s ÷ 55.6 GB = 60 tokens/s; L40S FP8: 864 GB/s ÷ 27.8 GB = 31). H200: 4.8 ÷ 3.35 = 1.43× decode; KV room after BF16 weights and 1.5 GB runtime at 90%: 69.8 GB vs 14.9 GB ≈ 4.7×.</span><span class="pg">35</span></div>
 </section>
 <!-- 17 · Spec sheet map -->
 <section class="slide" data-page="17" data-title="Read a GPU spec sheet as answers to four questions" style="--accent:var(--orange)">
@@ -1178,7 +1239,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <svg viewBox="0 0 1130 450" width="100%" height="100%" id="specmap" aria-label="Spec lines connect to what they decide: memory capacity to fit and concurrency, memory bandwidth to decode and ITL, tensor FLOPS to prefill and TTFT, NVLink to multi-GPU scaling"></svg>
     </div>
   </div>
-  <div class="ft"><span>H100 SXM: 80 GB HBM3, 3.35 TB/s, 989 TFLOPS dense BF16 (1,979 FP8 dense), NVLink 900 GB/s bidirectional, 50 MB L2, 700 W.</span><span class="pg">35</span></div>
+  <div class="ft"><span>H100 SXM: 80 GB HBM3, 3.35 TB/s, 989 TFLOPS dense BF16 (1,979 FP8 dense), NVLink 900 GB/s bidirectional, 50 MB L2, 700 W.</span><span class="pg">36</span></div>
 </section>
 <!-- 18 · Which spec moves which metric -->
 <section class="slide" data-page="18" data-title="Which hardware specs improve TTFT and ITL" style="--accent:var(--orange)">
@@ -1205,7 +1266,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <p class="note" id="upg-note"></p>
     </div>
   </div>
-  <div class="ft"><span>First-order model: MFU 50%, MBU 70%, batch 1. Kiely §3.1: pick FLOPS for prefill, bandwidth for decode. NVLink matters once the model is split.</span><span class="pg">36</span></div>
+  <div class="ft"><span>First-order model, assumed MFU 50%, MBU 70%, batch 1: TTFT = 2 × 27.8B × 2,000 ÷ (50% × FLOPS); TPOT = weight bytes ÷ (70% × bandwidth). Doubling one spec only shrinks the term it appears in. Kiely §3.1. NVLink matters once the model is split.</span><span class="pg">37</span></div>
 </section>
 <!-- 21 · Product lines -->
 <section class="slide" data-page="21" data-title="Product lines and form factors" style="--accent:var(--orange)">
@@ -1222,7 +1283,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
     <p class="note"><b>MIG</b> (A100, H100, H200, B200) splits a GPU into up to 7 compute slices; on an H100 a 3-slice MIG gets ≈ 3/7 of the compute and 40 GB.</p>
     <p class="note"><b>Transformer Engine</b> (Hopper+) picks FP8 or 16-bit per layer during the matmuls.</p>
   </div>
-  <div class="ft"><span>NVIDIA product pages; Kiely §3.2–3.3 (Lovelace has no NVLink; MIG slices); AWS P5/P6 pages.</span><span class="pg">37</span></div>
+  <div class="ft"><span>NVIDIA product pages; Kiely §3.2–3.3 (Lovelace has no NVLink); AWS P5/P6 pages. MIG: up to 7 slices; the H100 3g.40gb profile gets 3 of 7 compute slices and 40 GB (NVIDIA MIG user guide). DGX Spark: 128 GB unified memory (NVIDIA product page).</span><span class="pg">38</span></div>
 </section>
 <!-- 23 · AWS table -->
 <section class="slide" data-page="23" data-title="AWS GPU instances for inference" style="--accent:var(--orange)">
@@ -1234,7 +1295,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
       <span class="note">Bars: <span class="dot" style="background:var(--violet)"></span> total GPU memory (log scale) · <span class="dot" style="background:var(--orange)"></span> HBM/GDDR bandwidth per GPU</span>
     </div>
   </div>
-  <div class="ft"><span>GPU count, memory, NVSwitch and network from AWS instance pages. Per-GPU bandwidth and dense TFLOPS from NVIDIA datasheets (AWS doesn't publish them); A10G compute not published. B300 compute ≈ B200 at BF16.</span><span class="pg">38</span></div>
+  <div class="ft"><span>GPU count, memory, NVSwitch and network from AWS instance pages. Per-GPU bandwidth and dense TFLOPS from NVIDIA datasheets (AWS doesn't publish them); A10G compute not published. B300 compute ≈ B200 at BF16.</span><span class="pg">39</span></div>
 </section>
 </div></div>
 <div id="parking" hidden aria-hidden="true"><!-- 3 · Why -->
@@ -1830,7 +1891,7 @@ svg.dim .hwk:not(.hot){opacity:.42}
   <div class="ft"><span>H100 SXM5: 132 SMs; per SM 4 tensor cores, 128 FP32 CUDA cores, 256 KB registers, 256 KB L1/shared; 50 MB L2; 80 GB HBM3 at 3.35 TB/s; NVLink 4 at 900 GB/s; PCIe Gen5 x16 ≈ 64 GB/s each way. Drawn schematically.</span><span class="pg">00</span></div>
 </section></div>
 <div id="help">← → navigate · N notes · O overview · R replay</div>
-<nav id="nav" aria-label="Slide navigation"><button id="ov-b" title="Overview (O)">▦</button><button id="notes-b" title="Speaker notes (N)">notes</button><button id="prev" aria-label="Previous slide">←</button><span id="count">01 / 38</span><button id="next" aria-label="Next slide">→</button></nav>
+<nav id="nav" aria-label="Slide navigation"><button id="ov-b" title="Overview (O)">▦</button><button id="notes-b" title="Speaker notes (N)">notes</button><button id="prev" aria-label="Previous slide">←</button><span id="count">01 / 39</span><button id="next" aria-label="Next slide">→</button></nav>
 <aside id="notes" hidden><span class="lbl">Speaker notes</span><p id="notes-t"></p></aside>
 <div id="overview" hidden><div class="grid" id="ov-grid"></div></div>
 
@@ -2402,7 +2463,7 @@ paged:'Left: reserving max length wastes most memory and turns request D away. R
   {n:'Ada Lovelace',y:'2022',f:'L4 · L40S',mt:'48 GB GDDR6',m:[48],bt:'0.86 TB/s',b:[0.864],ct:'362',c:362,fm:{FP16:1,BF16:1,INT8:1,FP8:2},lk:'PCIe 4 only',nw:'FP8 on PCIe cards · low power',aws:'g6 · g6e',q:[1,'FP8 only · ≤ 31 tok/s'],
    co:'<b>Ada</b> brought <b>FP8</b> to cheaper PCIe cards, but with GDDR memory and <b>no NVLink</b>. An L40S can\'t hold Qwen3.8 in BF16 (55.6 > 48 GB); in FP8 (27.8 GB) it fits, at ≈ 31 tok/s.'},
   {n:'Hopper',y:'2022–24',f:'H100 → H200',mt:'80 → 141 GB HBM3',m:[80,141],bt:'3.35 → 4.8 TB/s',b:[3.35,4.8],ct:'989',c:989,fm:{FP16:1,BF16:1,INT8:1,FP8:1},lk:'NVLink 4 · 900 GB/s',nw:'Transformer Engine · TMA · thread-block clusters',aws:'p5 · p5e · p5en',q:[1,'✓ BF16 · ≤ 60 → 86 tok/s'],
-   co:'<b>Hopper</b> is this deck\'s reference GPU: FP8 with the <b>Transformer Engine</b>, HBM3, NVLink 4. Qwen3.8 BF16 on an H100: ≤ 60 tok/s. The <b>H200</b> is the same chip with 141 GB at 4.8 TB/s: +43% decode speed and ~2.5× the KV room.'},
+   co:'<b>Hopper</b> is this deck\'s reference GPU: FP8 with the <b>Transformer Engine</b>, HBM3, NVLink 4. Qwen3.8 BF16 on an H100: ≤ 60 tok/s. The <b>H200</b> is the same chip with 141 GB at 4.8 TB/s: +43% decode speed and ~4.7× the KV room.'},
   {n:'Blackwell',y:'2024–25',f:'B200 · GB200',mt:'180 GB HBM3e',m:[180],bt:'8 TB/s',b:[8],ct:'2,250',c:2250,fm:{FP16:1,BF16:1,INT8:1,FP8:1,FP4:2},lk:'NVLink 5 · 1.8 TB/s',nw:'FP4 · 2 dies per package · NVL72 racks',aws:'p6-b200 · p6e-gb200',q:[1,'✓ BF16 · ≤ 144 tok/s'],
    co:'<b>Blackwell</b> added <b>FP4</b> (NVFP4, MXFP4) and puts two dies in one package. 8 TB/s gives Qwen3.8 BF16 a ≈ 144 tok/s ceiling; GB200 NVL72 joins 72 GPUs into one NVLink domain.'},
   {n:'Blackwell Ultra',y:'2025',f:'B300 · GB300',mt:'288 GB HBM3e',m:[288],bt:'8 TB/s',b:[8],ct:'≈ 2,250',c:2250,fm:{FP16:1,BF16:1,INT8:1,FP8:1,FP4:1},lk:'NVLink 5 · 1.8 TB/s',nw:'1.5× FP4 · faster attention softmax',aws:'p6-b300 · p6e-gb300',q:[1,'✓ BF16 · ≤ 144 tok/s'],
@@ -2922,9 +2983,27 @@ function runOnGpu(mode){const s=$('#'+mode+'-d');if(!s)return;const pre=mode==='
   `<div class="card" style="border-left:3px solid var(--blue);padding:10px 14px;display:flex;flex-direction:column;gap:6px"><h3 style="color:var(--blue)">Time budget · 2,000 tokens</h3>${bar('reading the weights',rd,'var(--orange)')}${bar('tensor-core math',cpPre*1e3,'var(--blue)')}<p style="margin:2px 0 0">The math takes ${fmt(cpPre*1e3/rd,1)}× longer than the reading. <b>Compute-bound</b>: faster tensor cores or FP8 help.</p></div>
    <div class="card" style="border-left:3px solid var(--green);padding:10px 14px"><h3 style="color:var(--green)">What prefill sets</h3><p>Time to first token ≈ <b>${fmt(Pf.tpre+0.003,2)} s</b>. It grows with prompt length: double the prompt, double the math.</p></div>
    <div class="card" style="border-left:3px solid var(--violet);padding:10px 14px"><h3 style="color:var(--violet)">Each weight is used 2,000 times</h3><p>One trip from GPU memory feeds 2,000 tokens. That reuse is what keeps the tensor cores fed.</p></div>`
- :`<div class="card" style="border-left:3px solid var(--orange);padding:10px 14px;display:flex;flex-direction:column;gap:6px"><h3 style="color:var(--orange)">Time budget · one token</h3>${bar('reading the weights',rd,'var(--orange)')}${bar('tensor-core math',cpDec,'var(--blue)')}<p style="margin:2px 0 0">Reading takes ${fmt(rd/cpDec,0)}× longer than the math. <b>Memory-bound</b>: faster memory or smaller weights help.</p></div>
-   <div class="card" style="border-left:3px solid var(--green);padding:10px 14px"><h3 style="color:var(--green)">One user</h3><p>≈ <b>${ms(Pf.tdec*1e3)} ms</b> per token, ≈ <b>${fmt(1/Pf.tdec,0)} tokens/s</b>. Fine for reading speed, but the GPU is mostly waiting.</p></div>
-   <div class="card" style="border-left:3px solid var(--violet);padding:10px 14px"><h3 style="color:var(--violet)">16 users, batched</h3><p>One weight read now serves 16 tokens: ≈ <b>${ms(P16.tdec*1e3)} ms</b> per step, ≈ <b>${fmt(16/P16.tdec,0)} tokens/s</b> in total. This is why servers batch.</p></div>`;
+ :(()=>{const td=Pf.tdec*1e3,memPct=rd/td*100,tcPct=cpDec/td*100,F=L40.fp8*1e12*0.5,tc16=2*QP*16/F/P16.tdec*100,W=300,mw=rd/td*W,tw=Math.max(1.5,tcPct/100*W);
+   const ridge=L40.fp8*1e12/(L40.bw*1e12),BX=118,BW=W-BX,lg=v=>Math.log10(v)/4*BW;
+   const ob=(y,lab,v,c,vt)=>{const w=lg(v),inside=BX+w>W-40;return `<text x="0" y="${y+11}" style="font-size:11px;fill:var(--ink2)">${lab}</text><rect x="${BX}" y="${y}" width="${w.toFixed(1)}" height="14" rx="2" fill="${c}"/><text x="${(inside?BX+w-4:BX+w+4).toFixed(1)}" y="${y+11}" text-anchor="${inside?'end':'start'}" style="font-size:11px;font-weight:600;fill:${inside?'#fff':c}">${vt}</text>`};
+   return `<div class="card" style="border-left:3px solid var(--orange);padding:9px 14px;display:flex;flex-direction:column;gap:4px"><h3 style="color:var(--orange)">One decode step · ${fmt(td,0)} ms · ${fmt(1/Pf.tdec,0)} tokens/s</h3>
+     <svg viewBox="0 0 ${W} 118" width="100%" aria-label="Timeline of one decode step: GPU memory is busy about ${fmt(memPct,0)} percent of the time; all the tensor-core math added up fills about ${fmt(tcPct,1)} percent">
+      <text x="0" y="12" style="font-size:11px;fill:var(--ink2)">GPU memory · reading 27.8 GB of weights</text>
+      <rect x="0" y="18" width="${mw.toFixed(1)}" height="18" rx="2" fill="var(--orange)"/><rect x="${mw.toFixed(1)}" y="18" width="${(W-mw).toFixed(1)}" height="18" rx="2" fill="var(--rule)"/>
+      <text x="0" y="58" style="font-size:11px;fill:var(--ink2)">tensor cores · all the math, added up</text>
+      <rect x="0" y="64" width="${W}" height="18" rx="2" fill="none" stroke="var(--blue)" stroke-dasharray="3 3"/><rect x="0" y="64" width="${tw}" height="18" fill="var(--blue)"/>
+      <path d="M${tw+2} 73 H40" stroke="var(--blue)" stroke-width="1"/><text x="44" y="77" style="font-size:11px;fill:var(--blue)">${fmt(cpDec,2)} ms · the rest is waiting</text>
+      <line class="tlsweep" x1="0" x2="0" y1="14" y2="86" stroke="var(--ink)" stroke-width="1.6"/>
+      <text x="0" y="108" style="font-size:12.5px;font-weight:600;fill:var(--orange)">memory busy ≈ ${fmt(memPct,0)}%</text><text x="${W}" y="108" text-anchor="end" style="font-size:12.5px;font-weight:600;fill:var(--blue)">tensor cores ≈ ${fmt(tcPct,1)}%</text>
+     </svg></div>
+   <div class="card" style="border-left:3px solid var(--violet);padding:9px 14px;display:flex;flex-direction:column;gap:4px"><h3 style="color:var(--violet)">Why: math per byte read</h3>
+     <svg viewBox="0 0 ${W} 92" width="100%" aria-label="Operations per byte, log scale: decode gives 2, sixteen users give 32, prefill gives 4,000; the L40S needs about ${fmt(ridge,0)} to keep its tensor cores busy">
+      ${ob(2,'decode, 1 user',2,'var(--orange)','2')}${ob(22,'decode, 16 users',32,'var(--violet)','32')}${ob(42,'prefill, 2K tokens',4000,'var(--blue)','4,000')}
+      <line x1="${(BX+lg(ridge)).toFixed(1)}" x2="${(BX+lg(ridge)).toFixed(1)}" y1="0" y2="62" stroke="var(--ink)" stroke-dasharray="3 3"/>
+      <text x="${W}" y="80" text-anchor="end" style="font-size:11px;fill:var(--ink)">dashed: L40S needs ≈ ${fmt(ridge,0)} (log scale)</text>
+     </svg>
+     <p style="margin:0">Each 1-byte FP8 weight gives just <b>2 operations</b> per token, but the tensor cores could do <b>≈ ${fmt(ridge,0)}</b> in the time a byte arrives. Batching 16 users: (27.8 + 16 × 0.3) GB ÷ 605 GB/s + 3 ms ≈ ${ms(P16.tdec*1e3)} ms per step for 16 tokens → ≈ <b>${fmt(16/P16.tdec,0)} tokens/s</b>; tensor cores ≈ <b>${fmt(tc16,0)}%</b> busy, still memory-bound.</p></div>`})();
+
  const sb=$('#'+mode+'-steps'),cap=$('#'+mode+'-cap');let raf=0,cur=0,auto=true;
  ST.forEach((_,i)=>{const b=document.createElement('button');b.textContent=i+1;b.setAttribute('aria-pressed','false');b.onclick=()=>{auto=false;show(i)};sb.appendChild(b)});
  function stop(){cancelAnimationFrame(raf);dots.innerHTML='';for(const k in paths)paths[k].setAttribute('opacity',0);tcs.forEach(t=>t.setAttribute('opacity',.25));tcl.textContent='';kvb.removeAttribute('class')}
@@ -2935,7 +3014,7 @@ function runOnGpu(mode){const s=$('#'+mode+'-d');if(!s)return;const pre=mode==='
   tcl.style.fill=st.tc==='busy'?'var(--blue)':'var(--orange)';
   const D=[];st.p.forEach(k=>{const pa=paths[k];pa.setAttribute('opacity',.6);pa.setAttribute('stroke',st.c);const L=pa.getTotalLength();for(let j=0;j<4;j++)D.push([pa,L,j/4,el('circle',{r:4.5,fill:st.c},dots)])});
   const t0=performance.now();(function f(t){D.forEach(([pa,L,o,c])=>{const q=pa.getPointAtLength((((t-t0)/1400+o)%1)*L);c.setAttribute('cx',q.x);c.setAttribute('cy',q.y)});
-   if(st.tc){const ph=((t-t0)%1400)/1400;tcs.forEach((tc,j)=>tc.setAttribute('opacity',st.tc==='busy'?(.75+.25*Math.sin((t-t0)/120+j)):(ph<.05?.95:.12)))}
+   if(st.tc){const ph=((t-t0)%1400)/1400;tcs.forEach((tc,j)=>tc.setAttribute('opacity',st.tc==='busy'?(.75+.25*Math.sin((t-t0)/120+j)):(ph>.5&&ph<.53?.95:.12)))}
    raf=requestAnimationFrame(f)})(t0)}
  show(2);
  INIT[mode]=()=>{auto=true;show(0);const iv=setInterval(()=>{if(auto)show((cur+1)%ST.length)},3400);return()=>{clearInterval(iv);stop()}};
@@ -2943,6 +3022,7 @@ function runOnGpu(mode){const s=$('#'+mode+'-d');if(!s)return;const pre=mode==='
 runOnGpu('rpf');runOnGpu('rdc');
 
 Object.assign(NOTES,{
+ wex:'Everything on one page, from the spec sheet. Inputs on the left: three datasheet numbers, the model size, the workload, and our assumptions. One rule: time is the larger of bytes over bandwidth and operations over compute, plus overhead. Prefill: math is larger, 0.31 seconds. Decode: reading is larger, about 50 milliseconds per token. Memory caps us at 43 users; at 43 users the GPU makes about 440 tokens a second, about a dollar per million tokens.',
  hw:'Before running anything, meet the machine. This is the cheapest AWS instance that holds Qwen3.8: one L40S with 48 GB, in FP8. Walk outside-in: the host CPU and its RAM, the PCIe link, the GPU memory chips, then onto the GPU chip itself: L2, the 142 SMs, and inside one SM the CUDA cores, tensor cores, registers and shared memory. Click any card to jump to it.',
  rpf:'Prefill on this one GPU. The prompt arrives as token IDs, then the weights stream from GPU memory, through L2, into the SMs once. Each weight tile is used for all 2,000 tokens, so the tensor cores stay busy and the math, not the memory, sets the time. The KV cache is filled in the same pass, and the first token comes out after about 0.3 seconds.',
  rdc:'Decode on the same GPU. Now only one token goes in, yet every weight still has to be read. Reading 27.8 GB takes about 46 ms while the math for one token takes about 0.15 ms, so the tensor cores sit idle most of the step. That is what memory-bound means. The fix is batching: one weight read serves many users at once.'});

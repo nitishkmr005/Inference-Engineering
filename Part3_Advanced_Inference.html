@@ -416,6 +416,29 @@ svg.dim .hwk:not(.hot){opacity:.42}
 .ttm td{font-family:var(--mono);font-size:12px;padding:5px 8px}.ttm td:first-child{border-left:none}
 .ttm tr.on td{background:color-mix(in srgb,var(--green) 9%,transparent);color:var(--ink);font-weight:600}
 .ttm .bad{color:var(--orange);font-weight:600}
+.tlsweep{animation:tlsweep 3s linear infinite}@keyframes tlsweep{from{transform:translateX(0)}to{transform:translateX(300px)}}
+/* worked example */
+.wxin{display:flex;flex-direction:column;gap:8px;padding:12px 14px}
+.wxg{display:flex;flex-direction:column;gap:1px;font-size:12.5px;color:var(--ink2)}
+.wxg>span{font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--mute);margin-bottom:2px}
+.wxg b{color:var(--ink);font-family:var(--mono);font-size:12px}
+.wxa b{color:var(--orange)}
+.wxrule{margin-top:auto;border-top:1px solid var(--rule);padding-top:8px;font-family:var(--mono);font-size:11.5px;color:var(--ink);line-height:1.5}.wxrule span{color:var(--mute)}
+.wxs{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:10px;min-height:0}
+.wx{border-left:3px solid var(--c);padding:9px 12px;display:flex;flex-direction:column;gap:3px;min-height:0}
+.wx h3{font-size:14px;color:var(--c);display:flex;gap:7px;align-items:center;margin-bottom:2px}
+.wx h3 i{font-style:normal;width:18px;height:18px;border-radius:50%;background:var(--c);color:#fff;font-family:var(--mono);font-size:10.5px;display:grid;place-items:center}
+.wx code{font-family:var(--mono);font-size:10.8px;color:var(--ink2);line-height:1.4}
+.wx p{font-size:11.8px;color:var(--ink2);margin:2px 0 0;line-height:1.35}
+.wxr{margin-top:auto;padding-top:5px;border-top:1px dashed var(--rule);font-size:13px;color:var(--ink)}.wxr b{color:var(--c);font-size:15px}
+.wxo{font-size:11px;color:var(--mute);line-height:1.3;display:block;margin-top:1px}
+.wxs{display:flex!important;flex-direction:column}
+.wxrow{display:flex;gap:10px;min-height:0}.wxt{flex:1}.wxb{flex:1.35}
+.wxrow>.wx{flex:1;min-width:0}.wxb>.wx5{flex:1.9}
+.wxst{display:flex;gap:7px;font-size:11.8px;color:var(--ink2);line-height:1.35}
+.wxst em{font-style:normal;font-family:var(--mono);font-size:10px;color:#fff;background:var(--c);border-radius:3px;width:15px;height:15px;display:grid;place-items:center;flex:none;margin-top:1px}
+.wxst code{display:block;margin-top:2px}
+.wx code{font-size:10.3px}.wxb{flex:1.2}.wx{padding:8px 11px}
 </style>
 
 </head>
